@@ -7,6 +7,8 @@ namespace Ecommerce.Core.src.Entity
     {
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]
         public float Rating { get; set; }
+        
+        [Column(TypeName = "text")]
         public string? Content { get; set; }
 
         [ForeignKey("UserId")]
