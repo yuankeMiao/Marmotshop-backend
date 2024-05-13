@@ -117,7 +117,7 @@ namespace Ecommerce.WebAPI.src.Database
                 product.HasIndex(p => p.Price);
                 product.Property(p => p.Price).IsRequired();
                 product.ToTable(t => t.HasCheckConstraint("product_price_check", "price > 0"));
-                product.Property(p => p.Inventory).HasDefaultValue(0);
+                product.Property(p => p.Stock).HasDefaultValue(0);
             });
 
             // Fetch seed data
