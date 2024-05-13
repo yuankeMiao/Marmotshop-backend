@@ -107,7 +107,7 @@ namespace Ecommerce.WebAPI.src.Database
                 .HasOne(o => o.User)
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Constraints for OrderProduct
             modelBuilder.Entity<OrderProduct>()

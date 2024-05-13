@@ -10,9 +10,12 @@ namespace Ecommerce.Core.src.Entity
         public User User { get; set; } = null!; //reference
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public required ICollection<OrderProduct> Products { get; set; }
-        // I removed foreign key reference for address, becaue if user deleted an address, 
-        //it should not influence the address in orders
-        // now when user place an order, it will pass the value of address to order
-        public required Address Address{ get; set; } 
+        // I removed reference of address, so the order address will never change
+        // otherwise when user changed address, it will influence the order history
+        public required string AddressLine1 { get; set; }
+        public string? AddressLine2 { get; set; }
+        public int AddressPostalCode { get; set; }
+        public required string AddressCity { get; set; }
+
     }
 }

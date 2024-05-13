@@ -8,7 +8,10 @@ namespace Ecommerce.Service.src.DTO
         public required UserReadDto OrderUser { get; set; } // User information
         public required ICollection<OrderProductReadDto> OrderProducts { get; set; }
         public OrderStatus OrderStatus { get; set; }
-        public required Address OrderAdress { get; set; }
+        public required string AddressLine1 { get; set; }
+        public string? AddressLine2 { get; set; }
+        public int AddressPostalCode { get; set; }
+        public required string AddressCity { get; set; }
     }
 
     public class OrderCreateDto
@@ -16,6 +19,10 @@ namespace Ecommerce.Service.src.DTO
         public Guid OrderUserId { get; set; }
         public required ICollection<OrderProductCreateDto> OrderProducts { get; set; }
         public required Address OrderAdress { get; set; }
+        public required string AddressLine1 { get; set; }
+        public string? AddressLine2 { get; set; }
+        public int AddressPostalCode { get; set; }
+        public required string AddressCity { get; set; }
 
     }
 
