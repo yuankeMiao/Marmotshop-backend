@@ -9,6 +9,6 @@ namespace Ecommerce.Core.src.Entity
         public Guid UserId { get; set; }
         public required User User { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public required ICollection<OrderProduct> OrderProducts { get; set; }
+        public required ICollection<OrderProduct> Products { get; set; }
     }
 }

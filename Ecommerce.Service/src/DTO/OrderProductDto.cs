@@ -5,9 +5,8 @@ namespace Ecommerce.Service.src.DTO
         public Guid ProductId { get; set; }
         public required string ProductTitle { get; set; }
         public decimal ProductPrice { get; set; }
-        public int DiscountPercentage { get; set; }
-        public string? Brand { get; set; }
-        public int Quantity { get; set; }
+        public int ProductDiscountPercentage { get; set; }
+        public int ProductQuantity { get; set; }
     }
 
     public class OrderProductCreateDto

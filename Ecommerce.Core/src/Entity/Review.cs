@@ -5,6 +5,7 @@ namespace Ecommerce.Core.src.Entity
 {
     public class Review : BaseEntity
     {
+        [Column(TypeName = "integer")]
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]
         public int Rating { get; set; }
         
@@ -13,10 +14,10 @@ namespace Ecommerce.Core.src.Entity
 
         [ForeignKey("UserId")]
         public Guid UserId { get; set; } // Foreign key navigate to user
-        public required User User { get; set; } // might remove this 
+        public required User User { get; set; } 
 
         [ForeignKey("ProductId")]
         public Guid ProductId { get; set; } // Foreign key navigate to product
-        public required Product Product { get; set; } // might remove this 
+        public required Product Product { get; set; } 
     }
 }

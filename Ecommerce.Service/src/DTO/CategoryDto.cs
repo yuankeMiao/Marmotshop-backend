@@ -4,7 +4,6 @@ namespace Ecommerce.Service.src.DTO
 {
     public class CategoryReadDto: BaseEntity
     {
-        public Guid CategoryId { get; set; }
         public required string CategoryName { get; set; }
         public required string CategoryImage { get; set; }
     }

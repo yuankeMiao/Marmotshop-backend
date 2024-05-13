@@ -7,8 +7,9 @@ namespace Ecommerce.Service.src.DTO
     {
         public int ReviewRating { get; set; }
         public string? ReviewContent { get; set; }
-        public required UserReadDto User { get; set; }
-        public required ProductReviewReadDto Product { get; set; }
+        public required UserReadDto ReviewUser { get; set; }
+        public required string ReviewProductId { get; set; }
+         public required string ReviewProductTitle { get; set; }
     }
     public class ReviewCreateDto
     {

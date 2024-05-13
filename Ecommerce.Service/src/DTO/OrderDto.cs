@@ -5,14 +5,14 @@ namespace Ecommerce.Service.src.DTO
 {
     public class OrderReadDto : BaseEntity
     {
-        public required UserReadDto User { get; set; } // User information
+        public required UserReadDto OrderUser { get; set; } // User information
         public required ICollection<OrderProductReadDto> OrderProducts { get; set; }
         public OrderStatus OrderStatus { get; set; }
     }
 
     public class OrderCreateDto
     {
-        public Guid UserId { get; set; }
+        public Guid OrderUserId { get; set; }
         public required ICollection<OrderProductCreateDto> OrderProducts { get; set; }
     }
 

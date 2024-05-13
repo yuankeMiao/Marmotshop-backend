@@ -7,7 +7,6 @@ namespace Ecommerce.Service.src.DTO
     // then I don't need to pass image Id to client
     public class ProductReadDto : BaseEntity
     {
-
         public required string ProductTitle { get; set; }
         public required string ProductDescription { get; set; }
         public int ProductPrice { get; set; }
@@ -15,7 +14,7 @@ namespace Ecommerce.Service.src.DTO
         public decimal? ProductRating { get; set; }
         public int ProductStock { get; set; }
         public string? ProductBrand { get; set; }
-        public required CategoryReadDto Category { get; set; }
+        public required CategoryReadDto ProductCategory { get; set; }
         public required string ProductThumbnail { get; set; }
         public required ICollection<string> ProductImageUrls { get; set; }
     }
@@ -26,9 +25,9 @@ namespace Ecommerce.Service.src.DTO
         public required string ProductDescription { get; set; }
         public int ProductPrice { get; set; }
         public int ProductDiscountPercentage { get; set; }
-        public Guid CategoryId { get; set; }
         public int ProductStock { get; set; }
         public string? ProductBrand { get; set; }
+        public Guid CategoryId { get; set; }
         public required string ProductThumbnail { get; set; }
         public required ICollection<string> ProductImageUrls { get; set; }
     }
@@ -36,7 +35,6 @@ namespace Ecommerce.Service.src.DTO
 
     public class ProductUpdateDto
     {
-        public Guid Id { get; set; }
         public string? ProductTitle { get; set; }
         public string? ProductDescription { get; set; }
         public int? ProductPrice { get; set; }
@@ -46,13 +44,5 @@ namespace Ecommerce.Service.src.DTO
         public string? ProductBrand { get; set; }
         public string? ProductThumbnail { get; set; }
         public ICollection<string>? ProductImageUrls { get; set; }
-    }
-
-    public class ProductReviewReadDto // check later
-    {
-        public required string ProductTitle { get; set; }
-        public required string ProductDescription { get; set; }
-        public int ProductPrice { get; set; }
-        public Guid CategoryId { get; set; }
     }
 }

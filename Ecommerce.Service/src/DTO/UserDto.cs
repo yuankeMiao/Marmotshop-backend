@@ -18,6 +18,7 @@ namespace Ecommerce.Service.src.DTO
     {
         public required string UserFirstname { get; set; }
         public required string UserLastname { get; set; }
+         public required string UserEmail { get; set; }
         public required string UserPassword { get; set; }
         public string? UserAvatar { get; set; }
         public UserRole UserRole { get; set; }
