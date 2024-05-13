@@ -96,12 +96,6 @@ namespace Ecommerce.Service.src.Shared
             //     .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             //     .ForMember(dest => dest.ProductInventory, opt => opt.MapFrom(src => src.Inventory));
 
-            CreateMap<Product, ProductReviewReadDto>()
-                .ForMember(dest => dest.ProductTitle, opt => opt.MapFrom(src => src.Title))
-                .ForMember(dest => dest.ProductDescription, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.ProductPrice, opt => opt.MapFrom(src => src.Price))
-                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId));
-
             #endregion
 
 
