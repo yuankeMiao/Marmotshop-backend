@@ -103,11 +103,13 @@ namespace Ecommerce.Service.src.Shared
             CreateMap<Order, OrderReadDto>()
                 .ForMember(dest => dest.OrderUser, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.OrderProducts, opt => opt.MapFrom(src => src.Products))
-                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status));
+                .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.OrderAdress, opt => opt.MapFrom(src => src.Address));
 
             CreateMap<OrderCreateDto, Order>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.OrderUserId))
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.OrderProducts));
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.OrderProducts))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.OrderAdress));
 
             CreateMap<OrderUpdateDto, Order>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.OrderStatus));

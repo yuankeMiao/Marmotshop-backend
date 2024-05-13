@@ -7,10 +7,12 @@ namespace Ecommerce.Core.src.Entity
     {
         [ForeignKey("OrderId")]
         public Guid OrderId { get; set; } // Foreign key navigate to Order
+        public Order Order { get; set; } = null!;
 
         [ForeignKey("ProductId")]
         public Guid ProductId { get; set; } // Foreign key navigate to product
-        public required Product Product { get; set; }
+        public Product Product { get; set; } = null!;
+        [Required]
         public int Quantity { get; set; }
     }
 }

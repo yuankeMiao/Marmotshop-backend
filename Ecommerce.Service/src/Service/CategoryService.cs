@@ -75,7 +75,7 @@ namespace Ecommerce.Service.src.Service
         {
             try
             {
-                 var foundCategory = await _categoryRepo.GetCategoryByIdAsync(categoryId);
+                var foundCategory = await _categoryRepo.GetCategoryByIdAsync(categoryId);
 
                 // validations
                 if (categoryUpdateDto.CategoryName is not null && string.IsNullOrEmpty(categoryUpdateDto.CategoryName)) throw AppException.InvalidInputException("Category name cannot be empty");

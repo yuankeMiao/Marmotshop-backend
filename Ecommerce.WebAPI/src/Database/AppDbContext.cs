@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.ValueObject;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace Ecommerce.WebAPI.src.Database
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderProduct> OrderProducts { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Address> addresses { get; set; }
+        public DbSet<Address> Addresses { get; set; }
         #endregion
 
         #region Constructors
@@ -82,32 +83,62 @@ namespace Ecommerce.WebAPI.src.Database
             // Constraints for User
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
 
+            // Constraints for product
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Category)
                 .WithMany()
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Constraints for product
             modelBuilder.Entity<Product>()
                 .ToTable("Products", t => t.HasCheckConstraint("product_price_check", "price > 0"));
 
             modelBuilder.Entity<Product>().HasIndex(p => p.Title).IsUnique();
 
-
-            // Constraints for product image
-            modelBuilder.Entity<ProductImage>(i => i.Property(i => i.Url).HasColumnType("varchar"));
+            // Constraints for Image
+            modelBuilder.Entity<ProductImage>()
+                .HasOne(pi => pi.Product)
+                .WithMany()
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Constraints for Order
             modelBuilder.Entity<Order>()
-                .HasMany(o => o.OrderProducts)
-                .WithOne()
-                .HasForeignKey(op => op.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Constraints for OrderProduct
             modelBuilder.Entity<OrderProduct>()
                 .HasKey(op => new { op.OrderId, op.ProductId });
+
+            modelBuilder.Entity<OrderProduct>()
+                .HasOne(op => op.Order)
+                .WithMany(o => o.Products)
+                .HasForeignKey(op => op.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderProduct>()
+                .HasOne(op => op.Product)
+                .WithMany()
+                .HasForeignKey(op => op.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // OCnstraints for Reviews
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany()
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             // Constraints for Address
             modelBuilder.Entity<Address>()
