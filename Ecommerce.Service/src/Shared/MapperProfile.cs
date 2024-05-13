@@ -8,11 +8,20 @@ namespace Ecommerce.Service.src.Shared
     {
         public MapperProfile()
         {
-            // #region User Mapper:
-            CreateMap<User, UserReadDto>();
-            CreateMap<UserCreateDto, User>();
-            CreateMap<UserUpdateDto, User>();
-            // #endregion
+            #region Category Mapper:
+            CreateMap<Category, CategoryReadDto>()
+            .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.CategoryImage, opt => opt.MapFrom(src => src.Image));
+
+            CreateMap<CategoryCreateDto, Category>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CategoryName))
+            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage));
+
+            CreateMap<CategoryUpdateDto, Category>()
+             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CategoryName))
+            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage));
+            #endregion
 
             #region User Mapper:
             CreateMap<UserCreateDto, User>()
@@ -80,28 +89,6 @@ namespace Ecommerce.Service.src.Shared
                 .ForMember(dest => dest.ProductPrice, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId));
 
-            #endregion
-
-
-            #region Image Mapper:
-            CreateMap<ProductImage, ProductImageReadDto>();
-            CreateMap<ProductImageCreateDto, ProductImage>();
-            CreateMap<ProductImageUpdateDto, ProductImage>();
-            #endregion
-
-            #region Category Mapper:
-            CreateMap<Category, CategoryReadDto>()
-            .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Name))
-            .ForMember(dest => dest.CategoryImage, opt => opt.MapFrom(src => src.Image));
-
-            CreateMap<CategoryCreateDto, Category>()
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CategoryName))
-            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage));
-
-            CreateMap<CategoryUpdateDto, Category>()
-             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CategoryName))
-            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage));
             #endregion
 
             #region Order Mapper:

@@ -5,28 +5,27 @@ namespace Ecommerce.Service.src.DTO
 {
     public class OrderReadDto : BaseEntity
     {
-        public UserReadDto User { get; set; } // User information
-        public IEnumerable<OrderProductReadDto> OrderProducts { get; set; }
-        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
+        public required UserReadDto User { get; set; } // User information
+        public required ICollection<OrderProductReadDto> OrderProducts { get; set; }
+        public OrderStatus OrderStatus { get; set; }
     }
 
     public class OrderCreateDto
     {
-        public IEnumerable<OrderProductCreateDto> OrderProducts { get; set; }
-        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
+        public Guid UserId { get; set; }
+        public required ICollection<OrderProductCreateDto> OrderProducts { get; set; }
     }
 
-    public class OrderUpdateDto
+    public class OrderUpdateDto // to simplify the logic, only update status
     {
-        public Guid OrderId { get; set; }
         public OrderStatus OrderStatus { get; set; }
     }
 
-    public class OrderReadUpdateDto : BaseEntity
-    {
-        public Guid UserId { get; set; } // May be dropped due to the Endpoint design
-        public UserReadDto User { get; set; } // User information
-        public OrderStatus OrderStatus { get; set; }
-        public IEnumerable<OrderProductReadDto> OrderProducts { get; set; } // Order products list
-    }
+    // I think this is not needed, so i tempararily comment it out, will check later
+    // public class OrderReadUpdateDto : BaseEntity
+    // {
+    //     public required UserReadDto User { get; set; } // User information
+    //     public OrderStatus OrderStatus { get; set; }
+    //     public required IEnumerable<OrderProductReadDto> OrderProducts { get; set; } // Order products list
+    // }
 }

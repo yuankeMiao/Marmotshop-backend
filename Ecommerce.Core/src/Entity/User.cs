@@ -9,7 +9,12 @@ namespace Ecommerce.Core.src.Entity
         [Required]
         [Column(TypeName = "varchar")]
         [StringLength(20, MinimumLength = 2)]
-        public required string Name { get; set; }
+        public required string Firstname { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar")]
+        [StringLength(20, MinimumLength = 2)]
+        public required string Lastname { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(50)")]
@@ -23,14 +28,9 @@ namespace Ecommerce.Core.src.Entity
         [Required]
         [Column(TypeName = "bytea")]
         public required byte[] Salt { get; set; }
-        
+
         [Column(TypeName = "varchar")]
         public string? Avatar { get; set; }
         public UserRole UserRole { get; set; }
-
-        override public string ToString()
-        {
-            return $"User Name: {Name}, User Email: {Email}, User Avatar: {Avatar}, User Role: {UserRole}";
-        }
     }
 }

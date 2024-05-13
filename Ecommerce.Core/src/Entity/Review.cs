@@ -6,7 +6,7 @@ namespace Ecommerce.Core.src.Entity
     public class Review : BaseEntity
     {
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]
-        public float Rating { get; set; }
+        public int Rating { get; set; }
         
         [Column(TypeName = "text")]
         public string? Content { get; set; }
