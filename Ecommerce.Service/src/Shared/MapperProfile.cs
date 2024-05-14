@@ -104,12 +104,12 @@ namespace Ecommerce.Service.src.Shared
                 .ForMember(dest => dest.OrderUser, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.OrderProducts, opt => opt.MapFrom(src => src.Products))
                 .ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src => src.Status))
-                .ForMember(dest => dest.OrderAddressSnapshot, opt => opt.MapFrom(src => src.AddressSnapshot));
+                .ForMember(dest => dest.OrderShippingAddress, opt => opt.MapFrom(src => src.ShippingAddress));
 
             CreateMap<OrderCreateDto, Order>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.OrderUserId))
                 .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.OrderProducts))
-                .ForMember(dest => dest.AddressSnapshot, opt => opt.MapFrom(src => src.OrderAddressSnapshot));
+                .ForMember(dest => dest.ShippingAddress, opt => opt.MapFrom(src => src.OrderShippingAddress));
 
             CreateMap<OrderUpdateDto, Order>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.OrderStatus));
@@ -118,12 +118,16 @@ namespace Ecommerce.Service.src.Shared
 
             #region Order Product Mapper:
             CreateMap<OrderProduct, OrderProductReadDto>()
+                .ForMember(dest => dest.ProductTitle, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.ProductThumbnail, opt => opt.MapFrom(src => src.Thumbnail))
+                .ForMember(dest => dest.ProductActualPrice, opt => opt.MapFrom(src => src.ActualPrice))
                 .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Quantity))
-                .ForMember(dest => dest.ProductTitle, opt => opt.MapFrom(src => src.ProductSnapshot.Title))
-                .ForMember(dest => dest.ProductPrice, opt => opt.MapFrom(src => src.ProductSnapshot.Price))
-                .ForMember(dest => dest.ProductDiscountPercentage, opt => opt.MapFrom(src => src.ProductSnapshot.DiscountPercentage));
+                .ForMember(dest => dest.ProductTotalPrice, opt => opt.MapFrom(src => src.TotalPrice));
 
-            CreateMap<OrderProductCreateDto, OrderProduct>();
+
+            CreateMap<OrderProductCreateDto, OrderProduct>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.ProductQuantity));
 
             #endregion
 

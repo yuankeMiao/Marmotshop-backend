@@ -12,6 +12,7 @@ namespace Ecommerce.Service.src.DTO
         public required string UserEmail { get; set; }
         public string? UserAvatar { get; set; }
         public UserRole UserRole { get; set; }
+        public HashSet<Address> UserAddresses { get; set; } = [];
     }
 
     public class UserCreateDto
@@ -22,6 +23,7 @@ namespace Ecommerce.Service.src.DTO
         public required string UserPassword { get; set; }
         public string? UserAvatar { get; set; }
         public UserRole UserRole { get; set; }
+        public HashSet<Address>? UserAddresses { get; set; }
         public DateOnly? CreatedDate { get; set; }
         public DateOnly? UpdatedDate { get; set; }
     }
@@ -34,5 +36,6 @@ namespace Ecommerce.Service.src.DTO
         public string? UserPassword { get; set; }
         public string? UserAvatar { get; set; }
         public UserRole? UserRole { get; set; }
+        public HashSet<Address>? UserAddresses { get; set; }
     }
 }

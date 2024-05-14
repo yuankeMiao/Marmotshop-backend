@@ -12,8 +12,6 @@ namespace Ecommerce.Core.src.Entity
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public required HashSet<OrderProduct> Products { get; set; }
 
-        [ForeignKey("AddressId")]
-        public Guid AddressId { get; set; }
-        public AddressSnapshot AddressSnapshot { get; set; } = null!; //reference
+        public required string ShippingAddress { get; set; }
     }
 }

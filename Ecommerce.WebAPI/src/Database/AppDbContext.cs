@@ -113,12 +113,6 @@ namespace Ecommerce.WebAPI.src.Database
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.AddressSnapshot)
-                .WithOne()
-                .HasForeignKey<Order>(o => o.AddressId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Constraints for OrderProduct
             modelBuilder.Entity<OrderProduct>()
                 .HasOne(op => op.Order)
@@ -127,7 +121,7 @@ namespace Ecommerce.WebAPI.src.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderProduct>()
-                .HasOne(op => op.ProductSnapshot)
+                .HasOne(op => op.Product)
                 .WithOne()
                 .HasForeignKey<OrderProduct>(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
