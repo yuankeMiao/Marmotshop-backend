@@ -1,8 +1,9 @@
 
+using Ecommerce.Core.src.Entity;
 
 namespace Ecommerce.Service.src.DTO
 {
-    public class AddressReadDto
+    public class AddressReadDto: BaseEntity
     {
         public required string Recipient { get; set; }
         public required string Phone { get; set; }
@@ -25,6 +26,7 @@ namespace Ecommerce.Service.src.DTO
 
     public class AddressUpdateDto
     {
+        public Guid Id { get; set; }
         public string? Recipient { get; set; }
         public string? Phone { get; set; }
         public string? Line1 { get; set; }

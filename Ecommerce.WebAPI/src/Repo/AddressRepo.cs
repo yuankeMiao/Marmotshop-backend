@@ -41,7 +41,7 @@ namespace Ecommerce.WebAPI.src.Repo
         }
         public async Task<bool> DeleteAddressByIdAsync(Guid AddressId)
         {
-            var foundAddress = await _addresses.FindAsync(AddressId) ?? throw AppException.NotFound("Address not found");
+            var foundAddress = await GetAddressByIdAsync(AddressId);
             _addresses.Remove(foundAddress);
             await _context.SaveChangesAsync();
             return true;

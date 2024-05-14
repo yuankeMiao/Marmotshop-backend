@@ -57,8 +57,8 @@ namespace Ecommerce.WebAPI.src.Repo
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            var foundUser = await _users.FirstOrDefaultAsync(u => u.Email == email);
-            return foundUser; // modify later
+            var foundUser = await _users.FirstOrDefaultAsync(u => u.Email == email) ?? throw AppException.NotFound("User not found");
+            return foundUser; 
         }
 
         public async Task<User> CreateUserAsync(User newUser)

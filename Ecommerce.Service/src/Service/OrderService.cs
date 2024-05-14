@@ -83,18 +83,23 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(BaseQueryOptions? options)
         {
-            var orders = await _orderRepo.GetAllOrdersAsync(options);
-            var orderReadDtos = new HashSet<OrderReadDto>();
-
-            foreach (var order in orders)
+            try
             {
-                var orderReadDto = _mapper.Map<Order, OrderReadDto>(order);
-                var orderProdutcs = await _orderProductRepo.GetAllOrderProductsByOrderIdAsync(order.Id);
-                orderReadDto.Products = _mapper.Map<List<OrderProduct>, HashSet<OrderProductReadDto>>(orderProdutcs);
-                orderReadDtos.Add(orderReadDto);
-            }
+                var orders = await _orderRepo.GetAllOrdersAsync(options);
+                var orderReadDtos = orders.Select(o => _mapper.Map<Order, OrderReadDto>(o));
 
-            return orderReadDtos;
+                foreach (var orderReadDto in orderReadDtos)
+                {
+                    var orderProducts = await _orderProductRepo.GetAllOrderProductsByOrderIdAsync(orderReadDto.Id);
+                    orderReadDto.Products = _mapper.Map<List<OrderProduct>, HashSet<OrderProductReadDto>>(orderProducts);
+                }
+
+                return orderReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<OrderReadDto> GetOrderByIdAsync(Guid orderId)
@@ -106,8 +111,11 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
-
                 var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
+                
+                var orderProducts = await _orderProductRepo.GetAllOrderProductsByOrderIdAsync(foundOrder.Id);
+                orderReadDto.Products = _mapper.Map<IEnumerable<OrderProduct>, HashSet<OrderProductReadDto>>(orderProducts);
+
                 return orderReadDto;
             }
             catch (Exception)

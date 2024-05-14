@@ -17,6 +17,28 @@ namespace Ecommerce.WebAPI.src.Repo
             _orders = _context.Orders;
         }
 
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync(BaseQueryOptions? options)
+        {
+            var query = _orders.AsQueryable();
+
+            // Pagination
+            if (options is not null)
+            {
+                query = query.OrderBy(o => o.CreatedDate)
+                             .Skip(options.Offset)
+                             .Take(options.Limit);
+            }
+
+            var orders = await query.ToListAsync();
+            return orders;
+        }
+
+        public async Task<Order?> GetOrderByIdAsync(Guid orderId)
+        {
+            var foundOrder = await _orders.FindAsync(orderId);
+            return foundOrder;
+        }
+
         public async Task<Order> CreateOrderAsync(Order createdOrder)
         {
             using (var transaction = _context.Database.BeginTransaction())
@@ -40,6 +62,13 @@ namespace Ecommerce.WebAPI.src.Repo
             }
         }
 
+        public async Task<Order> UpdateOrderByIdAsync(Order updatedOrder)
+        {
+            _orders.Update(updatedOrder);
+            await _context.SaveChangesAsync();
+            return updatedOrder;
+        }
+
         public async Task<bool> DeleteOrderByIdAsync(Guid orderId)
         {
             var foundOrder = await _orders.FindAsync(orderId);
@@ -53,33 +82,5 @@ namespace Ecommerce.WebAPI.src.Repo
             return true;
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync(BaseQueryOptions? options)
-        {
-            var query = _orders.AsQueryable();
-
-            // Pagination
-            if (options is not null)
-            {
-                query = query.OrderBy(o => o.CreatedDate)
-                             .Skip(options.Offset)
-                             .Take(options.Limit);
-            }
-
-            var orders = await query.ToListAsync();
-            return orders;
-        }
-
-        public async Task<Order> GetOrderByIdAsync(Guid orderId)
-        {
-            var foundOrder = await _orders.FindAsync(orderId);
-            return foundOrder;
-        }
-
-        public async Task<Order> UpdateOrderByIdAsync(Order updatedOrder)
-        {
-            _orders.Update(updatedOrder);
-            await _context.SaveChangesAsync();
-            return updatedOrder;
-        }
     }
 }
