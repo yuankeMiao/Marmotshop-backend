@@ -10,7 +10,7 @@ namespace Ecommerce.Core.src.Entity
         public User User { get; set; } = null!; //reference
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public required ICollection<OrderProduct> Products { get; set; }
+        public required HashSet<OrderProduct> Products { get; set; }
 
         [ForeignKey("AddressId")]
         public Guid AddressId { get; set; }

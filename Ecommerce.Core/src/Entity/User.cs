@@ -32,6 +32,6 @@ namespace Ecommerce.Core.src.Entity
         [Column(TypeName = "varchar")]
         public string? Avatar { get; set; }
         public UserRole UserRole { get; set; }
-        public ICollection<Address> Addresses { get; set; } = [];
+        public HashSet<Address> Addresses { get; set; } = [];
     }
 }
