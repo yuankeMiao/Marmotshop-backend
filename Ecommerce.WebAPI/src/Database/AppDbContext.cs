@@ -144,7 +144,7 @@ namespace Ecommerce.WebAPI.src.Database
             // Constraints for Address
             modelBuilder.Entity<Address>()
                 .HasOne(a => a.User)
-                .WithMany()
+                .WithMany(u => u.Addresses)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -44,15 +44,20 @@ builder.Services.AddDbContext<AppDbContext>
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
-builder.Services.AddScoped<IProductImageRepo, ProductImageRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
+builder.Services.AddScoped<IProductImageRepo, ProductImageRepo>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddScoped<IOrderRepo, OrderRepo>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderProductRepo, OrderProductRepo>();
+
 builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 

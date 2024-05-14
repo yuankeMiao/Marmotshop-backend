@@ -67,6 +67,14 @@ namespace Ecommerce.Core.src.Common
             };
         }
 
+        public static AppException DuplicateException(string duplicatedItem)
+        {
+            return new AppException(HttpStatusCode.BadRequest, duplicatedItem)
+            {
+                StatusCode = HttpStatusCode.Conflict, // 409
+                Message = $"{duplicatedItem} already exists."
+            };
+        }
         public static AppException DuplicateEmailException(string message = "Email is already in use, please choose another email")
         {
             return new AppException(HttpStatusCode.BadRequest, message)

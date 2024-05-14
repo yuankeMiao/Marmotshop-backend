@@ -1,11 +1,9 @@
-using System.Net;
-using System.Text.RegularExpressions;
+
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.WebAPI.src.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 
 namespace Ecommerce.WebAPI.src.Repo
 {
@@ -68,10 +66,9 @@ namespace Ecommerce.WebAPI.src.Repo
             var duplicatedUser = await _users.FirstOrDefaultAsync(user => user.Email == newUser.Email);
             if (duplicatedUser is not null) throw AppException.DuplicateEmailException();
 
-            var user = await _users.AddAsync(newUser);
+            await _users.AddAsync(newUser);
             await _context.SaveChangesAsync();
             return newUser;
-
         }
 
         public async Task<User> UpdateUserByIdAsync(User updatedUser)

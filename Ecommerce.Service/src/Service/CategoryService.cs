@@ -63,6 +63,7 @@ namespace Ecommerce.Service.src.Service
 
                 var newCategory = _mapper.Map<CategoryCreateDto, Category>(categoryCreateDto);
                 var createdCategory = await _categoryRepo.CreateCategoryAsync(newCategory);
+                
                 var createdCategoryDto = _mapper.Map<Category, CategoryReadDto>(createdCategory);
                 return createdCategoryDto;
             }

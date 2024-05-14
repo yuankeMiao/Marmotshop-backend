@@ -23,12 +23,4 @@ namespace Ecommerce.Service.src.DTO
     {
         public OrderStatus Status { get; set; }
     }
-
-    // I think this is not needed, so i tempararily comment it out, will check later
-    // public class OrderReadUpdateDto : BaseEntity
-    // {
-    //     public required UserReadDto User { get; set; } // User information
-    //     public OrderStatus OrderStatus { get; set; }
-    //     public required IEnumerable<OrderProductReadDto> OrderProducts { get; set; } // Order products list
-    // }
 }

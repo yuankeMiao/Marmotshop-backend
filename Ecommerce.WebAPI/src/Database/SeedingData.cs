@@ -75,9 +75,6 @@ namespace Ecommerce.WebAPI.src.Database
         public static List<User> GetUsers()
         {
             var passwordService = new PasswordService();
-            var hashedAdminPassword = passwordService.HashPassword("admin@123", out byte[] adminSalt);
-            var hashedBinhPassword = passwordService.HashPassword("binh@123", out byte[] binhSalt);
-            var hashedAdnanPassword = passwordService.HashPassword("adnan@123", out byte[] adnanSalt);
             var hashedYuankePassword = passwordService.HashPassword("yuanke@123", out byte[] yuankeSalt);
             var hashedCustomerPassword = passwordService.HashPassword("customer@123", out byte[] customerSalt);
             return new List<User>

@@ -52,6 +52,7 @@ namespace Ecommerce.Service.src.Service
             }
             order.Products = newOrderProducts;
             order.Status = OrderStatus.Pending;
+            order.ShippingAddress = orderCreateDto.ShippingAddress;
 
             var createdOrder = await _orderRepo.CreateOrderAsync(order);
             var orderReadDto = _mapper.Map<OrderReadDto>(createdOrder);
@@ -89,7 +90,7 @@ namespace Ecommerce.Service.src.Service
             {
                 var orderReadDto = _mapper.Map<Order, OrderReadDto>(order);
                 var orderProdutcs = await _orderProductRepo.GetAllOrderProductsByOrderIdAsync(order.Id);
-                orderReadDto.Products = _mapper.Map<HashSet<OrderProduct>, HashSet<OrderProductReadDto>>(orderProdutcs);
+                orderReadDto.Products = _mapper.Map<List<OrderProduct>, HashSet<OrderProductReadDto>>(orderProdutcs);
                 orderReadDtos.Add(orderReadDto);
             }
 
