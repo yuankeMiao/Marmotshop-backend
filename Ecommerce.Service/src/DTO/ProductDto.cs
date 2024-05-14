@@ -7,42 +7,43 @@ namespace Ecommerce.Service.src.DTO
     // then I don't need to pass image Id to client
     public class ProductReadDto : BaseEntity
     {
-        public required string ProductTitle { get; set; }
-        public required string ProductDescription { get; set; }
-        public int ProductPrice { get; set; }
-        public int ProductDiscountPercentage { get; set; }
-        public decimal? ProductRating { get; set; }
-        public int ProductStock { get; set; }
-        public string? ProductBrand { get; set; }
-        public required CategoryReadDto ProductCategory { get; set; }
-        public required string ProductThumbnail { get; set; }
-        public required ICollection<string> ProductImageUrls { get; set; }
+        public required string Title { get; set; }
+        public required string Description { get; set; }
+        public int Price { get; set; }
+        public int DiscountPercentage { get; set; }
+        public decimal? Rating { get; set; }
+        public int Stock { get; set; }
+        public string? Brand { get; set; }
+        public required Guid CategoryId { get; set; }
+        public required CategoryReadDto Category { get; set; }
+        public required string Thumbnail { get; set; }
+        public required ICollection<string> ImageUrls { get; set; }
     }
 
     public class ProductCreateDto
     {
-        public required string ProductTitle { get; set; }
-        public required string ProductDescription { get; set; }
-        public int ProductPrice { get; set; }
-        public int ProductDiscountPercentage { get; set; }
-        public int ProductStock { get; set; }
-        public string? ProductBrand { get; set; }
+        public required string Title { get; set; }
+        public required string Description { get; set; }
+        public int Price { get; set; }
+        public int DiscountPercentage { get; set; }
+        public int Stock { get; set; }
+        public string? Brand { get; set; }
         public Guid CategoryId { get; set; }
-        public required string ProductThumbnail { get; set; }
-        public required ICollection<string> ProductImageUrls { get; set; }
+        public required string Thumbnail { get; set; }
+        public required ICollection<string> ImageUrls { get; set; }
     }
 
 
     public class ProductUpdateDto
     {
-        public string? ProductTitle { get; set; }
-        public string? ProductDescription { get; set; }
-        public int? ProductPrice { get; set; }
-        public int? ProductDiscountPercentage { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public int? Price { get; set; }
+        public int? DiscountPercentage { get; set; }
         public Guid? CategoryId { get; set; }
-        public int? ProductStock { get; set; }
-        public string? ProductBrand { get; set; }
-        public string? ProductThumbnail { get; set; }
-        public ICollection<string>? ProductImageUrls { get; set; }
+        public int? Stock { get; set; }
+        public string? Brand { get; set; }
+        public string? Thumbnail { get; set; }
+        public ICollection<string>? ImageUrls { get; set; }
     }
 }

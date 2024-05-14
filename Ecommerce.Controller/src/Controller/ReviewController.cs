@@ -68,7 +68,7 @@ namespace Ecommerce.Controller.src.Controller
         [HttpPatch("{reviewId}")]
         public async Task<ReviewReadDto> UpdateReviewByIdAsync([FromRoute] Guid reviewId, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
-            reviewUpdateDto.ReviewId = reviewId; // If review is found...
+            // reviewUpdateDto.ReviewId = reviewId; // If review is found...
             return await _service.UpdateReviewByIdAsync(reviewId, reviewUpdateDto); // Will be modified later
         }
 

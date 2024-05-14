@@ -41,9 +41,8 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{orderId}")]
-        public async Task<OrderReadUpdateDto> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
+        public async Task<OrderReadDto> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
         {
-            orderUpdateDto.OrderId = orderId; // If order is found...
             return await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto); // Will be modified later
         }
 

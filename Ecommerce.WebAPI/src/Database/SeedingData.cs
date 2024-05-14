@@ -85,52 +85,24 @@ namespace Ecommerce.WebAPI.src.Database
                 new User
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Admin1",
-                    Email = "john@example.com",
-                    Password = hashedAdminPassword,
-                    Salt= adminSalt,
-                    Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    UserRole = UserRole.Admin,
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Binh",
-                    Email = "binh@admin.com",
-                    Password = hashedBinhPassword,
-                    Salt= binhSalt,
-                    Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    UserRole = UserRole.Admin,
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Adnan",
-                    Email = "adnan@admin.com",
-                    Password = hashedAdnanPassword,
-                    Salt= adnanSalt,
-                    Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    UserRole = UserRole.Admin,
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Yuanke",
+                    Firstname = "Yuanke",
+                    Lastname = "Miao",
                     Email = "yuanke@admin.com",
                     Password = hashedYuankePassword,
                     Salt= yuankeSalt,
                     Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    UserRole = UserRole.Admin,
+                    Role = UserRole.Admin,
                 },
                 new User
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Customer1",
-                    Email = "customer1@customer.com",
+                     Firstname = "John",
+                    Lastname = "Doe",
+                    Email = "John@customer.com",
                     Password = hashedCustomerPassword,
                     Salt= customerSalt,
                     Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    UserRole = UserRole.Admin,
+                    Role = UserRole.Customer,
                 }
             };
         }

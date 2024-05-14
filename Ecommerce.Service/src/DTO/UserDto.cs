@@ -7,35 +7,35 @@ namespace Ecommerce.Service.src.DTO
 
     public class UserReadDto : BaseEntity
     {
-        public required string UserFirstname { get; set; }
-        public required string UserLastname { get; set; }
-        public required string UserEmail { get; set; }
-        public string? UserAvatar { get; set; }
-        public UserRole UserRole { get; set; }
-        public HashSet<Address> UserAddresses { get; set; } = [];
+        public required string Firstname { get; set; }
+        public required string Lastname { get; set; }
+        public required string Email { get; set; }
+        public string? Avatar { get; set; }
+        public UserRole Role { get; set; }
+        public HashSet<Address> Addresses { get; set; } = [];
     }
 
     public class UserCreateDto
     {
-        public required string UserFirstname { get; set; }
-        public required string UserLastname { get; set; }
-         public required string UserEmail { get; set; }
-        public required string UserPassword { get; set; }
-        public string? UserAvatar { get; set; }
-        public UserRole UserRole { get; set; }
-        public HashSet<Address>? UserAddresses { get; set; }
+        public required string Firstname { get; set; }
+        public required string Lastname { get; set; }
+         public required string Email { get; set; }
+        public required string Password { get; set; }
+        public string? Avatar { get; set; }
+        public UserRole Role { get; set; }
+        public HashSet<Address>? Addresses { get; set; }
         public DateOnly? CreatedDate { get; set; }
         public DateOnly? UpdatedDate { get; set; }
     }
 
     public class UserUpdateDto
     {
-        public string? UserFirstname { get; set; }
-        public string? UserLastname { get; set; }
-        public string? UserEmail { get; set; }
-        public string? UserPassword { get; set; }
-        public string? UserAvatar { get; set; }
-        public UserRole? UserRole { get; set; }
-        public HashSet<Address>? UserAddresses { get; set; }
+        public string? Firstname { get; set; }
+        public string? Lastname { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public string? Avatar { get; set; }
+        public UserRole? Role { get; set; }
+        public HashSet<Address>? Addresses { get; set; }
     }
 }

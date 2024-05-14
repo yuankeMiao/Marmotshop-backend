@@ -5,23 +5,23 @@ namespace Ecommerce.Service.src.DTO
 {
     public class OrderReadDto : BaseEntity
     {
-        public required UserReadDto OrderUser { get; set; } // User information
-        public required ICollection<OrderProductReadDto> OrderProducts { get; set; }
-        public OrderStatus OrderStatus { get; set; }
-        public required string OrderShippingAddress { get; set; }
+        public required UserReadDto User { get; set; } // User information
+        public required HashSet<OrderProductReadDto> Products { get; set; }
+        public OrderStatus Status { get; set; }
+        public required string ShippingAddress { get; set; }
     }
 
     public class OrderCreateDto
     {
-        public Guid OrderUserId { get; set; }
-        public required ICollection<OrderProductCreateDto> OrderProducts { get; set; }
-        public required string OrderShippingAddress { get; set; }
+        public Guid UserId { get; set; }
+        public required HashSet<OrderProductCreateDto> Products { get; set; }
+        public required string ShippingAddress { get; set; }
 
     }
 
     public class OrderUpdateDto // to simplify the logic, only update status
     {
-        public OrderStatus OrderStatus { get; set; }
+        public OrderStatus Status { get; set; }
     }
 
     // I think this is not needed, so i tempararily comment it out, will check later

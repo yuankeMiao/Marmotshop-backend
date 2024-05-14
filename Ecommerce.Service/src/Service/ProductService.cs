@@ -12,7 +12,7 @@ namespace Ecommerce.Service.src.Service
     public class ProductService : IProductService
     {
 
-        private readonly IProductRepo _productRepo;
+        private readonly IProductRepo _productRepo; 
         private IMapper _mapper;
         private readonly ICategoryRepo _categoryRepo;
         private readonly IProductImageRepo _productImageRepo;
@@ -31,7 +31,7 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 var products = await _productRepo.GetAllProductsAsync(productQueryOptions);
-                var productDtos = _mapper.Map<List<ProductReadDto>>(products);
+                var productDtos = _mapper.Map<HashSet<ProductReadDto>>(products);
 
 
                 foreach (var productDto in productDtos)
@@ -91,31 +91,31 @@ namespace Ecommerce.Service.src.Service
                     throw new ArgumentNullException(nameof(newProduct), "ProductC cannot be null");
                 }
                 // Check if the product name is provided
-                if (string.IsNullOrWhiteSpace(newProduct.ProductTitle))
+                if (string.IsNullOrWhiteSpace(newProduct.Title))
                 {
                     throw AppException.InvalidInputException("Product name cannot be empty");
                 }
 
                 // Check if the price is greater than zero
-                if (newProduct.ProductPrice <= 0)
+                if (newProduct.Price <= 0)
                 {
                     throw AppException.InvalidInputException("Price should be greated than zero.");
                 }
 
                 // Validate image URLs
-                if (newProduct.ProductImages is not null)
+                if (newProduct.ImageUrls is not null)
                 {
 
-                    foreach (var image in newProduct.ProductImages)
+                    foreach (var imageUrl in newProduct.ImageUrls)
                     {
                         // Check if the URL is provided
-                        if (string.IsNullOrWhiteSpace(image.Url))
+                        if (string.IsNullOrWhiteSpace(imageUrl))
                         {
                             throw AppException.InvalidInputException("Image URL cannot be empty");
                         }
 
                         // Check if the URL points to a valid image format 
-                        if (!IsImageUrlValid(image.Url))
+                        if (!IsImageUrlValid(imageUrl))
                         {
                             throw AppException.InvalidInputException("Invalid image format");
                         }
@@ -128,7 +128,6 @@ namespace Ecommerce.Service.src.Service
                     throw AppException.NotFound("Category not found");
                 }
                 var productEntity = _mapper.Map<Product>(newProduct);
-                productEntity.ProductImages = _mapper.Map<List<ProductImage>>(newProduct.ProductImages);
                 var createdProduct = await _productRepo.CreateProductAsync(productEntity);
 
                 var productReadDto = _mapper.Map<ProductReadDto>(createdProduct);
@@ -183,15 +182,15 @@ namespace Ecommerce.Service.src.Service
                 var foundProduct = await _productRepo.GetProductByIdAsync(productId);
 
 
-                foundProduct.Title = productUpdateDto.ProductTitle ?? foundProduct.Title;
-                foundProduct.Description = productUpdateDto.ProductDescription ?? foundProduct.Description;
+                foundProduct.Title = productUpdateDto.Title ?? foundProduct.Title;
+                foundProduct.Description = productUpdateDto.Description ?? foundProduct.Description;
                 foundProduct.CategoryId = productUpdateDto.CategoryId ?? foundProduct.CategoryId;
 
-                foundProduct.Price = productUpdateDto.ProductPrice ?? foundProduct.Price;
+                foundProduct.Price = productUpdateDto.Price ?? foundProduct.Price;
                 // Update inventory by adding the new inventory value
-                if (productUpdateDto.ProductInventory.HasValue)
+                if (productUpdateDto.Stock.HasValue)
                 {
-                    foundProduct.Inventory += productUpdateDto.ProductInventory.Value;
+                    foundProduct.Stock += productUpdateDto.Stock.Value;
                 }
 
                 // Find product images
@@ -199,30 +198,30 @@ namespace Ecommerce.Service.src.Service
 
 
                 // Update product images
-                if (productUpdateDto.ImagesToUpdate is not null && productUpdateDto.ImagesToUpdate.Any())
+                if (productUpdateDto.ImageUrls is not null && productUpdateDto.ImageUrls.Any())
                 {
-                    foreach (var imageDto in productUpdateDto.ImagesToUpdate)
+                    foreach (var imageUrl in productUpdateDto.ImageUrls)
                     {
                         // Find the image to update by URL
-                        var imageToUpdate = productImages.FirstOrDefault(img => img.Url == imageDto.Url);
+                        var imageToUpdate = productImages.FirstOrDefault(img => img.Url == imageUrl);
 
                         if (imageToUpdate is not null)
                         {
                             // Update image URL if it has changed
-                            if (imageToUpdate.Url != imageDto.Url)
+                            if (imageToUpdate.Url != imageUrl)
                             {
                                 // Update the image URL using the repository method
-                                var updateResult = _productImageRepo.UpdateImageUrlAsync(imageToUpdate.Id, imageDto.Url);
+                                var updateResult = _productImageRepo.UpdateImageUrlAsync(imageToUpdate.Id, imageUrl);
                             }
                         }
                         else
                         {
                             // Handle the case where the image URL from the DTO doesn't match any existing images
-                            throw new Exception($"Image with URL {imageDto.Url} not found.");
+                            throw new Exception($"Image with URL {imageUrl} not found.");
                         }
 
                         // Validate image URL
-                        if (!IsImageUrlValid(imageDto.Url))
+                        if (!IsImageUrlValid(imageUrl))
                         {
                             throw AppException.InvalidInputException("Invalid image URL format");
                         }
@@ -239,7 +238,7 @@ namespace Ecommerce.Service.src.Service
                 // Map the updated product entity to ProductReadDto
                 var updatedProductDto = _mapper.Map<Product, ProductReadDto>(updatedProduct);
                 // Update the productInventory value in the returned DTO
-                updatedProductDto.ProductInventory = foundProduct.Inventory;
+                updatedProductDto.Stock= foundProduct.Stock;
                 // Set the category property in the updated product DTO
                 updatedProductDto.Category = categoryDto;
                 return updatedProductDto;

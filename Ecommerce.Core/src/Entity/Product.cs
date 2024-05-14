@@ -30,7 +30,7 @@ namespace Ecommerce.Core.src.Entity
 
         [ForeignKey("CategoryId")]
         public Guid CategoryId { get; set; } //  foreign key navigate to category
-        public Category Category { get; set; } = null!;
+        public required Category Category { get; set; }
         public required string Thumbnail { get; set; }
         public ICollection<string> ImageUrls { get; set; } = [];
     }

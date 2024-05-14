@@ -29,13 +29,13 @@ namespace Ecommerce.WebAPI.src.Repo
                 // Filter by role if provided
                 if (userQueryOptions.SearchRole.HasValue)
                 {
-                    query = query.Where(u => u.UserRole == userQueryOptions.SearchRole.Value);
+                    query = query.Where(u => u.Role == userQueryOptions.SearchRole.Value);
                 }
 
                 // Search by name if provided
                 if (!string.IsNullOrEmpty(userQueryOptions.SearchName))
                 {
-                    query = query.Where(u => u.Name.Contains(userQueryOptions.SearchName));
+                    query = query.Where(u => u.Firstname.Contains(userQueryOptions.SearchName) || u.Lastname.Contains(userQueryOptions.SearchName));
                 }
 
                 if (userQueryOptions.Offset >= 0 && userQueryOptions.Limit > 0)
@@ -60,7 +60,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<User> GetUserByEmailAsync(string email)
         {
             var foundUser = await _users.FirstOrDefaultAsync(u => u.Email == email);
-            return foundUser;
+            return foundUser; // modify later
         }
 
         public async Task<User> CreateUserAsync(User newUser)

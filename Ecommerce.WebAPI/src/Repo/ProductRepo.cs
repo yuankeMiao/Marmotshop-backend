@@ -50,7 +50,7 @@ namespace Ecommerce.WebAPI.src.Repo
         {
             // var query = _products.AsQueryable();
             var query = _products.AsQueryable();
-            query = query.Include(p => p.ProductImages);
+            query = query.Include(p => p.ImageUrls);
             // Apply filters if ProductQueryOptions is not null
             if (options != null)
             {
@@ -134,7 +134,7 @@ namespace Ecommerce.WebAPI.src.Repo
         {
             // Load related images
             await _context.Entry(updatedProduct)
-                .Collection(p => p.ProductImages)
+                .Collection(p => p.ImageUrls)
                 .LoadAsync();
             _products.Update(updatedProduct);
             await _context.SaveChangesAsync();

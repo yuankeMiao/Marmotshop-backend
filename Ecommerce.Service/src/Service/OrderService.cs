@@ -14,33 +14,43 @@ namespace Ecommerce.Service.src.Service
         private readonly IOrderRepo _orderRepo;
         private IProductRepo _productRepo;
         private IUserRepo _userRepo;
+        private IOrderProductRepo _orderProductRepo;
 
-        public OrderService(IOrderRepo orderRepo, IMapper mapper, IProductRepo productRepo, IUserRepo userRepo)
+        public OrderService(IOrderRepo orderRepo, IMapper mapper, IProductRepo productRepo, IUserRepo userRepo, IOrderProductRepo orderProductRepo)
         {
             _mapper = mapper;
             _orderRepo = orderRepo;
             _productRepo = productRepo;
             _userRepo = userRepo;
+            _orderProductRepo = orderProductRepo;
         }
 
         public async Task<OrderReadDto> CreateOrderAsync(Guid userId, OrderCreateDto orderCreateDto)
         {
+            // check if user exists
             _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
-            var order = _mapper.Map<Order>(orderCreateDto);
+            // if true, created order object, assign userId
+            var order = _mapper.Map<OrderCreateDto, Order>(orderCreateDto);
             order.UserId = userId;
 
-            var newOrderProducts = new List<OrderProduct>();
-            foreach (var orderProductDto in orderCreateDto.OrderProducts)
+            // create orderProducts set
+            var newOrderProducts = new HashSet<OrderProduct>();
+
+            foreach (var orderProductDto in orderCreateDto.Products)
             {
+                // check every product in orderCreateDto.OrderProducts
                 var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId) ?? throw AppException.NotFound("Product not found");
-                newOrderProducts.Add(new OrderProduct
-                {
-                    Product = foundProduct,
-                    Quantity = orderProductDto.Quantity
-                });
+                // if found, create a new OrderProduct object
+                var newOrderProduct = _mapper.Map<Product, OrderProduct>(foundProduct);
+                newOrderProduct.Quantity = orderProductDto.Quantity;
+                newOrderProduct.TotalPrice = newOrderProduct.Quantity * newOrderProduct.ActualPrice;
+                newOrderProduct.OrderId = order.Id;
+
+                var createdOrderProduct = await _orderProductRepo.CreateOrderProductAsync(newOrderProduct);
+                newOrderProducts.Add(createdOrderProduct);
             }
-            order.OrderProducts = newOrderProducts;
+            order.Products = newOrderProducts;
             order.Status = OrderStatus.Pending;
 
             var createdOrder = await _orderRepo.CreateOrderAsync(order);
@@ -73,15 +83,17 @@ namespace Ecommerce.Service.src.Service
         public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(BaseQueryOptions? options)
         {
             var orders = await _orderRepo.GetAllOrdersAsync(options);
-            var orderDtos = new List<OrderReadDto>();
+            var orderReadDtos = new HashSet<OrderReadDto>();
 
             foreach (var order in orders)
             {
-                var orderDto = await MapOrderToDTO(order);
-                orderDtos.Add(orderDto);
+                var orderReadDto = _mapper.Map<Order, OrderReadDto>(order);
+                var orderProdutcs = await _orderProductRepo.GetAllOrderProductsByOrderIdAsync(order.Id);
+                orderReadDto.Products = _mapper.Map<HashSet<OrderProduct>, HashSet<OrderProductReadDto>>(orderProdutcs);
+                orderReadDtos.Add(orderReadDto);
             }
 
-            return orderDtos;
+            return orderReadDtos;
         }
 
         public async Task<OrderReadDto> GetOrderByIdAsync(Guid orderId)
@@ -92,16 +104,10 @@ namespace Ecommerce.Service.src.Service
             }
             try
             {
-                var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId);
-                if (foundOrder is null)
-                {
-                    throw AppException.NotFound("Order not found");
-                }
-                var orderDto = _mapper.Map<OrderReadDto>(foundOrder);
-                var user = await _userRepo.GetUserByIdAsync(foundOrder.UserId);
-                orderDto.User = _mapper.Map<UserReadDto>(user);
-                orderDto.OrderProducts = _mapper.Map<IEnumerable<OrderProductReadDto>>(orderDto.OrderProducts);
-                return orderDto;
+                var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
+
+                var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
+                return orderReadDto;
             }
             catch (Exception)
             {
@@ -109,7 +115,7 @@ namespace Ecommerce.Service.src.Service
             }
         }
 
-        public async Task<OrderReadUpdateDto> UpdateOrderByIdAsync(Guid orderId, OrderUpdateDto orderUpdateDto)
+        public async Task<OrderReadDto> UpdateOrderByIdAsync(Guid orderId, OrderUpdateDto orderUpdateDto)
         {
             var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId);
 
@@ -123,60 +129,16 @@ namespace Ecommerce.Service.src.Service
             }
 
             // Update order status and date
-            foundOrder.Status = orderUpdateDto.OrderStatus;
+            foundOrder.Status = orderUpdateDto.Status;
             foundOrder.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
             // Save changes
             var updatedOrder = await _orderRepo.UpdateOrderByIdAsync(foundOrder);
 
-            // Fetch user information
-            var user = await _userRepo.GetUserByIdAsync(updatedOrder.UserId);
+            var orderReadDto = _mapper.Map<OrderReadDto>(updatedOrder);
+            orderReadDto.Status = orderUpdateDto.Status;
 
-            var orderDto = _mapper.Map<OrderReadUpdateDto>(updatedOrder);
-            orderDto.User = _mapper.Map<UserReadDto>(user);
-            orderDto.OrderStatus = orderUpdateDto.OrderStatus;
-
-            return orderDto;
+            return orderReadDto;
         }
-
-        #region Helper class
-        private async Task<OrderReadDto> MapOrderToDTO(Order order)
-        {
-            var orderDto = _mapper.Map<OrderReadDto>(order);
-            var user = await _userRepo.GetUserByIdAsync(order.UserId);
-
-            // Map User
-            orderDto.User = _mapper.Map<UserReadDto>(user);
-
-            // Map OrderProducts
-            await MapOrderProductsToDTOs(order, orderDto);
-
-            return orderDto;
-
-        }
-
-        private async Task MapOrderProductsToDTOs(Order order, OrderReadDto orderDto)
-        {
-            if (order.OrderProducts != null && order.OrderProducts.Any())
-            {
-                var orderProductDtos = new List<OrderProductReadDto>();
-
-                foreach (var orderProduct in order.OrderProducts)
-                {
-                    var product = await _productRepo.GetProductByIdAsync(orderProduct.ProductId);
-                    var productDTO = _mapper.Map<ProductReadDto>(product);
-
-                    var orderProductDto = _mapper.Map<OrderProductReadDto>(orderProduct);
-                    orderProductDto.ProductTitle = productDTO.ProductTitle;
-                    orderProductDto.ProductPrice = productDTO.ProductPrice;
-
-                    orderProductDtos.Add(orderProductDto);
-                }
-
-                orderDto.OrderProducts = orderProductDtos;
-            }
-        }
-
-        #endregion
     }
 }

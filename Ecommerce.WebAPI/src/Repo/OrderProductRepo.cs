@@ -6,11 +6,15 @@ namespace Ecommerce.WebAPI.src.Repo
 {
     public class OrderProductRepo : IOrderProductRepo
     {
-        public Task<OrderProduct> CreateOrderProduct(OrderProduct product)
+        public Task<HashSet<OrderProduct>> GetAllOrderProductsByOrderIdAsync(Guid orderId)
         {
             throw new NotImplementedException();
         }
-        public Task<bool> DeleteOrderProduct(Guid OrderId, Guid ProductId)
+        public Task<OrderProduct> CreateOrderProductAsync(OrderProduct product)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteOrderProductAsync(Guid OrderId, Guid ProductId)
         {
             throw new NotImplementedException();
         }

@@ -24,17 +24,13 @@ namespace Ecommerce.WebAPI.src.Service
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, foundUser.Email),
-                new Claim(ClaimTypes.NameIdentifier, foundUser.Id.ToString()),
-                new Claim(ClaimTypes.Role, foundUser.UserRole.ToString()),
+                new(ClaimTypes.Email, foundUser.Email),
+                new(ClaimTypes.NameIdentifier, foundUser.Id.ToString()),
+                new(ClaimTypes.Role, foundUser.Role.ToString()),
             };
 
             // secret key
-            var jwtKey = _configuration["Secrets:JwtKey"];
-            if (jwtKey is null)
-            {
-                throw new ArgumentNullException("JwtKey is not found in appsettings.json");
-            }
+            var jwtKey = _configuration["Secrets:JwtKey"] ?? throw new ArgumentNullException("JwtKey is not found in appsettings.json");
             var securityKey = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)), SecurityAlgorithms.HmacSha256Signature);
 
             // Token handler

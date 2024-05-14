@@ -57,7 +57,7 @@ namespace Ecommerce.WebAPI.src.Database
             base.OnModelCreating(modelBuilder);
 
             // Enum columns
-            modelBuilder.Entity<User>(entity => entity.Property(u => u.UserRole).HasColumnType("user_role"));
+            modelBuilder.Entity<User>(entity => entity.Property(u => u.Role).HasColumnType("user_role"));
             modelBuilder.Entity<Order>(entity => entity.Property(o => o.Status).HasColumnType("order_status"));
 
             // Automatically set CreatedDate when creating data

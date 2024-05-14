@@ -39,8 +39,8 @@ namespace Ecommerce.Service.src.Service
             // Create a new Review object and set its properties
             var review = new Review
             {
-                Rating = reviewCreateDto.ReviewRating,
-                Content = reviewCreateDto.ReviewContent,
+                Rating = reviewCreateDto.Rating,
+                Content = reviewCreateDto.Content,
                 UserId = userId,
                 User = foundUser,
                 ProductId = reviewCreateDto.ProductId,
@@ -109,13 +109,13 @@ namespace Ecommerce.Service.src.Service
             }
 
             // Update
-            if (reviewUpdateDto.ReviewRating != null)
+            if (reviewUpdateDto.Rating != null)
             {
-                foundReview.Rating = reviewUpdateDto.ReviewRating.Value;
+                foundReview.Rating = reviewUpdateDto.Rating.Value;
             }
-            if (reviewUpdateDto.ReviewContent != null)
+            if (reviewUpdateDto.Content != null)
             {
-                foundReview.Content = reviewUpdateDto.ReviewContent;
+                foundReview.Content = reviewUpdateDto.Content;
             }
             foundReview.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
