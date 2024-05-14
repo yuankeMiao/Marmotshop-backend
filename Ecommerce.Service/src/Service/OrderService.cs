@@ -25,22 +25,15 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<OrderReadDto> CreateOrderAsync(Guid userId, OrderCreateDto orderCreateDto)
         {
-            var foundUser = await _userRepo.GetUserByIdAsync(userId);
-            if (foundUser is null)
-            {
-                throw AppException.NotFound("User not found");
-            }
+            _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
             var order = _mapper.Map<Order>(orderCreateDto);
-            order.User = foundUser;
+            order.UserId = userId;
+
             var newOrderProducts = new List<OrderProduct>();
             foreach (var orderProductDto in orderCreateDto.OrderProducts)
             {
-                var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId);
-                if (foundProduct is null)
-                {
-                    throw AppException.NotFound("Product not found");
-                }
+                var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId) ?? throw AppException.NotFound("Product not found");
                 newOrderProducts.Add(new OrderProduct
                 {
                     Product = foundProduct,

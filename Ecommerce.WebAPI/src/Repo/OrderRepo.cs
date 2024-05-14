@@ -10,15 +10,11 @@ namespace Ecommerce.WebAPI.src.Repo
     {
         private readonly AppDbContext _context;
         private readonly DbSet<Order> _orders;
-        private DbSet<Product> _products;
-        private readonly DbSet<OrderProduct> _orderProducts;
 
         public OrderRepo(AppDbContext context)
         {
             _context = context;
             _orders = _context.Orders;
-            _products = _context.Products;
-            _orderProducts = _context.OrderProducts;
         }
 
         public async Task<Order> CreateOrderAsync(Order createdOrder)
