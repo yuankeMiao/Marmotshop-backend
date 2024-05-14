@@ -36,7 +36,7 @@ builder.Services.AddDbContext<AppDbContext>
       options
         .UseNpgsql(dataSource)
         .UseSnakeCaseNamingConvention()
-        .AddInterceptors(new TimeStampInterceptor())
+        // .AddInterceptors(new TimeStampInterceptor())
 );
 
 // service registration -> automatically create all instances of dependencies

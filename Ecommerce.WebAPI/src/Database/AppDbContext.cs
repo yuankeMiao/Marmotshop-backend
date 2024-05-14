@@ -36,7 +36,11 @@ namespace Ecommerce.WebAPI.src.Database
         #region OnConfiguring
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
+            optionsBuilder
+            .AddInterceptors(new TimeStampInterceptor())
+            .EnableSensitiveDataLogging()
+            .EnableDetailedErrors()
+            .UseSnakeCaseNamingConvention();
         }
         #endregion
 
@@ -109,10 +113,13 @@ namespace Ecommerce.WebAPI.src.Database
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Constraints for OrderProduct
-            modelBuilder.Entity<OrderProduct>()
-                .HasKey(op => new { op.OrderId, op.ProductId });
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.AddressSnapshot)
+                .WithOne()
+                .HasForeignKey<Order>(o => o.AddressId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // Constraints for OrderProduct
             modelBuilder.Entity<OrderProduct>()
                 .HasOne(op => op.Order)
                 .WithMany(o => o.Products)
@@ -120,9 +127,9 @@ namespace Ecommerce.WebAPI.src.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderProduct>()
-                .HasOne(op => op.Product)
-                .WithMany()
-                .HasForeignKey(op => op.ProductId)
+                .HasOne(op => op.ProductSnapshot)
+                .WithOne()
+                .HasForeignKey<OrderProduct>(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
