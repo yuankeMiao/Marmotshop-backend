@@ -176,11 +176,6 @@ namespace Ecommerce.Service.src.Service
             {
                 // Delete the user entity from the repository
                 var deleted = await _userRepo.DeleteUserByIdAsync(userId);
-                if (!deleted)
-                {
-                    // If the user was not deleted for some reason, you can choose to throw an exception
-                    throw new Exception("User deletion failed.");
-                }
                 // Return true to indicate successful deletion
                 return true;
             }

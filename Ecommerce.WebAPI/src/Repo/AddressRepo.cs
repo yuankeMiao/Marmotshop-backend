@@ -17,7 +17,7 @@ namespace Ecommerce.WebAPI.src.Repo
             _addresses = _context.Addresses;
         }
 
-        public async Task<IEnumerable<Address>> GetAddressesByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Address>> GetAddressBookByUserIdAsync(Guid userId)
         {
             var foundAddresses = await _addresses.Where(a => a.UserId == userId).ToListAsync();
             return foundAddresses;
