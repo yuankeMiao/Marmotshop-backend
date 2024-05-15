@@ -47,10 +47,10 @@ namespace Ecommerce.Test.src.Service
                     Description = "Description 1",
                     Price = 10,
                     CategoryId = Guid.NewGuid(),
-                    ProductImages =
+                    Images =
                     [
-                        new ProductImage { Id = Guid.NewGuid(), Url = "image1.jpg" },
-                        new ProductImage { Id = Guid.NewGuid(), Url = "image2.jpg" }
+                        new Image { Id = Guid.NewGuid(), Url = "image1.jpg" },
+                        new Image { Id = Guid.NewGuid(), Url = "image2.jpg" }
                     ]
                 },
                 new Product
@@ -60,10 +60,10 @@ namespace Ecommerce.Test.src.Service
                     Description = "Description 2",
                     Price = 20,
                     CategoryId = Guid.NewGuid(),
-                    ProductImages =
+                    Images =
                     [
-                        new ProductImage { Id = Guid.NewGuid(), Url = "image3.jpg" },
-                        new ProductImage { Id = Guid.NewGuid(), Url = "image4.jpg" }
+                        new Image { Id = Guid.NewGuid(), Url = "image3.jpg" },
+                        new Image { Id = Guid.NewGuid(), Url = "image4.jpg" }
                     ]
                 }
             };
@@ -130,10 +130,10 @@ namespace Ecommerce.Test.src.Service
                 Description = "Test Description",
                 Price = 100,
                 CategoryId = Guid.NewGuid(),
-                ProductImages =
+                Images =
         [
-            new ProductImage { Id = Guid.NewGuid(), Url = "image1.jpg" },
-            new ProductImage { Id = Guid.NewGuid(), Url = "image2.jpg" }
+            new Image { Id = Guid.NewGuid(), Url = "image1.jpg" },
+            new Image { Id = Guid.NewGuid(), Url = "image2.jpg" }
         ]
             };
             _productRepoMock.Setup(repo => repo.GetProductByIdAsync(productId))
@@ -160,10 +160,10 @@ namespace Ecommerce.Test.src.Service
                 Description = "Test Description",
                 Price = 100,
                 CategoryId = Guid.NewGuid(),
-                ProductImages =
+                Images =
         [
-            new ProductImage { Id = Guid.NewGuid(), Url = "image1.jpg" },
-            new ProductImage { Id = Guid.NewGuid(), Url = "image2.jpg" }
+            new Image { Id = Guid.NewGuid(), Url = "image1.jpg" },
+            new Image { Id = Guid.NewGuid(), Url = "image2.jpg" }
         ]
             };
             _productRepoMock.Setup(repo => repo.GetProductByIdAsync(invalidProductId))
@@ -185,10 +185,10 @@ namespace Ecommerce.Test.src.Service
                 ProductDescription = "Test Description",
                 ProductPrice = 100,
                 CategoryId = Guid.NewGuid(),
-                ProductImages =
+                Images =
                 [
-                    new ProductImageCreateDto { Url = "image_url_1" },
-                    new ProductImageCreateDto { Url = "image_url_2" }
+                    new ImageCreateDto { Url = "image_url_1" },
+                    new ImageCreateDto { Url = "image_url_2" }
                 ]
             };
 
@@ -198,7 +198,7 @@ namespace Ecommerce.Test.src.Service
                 Description = newProduct.ProductDescription,
                 Price = newProduct.ProductPrice,
                 CategoryId = newProduct.CategoryId,
-                ProductImages = newProduct.ProductImages.Select(imageDto => new ProductImage { Url = imageDto.Url }).ToList()
+                Images = newProduct.Images.Select(imageDto => new Image { Url = imageDto.Url }).ToList()
             };
 
             _productRepoMock.Setup(repo => repo.CreateProductAsync(It.IsAny<Product>()))
@@ -213,7 +213,7 @@ namespace Ecommerce.Test.src.Service
             Assert.Equal(newProduct.ProductDescription, result.ProductDescription);
             Assert.Equal(newProduct.ProductPrice, result.ProductPrice);
             Assert.Equal(newProduct.CategoryId, result.CategoryId);
-            Assert.Equal(newProduct.ProductImages.Count(), result?.ProductImages?.Count());
+            Assert.Equal(newProduct.Images.Count(), result?.Images?.Count());
         }
 
         [Fact]

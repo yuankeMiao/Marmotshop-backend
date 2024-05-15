@@ -13,17 +13,17 @@ namespace Ecommerce.Service.src.Service
     public class ProductService : IProductService
     {
 
-        private readonly IProductRepo _productRepo; 
+        private readonly IProductRepo _productRepo;
         private IMapper _mapper;
         private readonly ICategoryRepo _categoryRepo;
-        private readonly IProductImageRepo _productImageRepo;
+        private readonly IImageRepo _imageRepo;
 
-        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo, IProductImageRepo productImageRepo)
+        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo, IImageRepo imageRepo)
         {
             _productRepo = productRepo;
             _mapper = mapper;
             _categoryRepo = categoryRepo;
-            _productImageRepo = productImageRepo;
+            _imageRepo = imageRepo;
         }
 
         public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
@@ -32,17 +32,16 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 var products = await _productRepo.GetAllProductsAsync(productQueryOptions);
-                var productDtos = _mapper.Map<HashSet<ProductReadDto>>(products);
-
+                var productDtos = _mapper.Map<IEnumerable<Product>, HashSet<ProductReadDto>>(products);
 
                 foreach (var productDto in productDtos)
                 {
-                    // Fetch category information for the product
-                    var category = await _categoryRepo.GetCategoryByIdAsync(productDto.CategoryId);
-                    var categoryDto = _mapper.Map<CategoryReadDto>(category);
 
-                    // Set the category property in the product DTO
-                    productDto.Category = categoryDto;
+                    var category = await _categoryRepo.GetCategoryByIdAsync(productDto.CategoryId);
+                    productDto.Category = _mapper.Map<CategoryReadDto>(category);
+
+                    var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
+                    productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(images);
                 }
 
                 return productDtos;
@@ -62,16 +61,15 @@ namespace Ecommerce.Service.src.Service
             }
             try
             {
-
                 var product = await _productRepo.GetProductByIdAsync(productId);
                 var productDto = _mapper.Map<ProductReadDto>(product);
 
-                // Fetch category information for the product
                 var category = await _categoryRepo.GetCategoryByIdAsync(productDto.CategoryId);
-                var categoryDto = _mapper.Map<CategoryReadDto>(category);
+                productDto.Category = _mapper.Map<CategoryReadDto>(category);
 
-                // Set the category property in the product DTO
-                productDto.Category = categoryDto;
+                var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
+                productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(images);
+
                 return productDto;
             }
             catch (Exception)
@@ -104,35 +102,32 @@ namespace Ecommerce.Service.src.Service
                 }
 
                 // Validate image URLs
-                if (newProduct.ImageUrls is not null)
+                if (newProduct.Images is not null)
                 {
 
-                    foreach (var imageUrl in newProduct.ImageUrls)
+                    foreach (var image in newProduct.Images)
                     {
                         // Check if the URL is provided
-                        if (string.IsNullOrWhiteSpace(imageUrl))
+                        if (string.IsNullOrWhiteSpace(image.Url))
                         {
                             throw AppException.InvalidInputException("Image URL cannot be empty");
                         }
 
                         // Check if the URL points to a valid image format 
-                        if (!IsImageUrlValid(imageUrl))
+                        if (!IsImageUrlValid(image.Url))
                         {
                             throw AppException.InvalidInputException("Invalid image format");
                         }
                     }
                 }
                 // Check if the specified category ID exists
-                var category = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId);
-                if (category == null)
-                {
-                    throw AppException.NotFound("Category not found");
-                }
+                var category = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
+                
+                
                 var productEntity = _mapper.Map<Product>(newProduct);
                 var createdProduct = await _productRepo.CreateProductAsync(productEntity);
 
                 var productReadDto = _mapper.Map<ProductReadDto>(createdProduct);
-                productReadDto.Category = _mapper.Map<CategoryReadDto>(category);
 
                 return productReadDto;
             }
@@ -193,34 +188,34 @@ namespace Ecommerce.Service.src.Service
                 foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
                 // Find product images
-                var productImages = await _productImageRepo.GetProductImagesByProductIdAsync(productId);
+                var images = await _imageRepo.GetImagesByProductIdAsync(productId);
 
 
                 // Update product images
-                if (productUpdateDto.ImageUrls is not null && productUpdateDto.ImageUrls.Any())
+                if (productUpdateDto.Images is not null && productUpdateDto.Images.Any())
                 {
-                    foreach (var imageUrl in productUpdateDto.ImageUrls)
+                    foreach (var image in productUpdateDto.Images)
                     {
                         // Find the image to update by URL
-                        var imageToUpdate = productImages.FirstOrDefault(img => img.Url == imageUrl);
+                        var imageToUpdate = images.FirstOrDefault(img => img.Url == image.Url);
 
                         if (imageToUpdate is not null)
                         {
                             // Update image URL if it has changed
-                            if (imageToUpdate.Url != imageUrl)
+                            if (imageToUpdate.Url != image.Url)
                             {
                                 // Update the image URL using the repository method
-                                var updateResult = _productImageRepo.UpdateImageUrlAsync(imageToUpdate.Id, imageUrl);
+                                var updateResult = _imageRepo.UpdateImageUrlAsync(imageToUpdate.Id, image.Url);
                             }
                         }
                         else
                         {
                             // Handle the case where the image URL from the DTO doesn't match any existing images
-                            throw new Exception($"Image with URL {imageUrl} not found.");
+                            throw new Exception($"Image with URL {image.Url} not found.");
                         }
 
                         // Validate image URL
-                        if (!IsImageUrlValid(imageUrl))
+                        if (!IsImageUrlValid(image.Url))
                         {
                             throw AppException.InvalidInputException("Invalid image URL format");
                         }
@@ -237,7 +232,7 @@ namespace Ecommerce.Service.src.Service
                 // Map the updated product entity to ProductReadDto
                 var updatedProductDto = _mapper.Map<Product, ProductReadDto>(updatedProduct);
                 // Update the productInventory value in the returned DTO
-                updatedProductDto.Stock= foundProduct.Stock;
+                updatedProductDto.Stock = foundProduct.Stock;
                 // Set the category property in the updated product DTO
                 updatedProductDto.Category = categoryDto;
                 return updatedProductDto;

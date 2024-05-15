@@ -10,18 +10,20 @@ namespace Ecommerce.WebAPI.src.Repo
     {
         private readonly AppDbContext _context;
         private readonly DbSet<Product> _products;
+        private readonly DbSet<Image> _images;
 
         public ProductRepo(AppDbContext context)
         {
             _context = context;
             _products = _context.Products;
+            _images = _context.Images;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryOptions? options)
         {
             // var query = _products.AsQueryable();
             var query = _products.AsQueryable();
-            query = query.Include(p => p.ImageUrls);
+            query = query.Include(p => p.Images);
             // Apply filters if ProductQueryOptions is not null
             if (options != null)
             {
@@ -75,13 +77,13 @@ namespace Ecommerce.WebAPI.src.Repo
             }
 
             // Execute the query
-            var products = await query.ToListAsync(); ;
+            var products = await query.ToListAsync();
             return products;
         }
 
         public async Task<Product> GetProductByIdAsync(Guid productId)
         {
-            var foundproduct = await _context.Products.FindAsync(productId) ?? throw AppException.NotFound("Product not found");
+            var foundproduct = await _products.FindAsync(productId) ?? throw AppException.NotFound("Product not found");
             return foundproduct;
         }
 
@@ -101,7 +103,7 @@ namespace Ecommerce.WebAPI.src.Repo
         {
             // Load related images
             await _context.Entry(updatedProduct)
-                .Collection(p => p.ImageUrls)
+                .Collection(p => p.Images)
                 .LoadAsync();
             _products.Update(updatedProduct);
             await _context.SaveChangesAsync();

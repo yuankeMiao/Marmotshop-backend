@@ -32,6 +32,6 @@ namespace Ecommerce.Core.src.Entity
         public Guid CategoryId { get; set; } //  foreign key navigate to category
         public Category Category { get; set; } = null!; // for reference only
         public required string Thumbnail { get; set; }
-        public ICollection<string> ImageUrls { get; set; } = []; // will change later
+        public IEnumerable<Image>? Images { get; set; }
     }
 }

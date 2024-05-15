@@ -1,3 +1,4 @@
+using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.WebAPI.src.Database;
@@ -5,26 +6,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.WebAPI.src.Repo
 {
-    public class ProductImageRepo : IProductImageRepo
+    public class ImageRepo : IImageRepo
     {
 
         private readonly AppDbContext _context;
-        private readonly DbSet<ProductImage> _productImages;
+        private readonly DbSet<Image> _images;
 
-        public ProductImageRepo(AppDbContext context)
+        public ImageRepo(AppDbContext context)
         {
             _context = context;
-            _productImages = _context.Images;
+            _images = _context.Images;
         }
 
-        public async Task<ProductImage> GetImageByIdAsync(Guid imageId)
+        public async Task<Image> GetImageByIdAsync(Guid imageId)
         {
-            return await _productImages.FindAsync(imageId);
+            return await _images.FindAsync(imageId) ?? throw AppException.NotFound("Image not found");
         }
 
-        public async Task<IEnumerable<ProductImage>> GetProductImagesByProductIdAsync(Guid productId)
+        public async Task<IEnumerable<Image>> GetImagesByProductIdAsync(Guid productId)
         {
-            return await _productImages
+            return await _images
                 .Where(image => image.ProductId == productId)
                 .ToListAsync();
         }

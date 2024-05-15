@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ecommerce.Core.src.Entity
 {
-    public class ProductImage : BaseEntity
+    public class Image : BaseEntity
     {
         [Column(TypeName = "varchar")]
         public required string Url { get; set; }

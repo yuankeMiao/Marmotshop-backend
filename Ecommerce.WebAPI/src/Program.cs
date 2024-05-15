@@ -49,7 +49,7 @@ builder.Services.AddScoped<IAddressRepo, AddressRepo>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
-builder.Services.AddScoped<IProductImageRepo, ProductImageRepo>();
+builder.Services.AddScoped<IImageRepo, ImageRepo>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();

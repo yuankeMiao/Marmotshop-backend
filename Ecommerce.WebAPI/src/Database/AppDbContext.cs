@@ -13,7 +13,7 @@ namespace Ecommerce.WebAPI.src.Database
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<ProductImage> Images { get; set; }
+        public DbSet<Image> Images { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderProduct> OrderProducts { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -88,13 +88,13 @@ namespace Ecommerce.WebAPI.src.Database
             modelBuilder.Entity<Product>()
                .ToTable("products", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
 
-            modelBuilder.Entity<ProductImage>()
+            modelBuilder.Entity<Image>()
                 .Property(p => p.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            modelBuilder.Entity<ProductImage>()
+            modelBuilder.Entity<Image>()
                 .Property(p => p.UpdatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            modelBuilder.Entity<ProductImage>()
+            modelBuilder.Entity<Image>()
                .ToTable("images", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
 
             modelBuilder.Entity<Category>()
@@ -144,9 +144,9 @@ namespace Ecommerce.WebAPI.src.Database
             modelBuilder.Entity<Product>().HasIndex(p => p.Title).IsUnique();
 
             // Constraints for Image
-            modelBuilder.Entity<ProductImage>()
+            modelBuilder.Entity<Image>()
                 .HasOne(pi => pi.Product)
-                .WithMany()
+                .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -222,8 +222,11 @@ namespace Ecommerce.WebAPI.src.Database
             var users = SeedingData.GetUsers();
             modelBuilder.Entity<User>().HasData(users);
 
-            var products = SeedingData.GetProducts();
+            var products = SeedingData.GetProducts(categories);
             modelBuilder.Entity<Product>().HasData(products);
+
+            var images = SeedingData.GetImages(products);
+            modelBuilder.Entity<Image>().HasData(images);
 
         }
         #endregion

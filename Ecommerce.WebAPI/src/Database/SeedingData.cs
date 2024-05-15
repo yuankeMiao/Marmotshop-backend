@@ -107,9 +107,8 @@ namespace Ecommerce.WebAPI.src.Database
         #endregion
 
         #region products
-        public static List<Product> GetProducts()
+        public static List<Product> GetProducts(List<Category> categories)
         {
-            var categories = GetCategories();
             var products = new List<Product>();
 
             var faker = new Faker("en");
@@ -131,12 +130,37 @@ namespace Ecommerce.WebAPI.src.Database
                         CategoryId = category.Id,
                         Thumbnail = faker.Image.PicsumUrl(),
                     };
+
                     products.Add(product);
                 }
             }
             return products;
         }
 
+        #endregion
+
+        #region  Image
+        public static List<Image> GetImages(List<Product> products)
+        {
+            var faker = new Faker("en");
+
+            var images = new List<Image>();
+            foreach (var product in products)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    var image = new Image
+                    {
+                        Id = Guid.NewGuid(),
+                        Url = faker.Image.PicsumUrl(),
+                        ProductId = product.Id,
+                    };
+                    images.Add(image);
+                }
+            }
+
+            return images;
+        }
         #endregion
     }
 }
