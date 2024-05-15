@@ -43,18 +43,10 @@ namespace Ecommerce.Controller.src.Controller
             return await _userService.CreateUserAsync(userCreateDto);
         }
 
-        // only user itself can update the user info
-        // resource-based authorization : data need to retrived from data resource to be verified
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{userId}")] // endpoint: /users/:user_id
         public async Task<UserReadDto> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
         {
-            var user = await _userService.GetUserByIdAsync(userId);
-            var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, user, "ResourceOwner");
-            if (!authResult.Succeeded)
-            {
-                throw AppException.Unauthorized("No permission.");
-            }
             return await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
         }
 
@@ -65,31 +57,6 @@ namespace Ecommerce.Controller.src.Controller
             return await _userService.DeleteUserByIdAsync(userId);
         }
 
-        [HttpGet("{userId}/addresses")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressBookByUserIdAsync([FromRoute] Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        [HttpPost("{userId}/addresses")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> AddAddressAsync([FromRoute] Guid userId, [FromBody] AddressCreateDto addressCreateDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        [HttpPost("{userId}/addresses/{addressId}")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid userId, [FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        [HttpDelete("{userId}/addresses/{addressId}")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid userId, [FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
-        {
-            throw new NotImplementedException();
-        }
-
-
         [Authorize]
         [HttpGet("profile")]
         public async Task<UserReadDto> GetUserProfileAsync()
@@ -98,6 +65,41 @@ namespace Ecommerce.Controller.src.Controller
             var userId = Guid.Parse(claims.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             return await _userService.GetUserByIdAsync(userId);
+        }
+
+        [Authorize] // will implement authorization later
+        [HttpPut("profile")]
+        public async Task<UserReadDto> UpdateUserProfileAsync(UserUpdateDto userUpdateDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpGet("profile/addresses")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressBookByUserIdAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpPost("profile/addresses")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> AddAddressAsync([FromBody] AddressCreateDto addressCreateDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpPut("profile/addresses/{addressId}")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpDelete("profile/addresses/{addressId}")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }
