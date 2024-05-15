@@ -1,6 +1,6 @@
+using Bogus;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.ValueObject;
-using Ecommerce.Service.src.ServiceAbstract;
 using Ecommerce.WebAPI.src.Service;
 
 namespace Ecommerce.WebAPI.src.Database
@@ -103,6 +103,40 @@ namespace Ecommerce.WebAPI.src.Database
                 }
             };
         }
+
+        #endregion
+
+        #region products
+        public static List<Product> GetProducts()
+        {
+            var categories = GetCategories();
+            var products = new List<Product>();
+
+            var faker = new Faker("en");
+
+            foreach (var category in categories)
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    var product = new Product
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = $"{faker.Commerce.ProductAdjective()} {faker.Commerce.Product()} {faker.Random.Word()}", // make sure title is unique
+                        Description = faker.Commerce.ProductDescription(),
+                        Price = decimal.Parse(faker.Commerce.Price()),
+                        DiscountPercentage = faker.Commerce.Random.Int(0, 30),
+                        Rating = faker.Commerce.Random.Int(1, 5),
+                        Stock = faker.Commerce.Random.Int(0, 200),
+                        Brand = faker.Random.Word(),
+                        CategoryId = category.Id,
+                        Thumbnail = faker.Image.PicsumUrl(),
+                    };
+                    products.Add(product);
+                }
+            }
+            return products;
+        }
+
         #endregion
     }
 }

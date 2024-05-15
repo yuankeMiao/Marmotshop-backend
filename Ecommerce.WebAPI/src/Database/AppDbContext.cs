@@ -222,6 +222,9 @@ namespace Ecommerce.WebAPI.src.Database
             var users = SeedingData.GetUsers();
             modelBuilder.Entity<User>().HasData(users);
 
+            var products = SeedingData.GetProducts();
+            modelBuilder.Entity<Product>().HasData(products);
+
         }
         #endregion
     }
