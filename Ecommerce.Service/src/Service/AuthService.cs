@@ -16,6 +16,7 @@ namespace Ecommerce.Service.src.Service
             _passwordService = passwordService;
         }
 
+
         public async Task<string> LoginAsync(UserCredential userCredential)
         {
             var foundUser = await _userRepo.GetUserByEmailAsync(userCredential.Email) ?? throw AppException.NotFound("Email is not registered");

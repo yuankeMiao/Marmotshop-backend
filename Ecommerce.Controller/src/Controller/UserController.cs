@@ -45,7 +45,7 @@ namespace Ecommerce.Controller.src.Controller
 
         // only user itself can update the user info
         // resource-based authorization : data need to retrived from data resource to be verified
-        [Authorize(/* Policy = "ResourceOwner" */)]
+        [Authorize]
         [HttpPut("{userId}")] // endpoint: /users/:user_id
         public async Task<UserReadDto> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
         {
@@ -55,7 +55,7 @@ namespace Ecommerce.Controller.src.Controller
             {
                 throw AppException.Unauthorized("No permission.");
             }
-             return await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
+            return await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
         }
 
         [Authorize(Roles = "Admin")]
@@ -63,6 +63,30 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<bool> DeleteUserByIdAsync([FromRoute] Guid userId)
         {
             return await _userService.DeleteUserByIdAsync(userId);
+        }
+
+        [HttpGet("{userId}/addresses")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressBookByUserIdAsync([FromRoute] Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost("{userId}/addresses")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> AddAddressAsync([FromRoute] Guid userId, [FromBody] AddressCreateDto addressCreateDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost("{userId}/addresses/{addressId}")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid userId, [FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpDelete("{userId}/addresses/{addressId}")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid userId, [FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        {
+            throw new NotImplementedException();
         }
 
         // Sample endpoint I found good to apply from Alia's code, please modify ^_^

@@ -12,7 +12,6 @@ namespace Ecommerce.Service.src.DTO
         public required string Email { get; set; }
         public string? Avatar { get; set; }
         public UserRole Role { get; set; }
-        public HashSet<AddressReadDto> Addresses { get; set; } = [];
     }
 
     public class UserCreateDto
@@ -23,7 +22,6 @@ namespace Ecommerce.Service.src.DTO
         public required string Password { get; set; }
         public string? Avatar { get; set; }
         public UserRole Role { get; set; }
-        public HashSet<AddressCreateDto>? Addresses { get; set; }
         public DateOnly? CreatedDate { get; set; }
         public DateOnly? UpdatedDate { get; set; }
     }

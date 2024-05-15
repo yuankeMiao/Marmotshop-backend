@@ -11,16 +11,14 @@ namespace Ecommerce.Service.src.Service
     public class UserService : IUserService
     {
         private readonly IUserRepo _userRepo;
-        private readonly IAddressRepo _addressRepo;
         private readonly IMapper _mapper;
         private readonly IPasswordService _passwordService;
 
 
-        public UserService(IMapper mapper, IUserRepo userRepo, IAddressRepo addressRepo, IPasswordService passwordService)
+        public UserService(IMapper mapper, IUserRepo userRepo, IPasswordService passwordService)
         {
             _mapper = mapper;
             _userRepo = userRepo;
-            _addressRepo = addressRepo;
             _passwordService = passwordService;
         }
         public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync(UserQueryOptions userQueryOptions)
@@ -29,12 +27,6 @@ namespace Ecommerce.Service.src.Service
             {
                 var users = await _userRepo.GetAllUsersAsync(userQueryOptions);
                 var UserReadDtos = users.Select(u => _mapper.Map<User, UserReadDto>(u));
-
-                foreach (var userReadDto in UserReadDtos)
-                {
-                    var addressBook = await _addressRepo.GetAddressBookByUserIdAsync(userReadDto.Id);
-                    userReadDto.Addresses = _mapper.Map<IEnumerable<Address>, HashSet<AddressReadDto>>(addressBook);
-                }
 
                 return UserReadDtos;
             }
@@ -55,9 +47,6 @@ namespace Ecommerce.Service.src.Service
                 var foundUser = await _userRepo.GetUserByIdAsync(userId);
                 var userReadDto = _mapper.Map<User, UserReadDto>(foundUser);
 
-                var addressBook = await _addressRepo.GetAddressBookByUserIdAsync(userReadDto.Id);
-                userReadDto.Addresses = _mapper.Map<IEnumerable<Address>, HashSet<AddressReadDto>>(addressBook);
-
                 return userReadDto;
             }
             catch (Exception)
@@ -76,9 +65,6 @@ namespace Ecommerce.Service.src.Service
             {
                 var foundUser = await _userRepo.GetUserByEmailAsync(email);
                 var userReadDto = _mapper.Map<User, UserReadDto>(foundUser);
-
-                var addressBook = await _addressRepo.GetAddressBookByUserIdAsync(userReadDto.Id);
-                userReadDto.Addresses = _mapper.Map<IEnumerable<Address>, HashSet<AddressReadDto>>(addressBook);
 
                 return userReadDto;
             }
@@ -117,22 +103,8 @@ namespace Ecommerce.Service.src.Service
                 newUser.Password = _passwordService.HashPassword(newUser.Password, out byte[] salt);
                 newUser.Salt = salt;
 
-                if (userCreateDto.Addresses is not null)
-                {
-                    var newAddressBook = new HashSet<Address>();
-                    foreach (var addressCreateDto in userCreateDto.Addresses)
-                    {
-                        var newAddress = _mapper.Map<AddressCreateDto, Address>(addressCreateDto);
-                        var createdAddress = await _addressRepo.CreateAddressAsync(newAddress);
-                        newAddressBook.Add(createdAddress);
-                    }
-                    newUser.Addresses = newAddressBook;
-                }
-
                 var createdUser = await _userRepo.CreateUserAsync(newUser);
                 var createdUserDto = _mapper.Map<User, UserReadDto>(createdUser);
-                createdUserDto.Addresses = _mapper.Map<HashSet<Address>, HashSet<AddressReadDto>>(newUser.Addresses);
-
                 return createdUserDto;
             }
             catch (Exception)
@@ -212,69 +184,6 @@ namespace Ecommerce.Service.src.Service
             {
                 throw;
             }
-        }
-
-        public async Task<AddressReadDto> AddAddressByUserIdAsync(Guid userId, AddressCreateDto addressCreateDto)
-        {
-            try
-            {
-                // find the user
-                var foundUser = await _userRepo.GetUserByIdAsync(userId);
-
-                // add the address to db
-                var newAddress = _mapper.Map<AddressCreateDto, Address>(addressCreateDto);
-                newAddress.UserId = userId;
-                var createdAddress = await _addressRepo.CreateAddressAsync(newAddress);
-
-                // return the new address
-                var createdAddressReadDto = _mapper.Map<Address, AddressReadDto>(createdAddress);
-                return createdAddressReadDto;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-        }
-
-        public async Task<AddressReadDto> UpdateAddressByIdAsync(Guid addressId, AddressUpdateDto addressUpdateDto)
-        {
-            try
-            {
-                // find the address
-                var foundAddress = await _addressRepo.GetAddressByIdAsync(addressId);
-
-                foundAddress.Recipient = addressUpdateDto.Recipient ?? foundAddress.Recipient;
-                foundAddress.Phone = addressUpdateDto.Phone ?? foundAddress.Phone;
-                foundAddress.Line1 = addressUpdateDto.Line1 ?? foundAddress.Line1;
-                foundAddress.Line2 = addressUpdateDto.Line2 ?? foundAddress.Line2;
-                foundAddress.PostalCode = addressUpdateDto.PostalCode ?? foundAddress.PostalCode;
-                foundAddress.City = addressUpdateDto.City ?? foundAddress.City;
-
-                var updatedAddress = await _addressRepo.UpdateAddressByIdAsync(foundAddress);
-                var updatedAddressReadDto = _mapper.Map<Address, AddressReadDto>(updatedAddress);
-                return updatedAddressReadDto;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<bool> DeleteAddressByIdAsync(Guid addressId)
-        {
-            try
-            {
-                // Delete the user entity from the repository
-                await _addressRepo.DeleteAddressByIdAsync(addressId);
-                // Return true to indicate successful deletion
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
         }
     }
 }
