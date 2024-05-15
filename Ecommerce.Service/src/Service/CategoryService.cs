@@ -89,6 +89,8 @@ namespace Ecommerce.Service.src.Service
                 foundCategory.Name = categoryUpdateDto.Name ?? foundCategory.Name;
                 foundCategory.Image = categoryUpdateDto.Image ?? foundCategory.Image;
 
+                foundCategory.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
                 var updateCategory = await _categoryRepo.UpdateCategoryByIdAsync(foundCategory);
 
                 var updatedCategoryDto = _mapper.Map<Category, CategoryReadDto>(updateCategory);

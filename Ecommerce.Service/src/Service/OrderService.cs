@@ -40,7 +40,7 @@ namespace Ecommerce.Service.src.Service
             foreach (var orderProductDto in orderCreateDto.Products)
             {
                 // check every product in orderCreateDto.OrderProducts
-                var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId) ?? throw AppException.NotFound("Product not found");
+                var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId);
                 // if found, create a new OrderProduct object
                 var newOrderProduct = _mapper.Map<Product, OrderProduct>(foundProduct);
                 newOrderProduct.Quantity = orderProductDto.Quantity;
@@ -49,6 +49,10 @@ namespace Ecommerce.Service.src.Service
 
                 var createdOrderProduct = await _orderProductRepo.CreateOrderProductAsync(newOrderProduct);
                 newOrderProducts.Add(createdOrderProduct);
+
+                // change the stock in product repo
+                foundProduct.Stock -= orderProductDto.Quantity;
+                await _productRepo.UpdateProductByIdAsync(foundProduct);
             }
             order.Products = newOrderProducts;
             order.Status = OrderStatus.Pending;

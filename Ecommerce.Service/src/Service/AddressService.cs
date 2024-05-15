@@ -56,6 +56,8 @@ namespace Ecommerce.Service.src.Service
                 foundAddress.PostalCode = addressUpdateDto.PostalCode ?? foundAddress.PostalCode;
                 foundAddress.City = addressUpdateDto.City ?? foundAddress.City;
 
+                foundAddress.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
                 var updatedAddress = await _addressRepo.UpdateAddressByIdAsync(foundAddress);
                 var UpdateAddressReadDto = _mapper.Map<Address, AddressReadDto>(updatedAddress);
 

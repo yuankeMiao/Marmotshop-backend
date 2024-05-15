@@ -55,7 +55,7 @@ namespace Ecommerce.WebAPI.src.Repo
                 }
                 catch (Exception e)
                 {
-                    System.Console.WriteLine(e.Message);
+                    //Console.WriteLine(e.Message);
                     transaction.Rollback();
                     throw;
                 }

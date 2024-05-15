@@ -157,6 +157,8 @@ namespace Ecommerce.Service.src.Service
                 foundUser.Avatar = userUpdateDto.Avatar ?? foundUser.Avatar;
                 foundUser.Role = userUpdateDto.Role ?? foundUser.Role;
 
+                foundUser.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
                 // Update the user entity with the new values
                 var updateUser = await _userRepo.UpdateUserByIdAsync(foundUser);
 

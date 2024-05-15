@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+
 using System.Text.RegularExpressions;
 using AutoMapper;
 using Ecommerce.Core.src.Common;
@@ -9,6 +9,7 @@ using Ecommerce.Service.src.ServiceAbstract;
 
 namespace Ecommerce.Service.src.Service
 {
+    // will modify later
     public class ProductService : IProductService
     {
 
@@ -187,11 +188,9 @@ namespace Ecommerce.Service.src.Service
                 foundProduct.CategoryId = productUpdateDto.CategoryId ?? foundProduct.CategoryId;
 
                 foundProduct.Price = productUpdateDto.Price ?? foundProduct.Price;
-                // Update inventory by adding the new inventory value
-                if (productUpdateDto.Stock.HasValue)
-                {
-                    foundProduct.Stock += productUpdateDto.Stock.Value;
-                }
+                foundProduct.Stock = productUpdateDto.Stock ?? foundProduct.Stock;
+
+                foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
                 // Find product images
                 var productImages = await _productImageRepo.GetProductImagesByProductIdAsync(productId);

@@ -3,7 +3,6 @@ using Ecommerce.Core.src.Common;
 using Ecommerce.WebAPI.src.Database;
 using Ecommerce.Core.src.RepoAbstract;
 using Microsoft.EntityFrameworkCore;
-using Ecommerce.Service.src.Service;
 
 namespace Ecommerce.WebAPI.src.Repo
 {
@@ -16,34 +15,6 @@ namespace Ecommerce.WebAPI.src.Repo
         {
             _context = context;
             _products = _context.Products;
-        }
-
-        public async Task<Product> CreateProductAsync(Product newProduct)
-        {
-            var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title);
-            if (foundProduct is null)
-            {
-                await _products.AddAsync(newProduct);
-                await _context.SaveChangesAsync();
-                return newProduct;
-            }
-            else
-            {
-                throw AppException.DuplicateEmailException("Product Title already exist");
-            }
-
-        }
-
-        public async Task<bool> DeleteProductByIdAsync(Guid productId)
-        {
-            var foundProduct = await _products.FindAsync(productId);
-            if (foundProduct is null)
-            {
-                throw AppException.NotFound("product not found");
-            };
-            _products.Remove(foundProduct);
-            await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryOptions? options)
@@ -108,26 +79,22 @@ namespace Ecommerce.WebAPI.src.Repo
             return products;
         }
 
-        public async Task<IEnumerable<Product>> GetMostPurchasedProductsAsync(int topNumber)
+        public async Task<Product> GetProductByIdAsync(Guid productId)
         {
-            var parameters = new List<object> { topNumber };
-
-            var mostPurchasedProducts = await _products
-                .FromSqlRaw("SELECT * FROM public.get_most_purchased_products({0})", parameters.ToArray())
-                .ToListAsync();
-
-            return mostPurchasedProducts;
+            var foundproduct = await _context.Products.FindAsync(productId) ?? throw AppException.NotFound("Product not found");
+            return foundproduct;
         }
 
 
-        public async Task<Product> GetProductByIdAsync(Guid productId)
+        public async Task<Product> CreateProductAsync(Product newProduct)
         {
-            var foundproduct = await _context.Products.FindAsync(productId);
-            if (foundproduct is null)
-            {
-                throw AppException.NotFound("Product not found, Product ID: " + productId);
-            }
-            return foundproduct;
+            var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title)
+            ?? throw AppException.DuplicateEmailException("Product Title already exist");
+
+            await _products.AddAsync(newProduct);
+            await _context.SaveChangesAsync();
+            return newProduct;
+
         }
 
         public async Task<Product> UpdateProductByIdAsync(Product updatedProduct)
@@ -140,5 +107,27 @@ namespace Ecommerce.WebAPI.src.Repo
             await _context.SaveChangesAsync();
             return updatedProduct;
         }
+
+        public async Task<bool> DeleteProductByIdAsync(Guid productId)
+        {
+            var foundProduct = await _products.FindAsync(productId) ?? throw AppException.NotFound("product not found");
+
+            _products.Remove(foundProduct);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // will modify later
+        public async Task<IEnumerable<Product>> GetMostPurchasedProductsAsync(int topNumber)
+        {
+            var parameters = new List<object> { topNumber };
+
+            var mostPurchasedProducts = await _products
+                .FromSqlRaw("SELECT * FROM public.get_most_purchased_products({0})", parameters.ToArray())
+                .ToListAsync();
+
+            return mostPurchasedProducts;
+        }
+
     }
 }
