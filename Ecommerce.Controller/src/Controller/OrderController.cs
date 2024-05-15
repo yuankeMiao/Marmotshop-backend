@@ -36,7 +36,7 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<OrderReadDto> CreateOrderAsync([FromBody] OrderCreateDto orderCreateDto)
         {
             var userId = GetUserIdClaim();
-            return await _orderService.CreateOrderAsync(userId, orderCreateDto); // Will be modified later
+            return await _orderService.CreateOrderWithtransactionAsync(userId, orderCreateDto); // Will be modified later
         }
 
         [Authorize(Roles = "Admin")]
@@ -67,7 +67,5 @@ namespace Ecommerce.Controller.src.Controller
             return userId;
         }
 
-        // Update order product information (Quantity, productId, ...) -> Will implement later.
-        // UpdateOrderStatusAsync(OrderId, OrderUpdateDto orderUpdate);
     }
 }

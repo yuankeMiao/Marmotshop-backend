@@ -10,11 +10,15 @@ namespace Ecommerce.WebAPI.src.Repo
     {
         private readonly AppDbContext _context;
         private readonly DbSet<Order> _orders;
+        private readonly DbSet<OrderProduct> _orderProducts;
+        private readonly DbSet<Product> _products;
 
         public OrderRepo(AppDbContext context)
         {
             _context = context;
             _orders = _context.Orders;
+            _orderProducts = _context.OrderProducts;
+            _products = _context.Products;
         }
 
         public async Task<IEnumerable<Order>> GetAllOrdersAsync(BaseQueryOptions? options)
@@ -30,35 +34,56 @@ namespace Ecommerce.WebAPI.src.Repo
             }
 
             var orders = await query.ToListAsync();
+            foreach (var order in orders)
+            {
+                var foundOrderProducts = await _orderProducts.Where(op => op.OrderId == order.Id).ToListAsync();
+                order.Products = [.. foundOrderProducts];
+            }
+
             return orders;
         }
 
-        public async Task<Order?> GetOrderByIdAsync(Guid orderId)
+        public async Task<Order> GetOrderByIdAsync(Guid orderId)
         {
-            var foundOrder = await _orders.FindAsync(orderId);
+            var foundOrder = await _orders.FindAsync(orderId) ?? throw AppException.NotFound("Order not found");
+            var foundOrderProducts = await _orderProducts.Where(op => op.OrderId == foundOrder.Id).ToListAsync();
+            foundOrder.Products = [.. foundOrderProducts];
+
             return foundOrder;
         }
 
-        public async Task<Order> CreateOrderAsync(Order createdOrder)
+        public async Task<Order> CreateOrderWithTransactionAsync(Order newOrder)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using var transaction = _context.Database.BeginTransaction();
+            try
             {
-                try
-                {
-                    // TODO: Funtion for updating the decrease of product inventory due to the quantity in the product order. (Will be implemented when having the product inventory).
-                    // TODO: Total price of transaction...
+                // create order record in order table
+                await _orders.AddAsync(newOrder);
 
-                    await _orders.AddAsync(createdOrder);
-                    await _context.SaveChangesAsync();
-                    transaction.Commit();
-                    return createdOrder;
-                }
-                catch (Exception e)
+                // create orderProduct record in orderProduct table
+                foreach (var newOrderProduct in newOrder.Products)
                 {
-                    //Console.WriteLine(e.Message);
-                    transaction.Rollback();
-                    throw;
+                    var duplicatedOrderProduct = await _orderProducts.FirstOrDefaultAsync(op => op.OrderId == newOrderProduct.OrderId && op.ProductId == newOrderProduct.ProductId);
+                    if (duplicatedOrderProduct is not null) throw AppException.DuplicateException("Product in order");
+
+                    await _orderProducts.AddAsync(newOrderProduct);
+
+                    // change product.Stock in product table
+                    var foundProduct = await _products.FindAsync(newOrderProduct.ProductId) ?? throw AppException.NotFound("Product");
+                    foundProduct.Stock -= newOrderProduct.Quantity;
+
+                    _products.Update(foundProduct);
                 }
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+                
+                return newOrder;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 
@@ -71,12 +96,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
         public async Task<bool> DeleteOrderByIdAsync(Guid orderId)
         {
-            var foundOrder = await _orders.FindAsync(orderId);
-            if (foundOrder is null)
-            {
-                throw AppException.NotFound("Order not found for ID: " + orderId);
-            }
-
+            var foundOrder = await _orders.FindAsync(orderId) ?? throw AppException.NotFound("Order not found for ID: " + orderId);
             _orders.Remove(foundOrder);
             await _context.SaveChangesAsync();
             return true;

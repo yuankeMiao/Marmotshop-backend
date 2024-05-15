@@ -7,7 +7,7 @@ namespace Ecommerce.Service.src.ServiceAbstract
     {
         Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(BaseQueryOptions options);
         Task<OrderReadDto> GetOrderByIdAsync(Guid orderId);
-        Task<OrderReadDto> CreateOrderAsync(Guid userId, OrderCreateDto orderCreateDto);
+        Task<OrderReadDto> CreateOrderWithtransactionAsync(Guid userId, OrderCreateDto orderCreateDto);
         Task<OrderReadDto> UpdateOrderByIdAsync(Guid orderId, OrderUpdateDto orderUpdateDto);
         Task<bool> DeleteOrderByIdAsync(Guid orderId);
     }

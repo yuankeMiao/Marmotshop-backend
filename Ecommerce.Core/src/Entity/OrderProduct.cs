@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Ecommerce.Core.src.ValueObject;
 
 namespace Ecommerce.Core.src.Entity
 {

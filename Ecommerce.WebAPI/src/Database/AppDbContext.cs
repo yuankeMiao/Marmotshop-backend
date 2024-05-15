@@ -64,21 +64,65 @@ namespace Ecommerce.WebAPI.src.Database
             modelBuilder.Entity<User>()
                 .Property(u => u.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<User>()
+               .Property(u => u.UpdatedDate)
+               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<User>()
+               .ToTable("users", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
+            modelBuilder.Entity<Address>()
+                .Property(a => a.CreatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Address>()
+               .Property(a => a.UpdatedDate)
+               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Address>()
+               .ToTable("addresses", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
             modelBuilder.Entity<Product>()
                 .Property(p => p.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Product>()
+                .Property(p => p.UpdatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Product>()
+               .ToTable("products", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
+            modelBuilder.Entity<ProductImage>()
+                .Property(p => p.CreatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<ProductImage>()
+                .Property(p => p.UpdatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<ProductImage>()
+               .ToTable("images", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
             modelBuilder.Entity<Category>()
                 .Property(c => c.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            modelBuilder.Entity<ProductImage>()
-                .Property(i => i.CreatedDate)
+            modelBuilder.Entity<Category>()
+                .Property(c => c.UpdatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Category>()
+               .ToTable("categories", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
             modelBuilder.Entity<Order>()
                 .Property(o => o.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Order>()
+                .Property(o => o.UpdatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Order>()
+               .ToTable("orders", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
+
             modelBuilder.Entity<Review>()
                 .Property(r => r.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Review>()
+                .Property(r => r.UpdatedDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Review>()
+               .ToTable("reviews", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
 
 
             // Constraints for Category
@@ -95,7 +139,7 @@ namespace Ecommerce.WebAPI.src.Database
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Product>()
-                .ToTable("Products", t => t.HasCheckConstraint("product_price_check", "price > 0"));
+                .ToTable("products", t => t.HasCheckConstraint("product_price_check", "price > 0"));
 
             modelBuilder.Entity<Product>().HasIndex(p => p.Title).IsUnique();
 
@@ -144,7 +188,7 @@ namespace Ecommerce.WebAPI.src.Database
             // Constraints for Address
             modelBuilder.Entity<Address>()
                 .HasOne(a => a.User)
-                .WithMany(u => u.Addresses)
+                .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
