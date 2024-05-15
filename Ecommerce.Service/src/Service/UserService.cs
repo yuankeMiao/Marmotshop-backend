@@ -185,22 +185,6 @@ namespace Ecommerce.Service.src.Service
                 foundUser.Avatar = userUpdateDto.Avatar ?? foundUser.Avatar;
                 foundUser.Role = userUpdateDto.Role ?? foundUser.Role;
 
-                if (userUpdateDto.Addresses is not null)
-                {
-                    foreach (var addressUpdateDto in userUpdateDto.Addresses)
-                    {
-                        var foundAddress = await _addressRepo.GetAddressByIdAsync(addressUpdateDto.Id);
-                        foundAddress.Recipient = addressUpdateDto.Recipient ?? foundAddress.Recipient;
-                        foundAddress.Phone = addressUpdateDto.Phone ?? foundAddress.Phone;
-                        foundAddress.Line1 = addressUpdateDto.Line1 ?? foundAddress.Line1;
-                        foundAddress.Line2 = addressUpdateDto.Line2 ?? foundAddress.Line2;
-                        foundAddress.PostalCode = addressUpdateDto.PostalCode ?? foundAddress.PostalCode;
-                        foundAddress.City = addressUpdateDto.City ?? foundAddress.City;
-
-                        var updatedAddress = await _addressRepo.UpdateAddressByIdAsync(foundAddress);
-                    }
-                }
-
                 // Update the user entity with the new values
                 var updateUser = await _userRepo.UpdateUserByIdAsync(foundUser);
 
@@ -220,7 +204,7 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 // Delete the user entity from the repository
-                var deleted = await _userRepo.DeleteUserByIdAsync(userId);
+                await _userRepo.DeleteUserByIdAsync(userId);
                 // Return true to indicate successful deletion
                 return true;
             }
@@ -228,6 +212,69 @@ namespace Ecommerce.Service.src.Service
             {
                 throw;
             }
+        }
+
+        public async Task<AddressReadDto> AddAddressByUserIdAsync(Guid userId, AddressCreateDto addressCreateDto)
+        {
+            try
+            {
+                // find the user
+                var foundUser = await _userRepo.GetUserByIdAsync(userId);
+
+                // add the address to db
+                var newAddress = _mapper.Map<AddressCreateDto, Address>(addressCreateDto);
+                newAddress.UserId = userId;
+                var createdAddress = await _addressRepo.CreateAddressAsync(newAddress);
+
+                // return the new address
+                var createdAddressReadDto = _mapper.Map<Address, AddressReadDto>(createdAddress);
+                return createdAddressReadDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<AddressReadDto> UpdateAddressByIdAsync(Guid addressId, AddressUpdateDto addressUpdateDto)
+        {
+            try
+            {
+                // find the address
+                var foundAddress = await _addressRepo.GetAddressByIdAsync(addressId);
+
+                foundAddress.Recipient = addressUpdateDto.Recipient ?? foundAddress.Recipient;
+                foundAddress.Phone = addressUpdateDto.Phone ?? foundAddress.Phone;
+                foundAddress.Line1 = addressUpdateDto.Line1 ?? foundAddress.Line1;
+                foundAddress.Line2 = addressUpdateDto.Line2 ?? foundAddress.Line2;
+                foundAddress.PostalCode = addressUpdateDto.PostalCode ?? foundAddress.PostalCode;
+                foundAddress.City = addressUpdateDto.City ?? foundAddress.City;
+
+                var updatedAddress = await _addressRepo.UpdateAddressByIdAsync(foundAddress);
+                var updatedAddressReadDto = _mapper.Map<Address, AddressReadDto>(updatedAddress);
+                return updatedAddressReadDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteAddressByIdAsync(Guid addressId)
+        {
+            try
+            {
+                // Delete the user entity from the repository
+                await _addressRepo.DeleteAddressByIdAsync(addressId);
+                // Return true to indicate successful deletion
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
     }
 }

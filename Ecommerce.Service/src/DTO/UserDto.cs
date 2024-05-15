@@ -36,6 +36,5 @@ namespace Ecommerce.Service.src.DTO
         public string? Password { get; set; }
         public string? Avatar { get; set; }
         public UserRole? Role { get; set; }
-        public HashSet<AddressUpdateDto>? Addresses { get; set; }
     }
 }
