@@ -8,8 +8,8 @@ namespace Ecommerce.Core.src.RepoAbstract
         Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryOptions? options);
         Task<IEnumerable<Product>> GetMostPurchasedProductsAsync(int topNumber);
         Task<Product> GetProductByIdAsync(Guid productId);
-        Task<Product> CreateProductAsync(Product newProduct);
-        Task<Product> UpdateProductByIdAsync(Product updatedProduct);
+        Task<Product> CreateProductWithTransactionAsync(Product newProduct);
+        Task<Product> UpdateProductByIdWithTransactionAsync(Product updatedProduct);
         Task<bool> DeleteProductByIdAsync(Guid productId);
     }
 }

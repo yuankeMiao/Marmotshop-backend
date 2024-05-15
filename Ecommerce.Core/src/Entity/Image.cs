@@ -2,8 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ecommerce.Core.src.Entity
 {
-    public class Image : BaseEntity
+    public class Image
     {
+        public Guid Id { get; set; }
         [Column(TypeName = "varchar")]
         public required string Url { get; set; }
         [ForeignKey("ProductId")]

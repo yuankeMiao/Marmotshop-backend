@@ -56,20 +56,12 @@ namespace Ecommerce.WebAPI.src.Repo
                 // Sorting
                 if (!string.IsNullOrEmpty(options.SortBy))
                 {
-                    switch (options.SortBy.ToLower())
+                    query = options.SortBy.ToLower() switch
                     {
-                        case "title":
-                            query = options.SortOrder == "desc" ? query.OrderByDescending(p => p.Title) : query.OrderBy(p => p.Title);
-                            break;
-                        case "price":
-                            query = options.SortOrder == "desc" ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price);
-                            break;
-
-                        default:
-                            // Default sorting by created date if sort by is not specified or invalid
-                            query = options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate);
-                            break;
-                    }
+                        "title" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Title) : query.OrderBy(p => p.Title),
+                        "price" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                        _ => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),// Default sorting by created date if sort by is not specified or invalid
+                    };
                 }
 
                 // Pagination
@@ -78,36 +70,94 @@ namespace Ecommerce.WebAPI.src.Repo
 
             // Execute the query
             var products = await query.ToListAsync();
+
+            foreach (var product in products)
+            {
+                var foundImages = await _images.Where(i => i.ProductId == product.Id).ToListAsync();
+                product.Images = foundImages;
+            }
+
             return products;
         }
 
         public async Task<Product> GetProductByIdAsync(Guid productId)
         {
             var foundproduct = await _products.FindAsync(productId) ?? throw AppException.NotFound("Product not found");
+            var foundImages = await _images.Where(i => i.ProductId == foundproduct.Id).ToListAsync();
+            foundproduct.Images = foundImages;
+
             return foundproduct;
         }
 
 
-        public async Task<Product> CreateProductAsync(Product newProduct)
+        public async Task<Product> CreateProductWithTransactionAsync(Product newProduct)
         {
-            var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title)
-            ?? throw AppException.DuplicateEmailException("Product Title already exist");
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                // create product record
+                var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title);
+                if(foundProduct is not null) throw AppException.DuplicateException("Product Title already exist");
 
-            await _products.AddAsync(newProduct);
-            await _context.SaveChangesAsync();
-            return newProduct;
+                await _products.AddAsync(newProduct);
 
+                // create image record
+                if (newProduct.Images is not null)
+                {
+                    foreach (var newImage in newProduct.Images)
+                    {
+                        await _images.AddAsync(newImage);
+                    }
+                }
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                return newProduct;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
-        public async Task<Product> UpdateProductByIdAsync(Product updatedProduct)
+        public async Task<Product> UpdateProductByIdWithTransactionAsync(Product updatedProduct)
         {
-            // Load related images
-            await _context.Entry(updatedProduct)
-                .Collection(p => p.Images)
-                .LoadAsync();
-            _products.Update(updatedProduct);
-            await _context.SaveChangesAsync();
-            return updatedProduct;
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                //check if product exist
+                var foundProduct = await _products.FindAsync(updatedProduct.Id) ?? throw AppException.NotFound("Product not found");
+                // update product table
+                _products.Update(updatedProduct);
+                // rewrite images, because image updates are more complicated in front end
+                // so it is eaasier to just re-write them
+                if (updatedProduct.Images is not null)
+                {
+                    // remove existing images
+                    var foundImages = await _images.Where(i => i.ProductId == updatedProduct.Id).ToListAsync();
+                    foreach (var image in foundImages)
+                    {
+                        _images.Remove(image);
+                    }
+
+                    // add new images
+                    foreach (var image in updatedProduct.Images)
+                    {
+                        await _images.AddAsync(image);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                return updatedProduct;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteProductByIdAsync(Guid productId)

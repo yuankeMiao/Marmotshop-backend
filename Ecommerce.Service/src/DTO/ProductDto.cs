@@ -12,7 +12,6 @@ namespace Ecommerce.Service.src.DTO
         public int Stock { get; set; }
         public string? Brand { get; set; }
         public required Guid CategoryId { get; set; }
-        public required CategoryReadDto Category { get; set; }
         public required string Thumbnail { get; set; }
         public IEnumerable<ImageReadDto>? Images { get; set; }
     }

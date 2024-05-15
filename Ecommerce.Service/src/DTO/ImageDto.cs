@@ -4,8 +4,9 @@ using Ecommerce.Core.src.Entity;
 
 namespace Ecommerce.Service.src.DTO
 {
-    public class ImageReadDto : BaseEntity
+    public class ImageReadDto
     {
+        public Guid Id { get; set;}
         public required string Url { get; set; }
         public Guid ProductId { get; set; }
     }

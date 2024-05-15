@@ -88,15 +88,6 @@ namespace Ecommerce.WebAPI.src.Database
             modelBuilder.Entity<Product>()
                .ToTable("products", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
 
-            modelBuilder.Entity<Image>()
-                .Property(p => p.CreatedDate)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            modelBuilder.Entity<Image>()
-                .Property(p => p.UpdatedDate)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            modelBuilder.Entity<Image>()
-               .ToTable("images", t => t.HasCheckConstraint("updated_date_check", "updated_date >= created_date "));
-
             modelBuilder.Entity<Category>()
                 .Property(c => c.CreatedDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

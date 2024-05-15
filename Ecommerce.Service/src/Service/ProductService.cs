@@ -16,14 +16,12 @@ namespace Ecommerce.Service.src.Service
         private readonly IProductRepo _productRepo;
         private IMapper _mapper;
         private readonly ICategoryRepo _categoryRepo;
-        private readonly IImageRepo _imageRepo;
 
-        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo, IImageRepo imageRepo)
+        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo)
         {
             _productRepo = productRepo;
             _mapper = mapper;
             _categoryRepo = categoryRepo;
-            _imageRepo = imageRepo;
         }
 
         public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
@@ -33,16 +31,6 @@ namespace Ecommerce.Service.src.Service
             {
                 var products = await _productRepo.GetAllProductsAsync(productQueryOptions);
                 var productDtos = _mapper.Map<IEnumerable<Product>, HashSet<ProductReadDto>>(products);
-
-                foreach (var productDto in productDtos)
-                {
-
-                    var category = await _categoryRepo.GetCategoryByIdAsync(productDto.CategoryId);
-                    productDto.Category = _mapper.Map<CategoryReadDto>(category);
-
-                    var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
-                    productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(images);
-                }
 
                 return productDtos;
             }
@@ -64,11 +52,8 @@ namespace Ecommerce.Service.src.Service
                 var product = await _productRepo.GetProductByIdAsync(productId);
                 var productDto = _mapper.Map<ProductReadDto>(product);
 
-                var category = await _categoryRepo.GetCategoryByIdAsync(productDto.CategoryId);
-                productDto.Category = _mapper.Map<CategoryReadDto>(category);
-
-                var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
-                productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(images);
+                // var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
+                productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(productDto.Images);
 
                 return productDto;
             }
@@ -87,7 +72,7 @@ namespace Ecommerce.Service.src.Service
             {
                 if (newProduct == null)
                 {
-                    throw new ArgumentNullException(nameof(newProduct), "ProductC cannot be null");
+                    throw new ArgumentNullException(nameof(newProduct), "Product cannot be null");
                 }
                 // Check if the product name is provided
                 if (string.IsNullOrWhiteSpace(newProduct.Title))
@@ -122,12 +107,13 @@ namespace Ecommerce.Service.src.Service
                 }
                 // Check if the specified category ID exists
                 var category = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
-                
-                
-                var productEntity = _mapper.Map<Product>(newProduct);
-                var createdProduct = await _productRepo.CreateProductAsync(productEntity);
 
+                var createdProduct = _mapper.Map<Product>(newProduct);
+                createdProduct.Images = _mapper.Map<IEnumerable<Image>>(createdProduct.Images);
+
+                await _productRepo.CreateProductWithTransactionAsync(createdProduct);
                 var productReadDto = _mapper.Map<ProductReadDto>(createdProduct);
+                productReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(productReadDto.Images);
 
                 return productReadDto;
             }
@@ -147,16 +133,7 @@ namespace Ecommerce.Service.src.Service
             }
             try
             {
-                var deletedProduct = await _productRepo.DeleteProductByIdAsync(productId);
-
-                if (!deletedProduct)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return await _productRepo.DeleteProductByIdAsync(productId);
             }
             catch (Exception)
             {
@@ -181,75 +158,40 @@ namespace Ecommerce.Service.src.Service
                 foundProduct.Title = productUpdateDto.Title ?? foundProduct.Title;
                 foundProduct.Description = productUpdateDto.Description ?? foundProduct.Description;
                 foundProduct.CategoryId = productUpdateDto.CategoryId ?? foundProduct.CategoryId;
-
                 foundProduct.Price = productUpdateDto.Price ?? foundProduct.Price;
+                foundProduct.DiscountPercentage = productUpdateDto.DiscountPercentage ?? foundProduct.DiscountPercentage;
                 foundProduct.Stock = productUpdateDto.Stock ?? foundProduct.Stock;
-
+                foundProduct.Brand = productUpdateDto.Brand ?? foundProduct.Brand;
+                foundProduct.Thumbnail = productUpdateDto.Thumbnail ?? foundProduct.Thumbnail;
                 foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
-                // Find product images
-                var images = await _imageRepo.GetImagesByProductIdAsync(productId);
-
-
-                // Update product images
-                if (productUpdateDto.Images is not null && productUpdateDto.Images.Any())
+                if (productUpdateDto.Images is not null)
                 {
-                    foreach (var image in productUpdateDto.Images)
-                    {
-                        // Find the image to update by URL
-                        var imageToUpdate = images.FirstOrDefault(img => img.Url == image.Url);
-
-                        if (imageToUpdate is not null)
-                        {
-                            // Update image URL if it has changed
-                            if (imageToUpdate.Url != image.Url)
-                            {
-                                // Update the image URL using the repository method
-                                var updateResult = _imageRepo.UpdateImageUrlAsync(imageToUpdate.Id, image.Url);
-                            }
-                        }
-                        else
-                        {
-                            // Handle the case where the image URL from the DTO doesn't match any existing images
-                            throw new Exception($"Image with URL {image.Url} not found.");
-                        }
-
-                        // Validate image URL
-                        if (!IsImageUrlValid(image.Url))
-                        {
-                            throw AppException.InvalidInputException("Invalid image URL format");
-                        }
-                    }
+                    var updatedImages = _mapper.Map<IEnumerable<Image>>(productUpdateDto.Images);
+                    foundProduct.Images = updatedImages;
                 }
 
+                var updatedProduct = await _productRepo.UpdateProductByIdWithTransactionAsync(foundProduct);
 
-                // Save changes to the database
-                var updatedProduct = await _productRepo.UpdateProductByIdAsync(foundProduct);
-
-                // Fetch category information for the updated product
-                var category = await _categoryRepo.GetCategoryByIdAsync(updatedProduct.CategoryId);
-                var categoryDto = _mapper.Map<CategoryReadDto>(category);
-                // Map the updated product entity to ProductReadDto
-                var updatedProductDto = _mapper.Map<Product, ProductReadDto>(updatedProduct);
-                // Update the productInventory value in the returned DTO
-                updatedProductDto.Stock = foundProduct.Stock;
-                // Set the category property in the updated product DTO
-                updatedProductDto.Category = categoryDto;
-                return updatedProductDto;
+                var updatedProductReadDto = _mapper.Map<ProductReadDto>(updatedProduct);
+                updatedProductReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(updatedProductReadDto.Images);
+                
+                return updatedProductReadDto;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
         // Method to validate image URL
-        bool IsImageUrlValid(string imageUrl)
+        static bool IsImageUrlValid(string imageUrl)
         {
             // Regular expression pattern to match common image file extensions (e.g., .jpg, .jpeg, .png, .gif)
             string pattern = @"^(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png)$";
 
             // Create a regular expression object
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            Regex regex = new(pattern, RegexOptions.IgnoreCase);
 
             // Check if the URL matches the pattern
             return regex.IsMatch(imageUrl);
