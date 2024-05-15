@@ -125,29 +125,6 @@ namespace Ecommerce.Service.src.Service
         }
 
 
-        public async Task<bool> DeleteProductByIdAsync(Guid productId)
-        {
-            if (productId == Guid.Empty)
-            {
-                throw new Exception("bad request");
-            }
-            try
-            {
-                return await _productRepo.DeleteProductByIdAsync(productId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-
-        public Task<IEnumerable<ProductReadDto>> GetMostPurchasedProductsAsync(int topNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-
         public async Task<ProductReadDto> UpdateProductByIdAsync(Guid productId, ProductUpdateDto productUpdateDto)
         {
             try
@@ -182,6 +159,28 @@ namespace Ecommerce.Service.src.Service
             {
                 throw;
             }
+        }
+
+        public async Task<bool> DeleteProductByIdAsync(Guid productId)
+        {
+            if (productId == Guid.Empty)
+            {
+                throw new Exception("bad request");
+            }
+            try
+            {
+                return await _productRepo.DeleteProductByIdAsync(productId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public Task<IEnumerable<ProductReadDto>> GetMostPurchasedProductsAsync(int topNumber)
+        {
+            throw new NotImplementedException();
         }
 
         // Method to validate image URL

@@ -97,7 +97,7 @@ namespace Ecommerce.WebAPI.src.Repo
             {
                 // create product record
                 var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title);
-                if(foundProduct is not null) throw AppException.DuplicateException("Product Title already exist");
+                if (foundProduct is not null) throw AppException.DuplicateException("Product Title already exist");
 
                 await _products.AddAsync(newProduct);
 
@@ -140,7 +140,7 @@ namespace Ecommerce.WebAPI.src.Repo
                     {
                         _images.Remove(image);
                     }
-
+                    await _context.SaveChangesAsync();
                     // add new images
                     foreach (var image in updatedProduct.Images)
                     {
