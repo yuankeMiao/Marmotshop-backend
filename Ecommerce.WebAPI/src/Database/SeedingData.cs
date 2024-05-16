@@ -235,7 +235,7 @@ namespace Ecommerce.WebAPI.src.Database
 
             foreach(var product in products)
             {
-                int reveiwAmount = faker.Random.Int(0,200);
+                int reveiwAmount = faker.Random.Int(0,100);
                 for (int i = 0; i < reveiwAmount; i ++)
                 {
                     var randomUser = faker.Random.ListItem(users);
