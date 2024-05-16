@@ -33,7 +33,6 @@ namespace Ecommerce.WebAPI.src.Repo
                              .Skip(options.Offset)
                              .Take(options.Limit);
             }
-
             var orders = await query.ToListAsync();
             return orders;
         }

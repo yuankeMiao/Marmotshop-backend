@@ -20,7 +20,7 @@ namespace Ecommerce.WebAPI.src.AuthorizationPolicy
             var userRole = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            if (userId == order.User.Id.ToString() || userRole == UserRole.Admin.ToString())
+            if (userId == order.UserId.ToString() || userRole == UserRole.Admin.ToString())
             {
                 context.Succeed(requirement);
             }

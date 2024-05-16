@@ -84,7 +84,7 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 var orders = await _orderRepo.GetAllOrdersAsync(options);
-                var orderReadDtos = orders.Select(o => _mapper.Map<Order, OrderReadDto>(o));
+                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
 
                 return orderReadDtos;
             }
@@ -105,9 +105,6 @@ namespace Ecommerce.Service.src.Service
                 var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
                 var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
                 
-                // automapper supports nested mapping, so i dont need it, will try it later
-                // orderReadDto.Products = _mapper.Map<IEnumerable<OrderProduct>, HashSet<OrderProductReadDto>>(foundOrder.Products);
-
                 return orderReadDto;
             }
             catch (Exception)

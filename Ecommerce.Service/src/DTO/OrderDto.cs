@@ -5,7 +5,7 @@ namespace Ecommerce.Service.src.DTO
 {
     public class OrderReadDto : BaseEntity
     {
-        public required UserReadDto User { get; set; } // User information
+        public required Guid UserId { get; set; } 
         public required HashSet<OrderProductReadDto> Products { get; set; }
         public OrderStatus Status { get; set; }
         public required string ShippingAddress { get; set; }

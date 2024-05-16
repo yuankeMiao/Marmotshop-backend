@@ -47,10 +47,12 @@ namespace Ecommerce.Service.src.Shared
 
 
             #region Order Mapper:
-            CreateMap<Order, OrderReadDto>();
+            CreateMap<Order, OrderReadDto>()
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
 
             CreateMap<OrderCreateDto, Order>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
 
             CreateMap<OrderUpdateDto, Order>();
 
@@ -59,7 +61,8 @@ namespace Ecommerce.Service.src.Shared
             #region OrderProduct Mapper:
             CreateMap<OrderProduct, OrderProductReadDto>();
             CreateMap<OrderProductCreateDto, OrderProduct>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));;
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+
             CreateMap<Product, OrderProduct>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));

@@ -7,7 +7,7 @@ namespace Ecommerce.Core.src.Entity
     {
         [ForeignKey("UserId")]
         public Guid UserId { get; set; } // foreign key
-        public User User { get; set; } = null!; //reference
+        public User User { get; set; } = null!; //reference only
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public required HashSet<OrderProduct> Products { get; set; }
