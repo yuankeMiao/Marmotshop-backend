@@ -18,43 +18,45 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [HttpGet("")]
-        public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
+        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
         {
 
-            return await _productService.GetAllProductsAsync(options);
+            var products = await _productService.GetAllProductsAsync(options);
+            return Ok(products);
         }
 
         [HttpGet("{productId}")]
-        public async Task<ProductReadDto> GetProductByIdAsync([FromRoute] Guid productId)
+        public async Task<ActionResult<ProductReadDto>> GetProductByIdAsync([FromRoute] Guid productId)
         {
-            return await _productService.GetProductByIdAsync(productId);
+            var product = await _productService.GetProductByIdAsync(productId);
+            return Ok(product);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("")]
-        public async Task<ProductReadDto> CreateProductAsync([FromBody] ProductCreateDto productCreateDto)
+        public async Task<ActionResult<ProductReadDto>> CreateProductAsync([FromBody] ProductCreateDto productCreateDto)
         {
 
-            return await _productService.CreateProductAsync(productCreateDto);
+            var product= await _productService.CreateProductAsync(productCreateDto);
+            return Created($"http://localhost:5227/api/v1/products/{product.Id}", product);
 
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{productId}")]
-        public async Task<ProductReadDto> UpdateProductByIdAsync([FromRoute] Guid productId, [FromBody] ProductUpdateDto productUpdateDto)
+        public async Task<ActionResult<ProductReadDto>> UpdateProductByIdAsync([FromRoute] Guid productId, [FromBody] ProductUpdateDto productUpdateDto)
         {
 
-            return await _productService.UpdateProductByIdAsync(productId, productUpdateDto);
-
+            var product = await _productService.UpdateProductByIdAsync(productId, productUpdateDto);
+            return Ok(product);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{productId}")]
-        public async Task<bool> DeleteProductByIdAsync([FromRoute] Guid productId)
+        public async Task<ActionResult<bool>> DeleteProductByIdAsync([FromRoute] Guid productId)
         {
-
-            return await _productService.DeleteProductByIdAsync(productId);
-
+            var deleted = await _productService.DeleteProductByIdAsync(productId);
+            return Ok(deleted);
         }
 
     }

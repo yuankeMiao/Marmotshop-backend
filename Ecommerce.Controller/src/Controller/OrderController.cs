@@ -16,41 +16,46 @@ namespace Ecommerce.Controller.src.Controller
         {
             _orderService = orderService;
         }
-
+        
         [Authorize(Roles = "Admin")]
         [HttpGet()]
-        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync([FromQuery] BaseQueryOptions options)
+        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] BaseQueryOptions options)
         {
-            return await _orderService.GetAllOrdersAsync(options); // Will be modified later
+            var orders = await _orderService.GetAllOrdersAsync(options);
+            return Ok(orders);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{orderId}")]
-        public async Task<OrderReadDto> GetOrderByIdAsync([FromRoute] Guid orderId)
+        public async Task<ActionResult<OrderReadDto>> GetOrderByIdAsync([FromRoute] Guid orderId)
         {
-            return await _orderService.GetOrderByIdAsync(orderId); // Will be modified later
+            var order = await _orderService.GetOrderByIdAsync(orderId);
+            return Ok(order);
         }
 
         [Authorize()]
         [HttpPost()]
-        public async Task<OrderReadDto> CreateOrderAsync([FromBody] OrderCreateDto orderCreateDto)
+        public async Task<ActionResult<OrderReadDto>> CreateOrderAsync([FromBody] OrderCreateDto orderCreateDto)
         {
             var userId = GetUserIdClaim();
-            return await _orderService.CreateOrderWithtransactionAsync(userId, orderCreateDto); // Will be modified later
+            var order = await _orderService.CreateOrderWithtransactionAsync(userId, orderCreateDto);
+            return Created($"http://localhost:5227/api/v1/orders/{order.Id}", order);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{orderId}")]
-        public async Task<OrderReadDto> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
+        public async Task<ActionResult<OrderReadDto>> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
         {
-            return await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto); // Will be modified later
+            var order =  await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto);
+            return Ok(order);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{orderId}")]
-        public async Task<bool> DeleteAnOrderByIdAsync([FromRoute] Guid orderId)
+        public async Task<ActionResult<bool>> DeleteAnOrderByIdAsync([FromRoute] Guid orderId)
         {
-            return await _orderService.DeleteOrderByIdAsync(orderId); // Will be modified later
+            var deleted = await _orderService.DeleteOrderByIdAsync(orderId); // if deleteion failed, server will throw error
+            return Ok(deleted);
         }
 
         private Guid GetUserIdClaim()

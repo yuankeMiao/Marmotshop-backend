@@ -23,55 +23,61 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet] // endpoint: /users
-        public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync([FromQuery] UserQueryOptions userQueryOptions)
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsersAsync([FromQuery] UserQueryOptions userQueryOptions)
         {
-            return await _userService.GetAllUsersAsync(userQueryOptions);
+            var users = await _userService.GetAllUsersAsync(userQueryOptions);
+            return Ok(users);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{userId}")] // endpoint: /users/:user_id
-        public async Task<UserReadDto> GetUserByIdAsync([FromRoute] Guid userId)
+        public async Task<ActionResult<UserReadDto>> GetUserByIdAsync([FromRoute] Guid userId)
         {
-            return await _userService.GetUserByIdAsync(userId);
+            var user = await _userService.GetUserByIdAsync(userId);
+            return Ok(user);
         }
 
         [AllowAnonymous]
         [HttpPost()] // endpoint: /users
-                     // public async Task<UserReadDto> CreateUserAsync([FromBody] UserCreateDto userCreateDto)
-        public async Task<UserReadDto> CreateUserAsync([FromBody] UserCreateDto userCreateDto)
+        public async Task<ActionResult<UserReadDto>> CreateUserAsync([FromBody] UserCreateDto userCreateDto)
         {
-            return await _userService.CreateUserAsync(userCreateDto);
+            var user = await _userService.CreateUserAsync(userCreateDto);
+            return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{userId}")] // endpoint: /users/:user_id
-        public async Task<UserReadDto> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
+        public async Task<ActionResult<UserReadDto>> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
         {
-            return await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
+            var user = await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
+            return Ok(user);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{userId}")] // endpoint: /users/:user_id
-        public async Task<bool> DeleteUserByIdAsync([FromRoute] Guid userId)
+        public async Task<ActionResult<bool>> DeleteUserByIdAsync([FromRoute] Guid userId)
         {
-            return await _userService.DeleteUserByIdAsync(userId);
+            var deleted = await _userService.DeleteUserByIdAsync(userId);
+            return Ok(deleted);
         }
 
         [Authorize]
         [HttpGet("profile")]
-        public async Task<UserReadDto> GetUserProfileAsync()
+        public async Task<ActionResult<UserReadDto>> GetUserProfileAsync()
         {
-            var claims = HttpContext.User;
-            var userId = Guid.Parse(claims.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userId = GetUserIdClaim();
 
-            return await _userService.GetUserByIdAsync(userId);
+            var user = await _userService.GetUserByIdAsync(userId);
+            return Ok(user);
         }
 
         [Authorize] // will implement authorization later
         [HttpPatch("profile")]
-        public async Task<UserReadDto> UpdateUserProfileAsync(UserUpdateDto userUpdateDto)
+        public async Task<ActionResult<UserReadDto>> UpdateUserProfileAsync(UserUpdateDto userUpdateDto)
         {
-            throw new NotImplementedException();
+            var userId = GetUserIdClaim();
+            var user = await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
+            return Ok(user);
         }
 
         [Authorize]
@@ -100,6 +106,20 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
             throw new NotImplementedException();
+        }
+
+        private Guid GetUserIdClaim()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                throw new Exception("User ID claim not found");
+            }
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new Exception("Invalid user ID format");
+            }
+            return userId;
         }
     }
 }

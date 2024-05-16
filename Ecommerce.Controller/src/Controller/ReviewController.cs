@@ -21,21 +21,24 @@ namespace Ecommerce.Controller.src.Controller
 
         [AllowAnonymous]
         [HttpGet()]
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync([FromQuery] BaseQueryOptions options)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsAsync([FromQuery] BaseQueryOptions options)
         {
-            return await _service.GetAllReviewsAsync(options); // Will be modified later
+            var reviews =  await _service.GetAllReviewsAsync(options);
+            return Ok(reviews);
         }
 
         [HttpGet("product/{productId}")]
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId)
         {
-            return await _service.GetAllReviewsByProductIdAsync(productId); 
+            var reviews = await _service.GetAllReviewsByProductIdAsync(productId);
+            return Ok(reviews);
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId)
         {
-            return await _service.GetAllReviewsByUserIdAsync(userId); // Will be modified later
+            var reviews = await _service.GetAllReviewsByUserIdAsync(userId);
+            return Ok(reviews);
         }
 
         [HttpGet("{reviewId}")]
@@ -47,29 +50,32 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize]
         [HttpPost()]
-        public async Task<ReviewReadDto> CreateReviewAsync([FromBody] ReviewCreateDto reviewCreateDto)
+        public async Task<ActionResult<ReviewReadDto>> CreateReviewAsync([FromBody] ReviewCreateDto reviewCreateDto)
         {
             var userId = GetUserIdClaim();
-            return await _service.CreateReviewAsync(userId, reviewCreateDto);
+            var review = await _service.CreateReviewAsync(userId, reviewCreateDto);
+            return Created($"http://localhost:5227/api/v1/reviews/{review.Id}", review);
         }
 
         // Customer auth = CreateAReview's Customer auth or Admin
         // Implement for admin first
         [Authorize(Roles = "Admin")]
         [HttpPatch("{reviewId}")]
-        public async Task<ReviewReadDto> UpdateReviewByIdAsync([FromRoute] Guid reviewId, [FromBody] ReviewUpdateDto reviewUpdateDto)
+        public async Task<ActionResult<ReviewReadDto>> UpdateReviewByIdAsync([FromRoute] Guid reviewId, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
-            // reviewUpdateDto.ReviewId = reviewId; // If review is found...
-            return await _service.UpdateReviewByIdAsync(reviewId, reviewUpdateDto); // Will be modified later
+
+            var review = await _service.UpdateReviewByIdAsync(reviewId, reviewUpdateDto);
+            return Ok(review);
         }
 
         // Customer auth = CreateAReview's Customer auth or Admin
         // Implement for admin first
         [Authorize(Roles = "Admin")]
         [HttpDelete("{reviewId}")]
-        public async Task<bool> DeleteReviewByIdAsync([FromRoute] Guid reviewId)
+        public async Task<ActionResult<bool>> DeleteReviewByIdAsync([FromRoute] Guid reviewId)
         {
-            return await _service.DeleteReviewByIdAsync(reviewId); // Will be modified later
+            var deleted = await _service.DeleteReviewByIdAsync(reviewId);
+            return Ok(deleted);
         }
 
         private Guid GetUserIdClaim()
