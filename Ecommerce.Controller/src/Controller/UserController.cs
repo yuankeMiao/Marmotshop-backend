@@ -12,11 +12,13 @@ namespace Ecommerce.Controller.src.Controller
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IAddressService _addressService;
         private IAuthorizationService _authorizationService;
 
-        public UserController(IUserService userService, IAuthorizationService authorizationService)
+        public UserController(IUserService userService, IAddressService addressService, IAuthorizationService authorizationService)
         {
             _userService = userService;
+            _addressService = addressService;
             _authorizationService = authorizationService;
         }
 
@@ -73,7 +75,7 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize] // will implement authorization later
         [HttpPatch("profile")]
-        public async Task<ActionResult<UserReadDto>> UpdateUserProfileAsync(UserUpdateDto userUpdateDto)
+        public async Task<ActionResult<UserReadDto>> UpdateUserProfileAsync([FromBody] UserUpdateDto userUpdateDto)
         {
             var userId = GetUserIdClaim();
             var user = await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
@@ -84,28 +86,46 @@ namespace Ecommerce.Controller.src.Controller
         [HttpGet("profile/addresses")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressBookByUserIdAsync()
         {
-            throw new NotImplementedException();
+            var userId = GetUserIdClaim();
+            var addressBook = await _addressService.GetAddressBookByUserIdAsync(userId);
+
+            return Ok(addressBook);
+        }
+
+        [Authorize] // need to check resource owner here
+        [HttpGet("profile/addresses/{addressId}")]
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressByIdAsync([FromRoute] Guid addressId)
+        {
+            var userId = GetUserIdClaim();
+            var address = await _addressService.GetAddressByIdAsync(addressId);
+
+            if (userId != address.UserId) return Forbid();
+            return Ok(address);
         }
 
         [Authorize]
         [HttpPost("profile/addresses")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> AddAddressAsync([FromBody] AddressCreateDto addressCreateDto)
         {
-            throw new NotImplementedException();
+            var userId = GetUserIdClaim();
+            var address = await _addressService.CreateAddressAsync(userId, addressCreateDto);
+            return Created($"http://localhost:5227/api/v1/user/profile/addresses/{address.Id}", address);
         }
 
         [Authorize]
         [HttpPatch("profile/addresses/{addressId}")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
-            throw new NotImplementedException();
+            var address = await _addressService.UpdateAddressAsync(addressId, addressUpdateDto);
+            return Ok(address);
         }
 
         [Authorize]
         [HttpDelete("profile/addresses/{addressId}")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId)
         {
-            throw new NotImplementedException();
+            var deleted = await _addressService.DeleteAddressByIdAsync(addressId);
+            return Ok(deleted);
         }
 
         private Guid GetUserIdClaim()

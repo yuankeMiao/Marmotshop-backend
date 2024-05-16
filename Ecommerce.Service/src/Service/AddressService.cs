@@ -7,7 +7,7 @@ using Ecommerce.Service.src.ServiceAbstract;
 
 namespace Ecommerce.Service.src.Service
 {
-    public class AddressService: IAddressService
+    public class AddressService : IAddressService
     {
         private readonly IAddressRepo _addressRepo;
         private readonly IMapper _mapper;
@@ -21,8 +21,22 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 var foundAddresses = await _addressRepo.GetAddressBookByUserIdAsync(userId);
-                var foundAddressesReadDto = foundAddresses.Select(a => _mapper.Map<Address, AddressReadDto>(a));
+                var foundAddressesReadDto = _mapper.Map<IEnumerable<AddressReadDto>>(foundAddresses);
                 return foundAddressesReadDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AddressReadDto> GetAddressByIdAsync(Guid addressId)
+        {
+            try
+            {
+                var foundAddress = await _addressRepo.GetAddressByIdAsync(addressId);
+                var foundAddressReadDto = _mapper.Map<AddressReadDto>(foundAddress);
+                return foundAddressReadDto;
             }
             catch (Exception)
             {
@@ -36,7 +50,7 @@ namespace Ecommerce.Service.src.Service
                 var newAddress = _mapper.Map<AddressCreateDto, Address>(addressCreateDto);
                 newAddress.UserId = UserId;
                 var createdAddress = await _addressRepo.CreateAddressAsync(newAddress);
-                var createdAddressReadDto = _mapper.Map<Address, AddressReadDto>(createdAddress);
+                var createdAddressReadDto = _mapper.Map<AddressReadDto>(createdAddress);
                 return createdAddressReadDto;
             }
             catch (Exception)
@@ -59,7 +73,7 @@ namespace Ecommerce.Service.src.Service
                 foundAddress.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
                 var updatedAddress = await _addressRepo.UpdateAddressByIdAsync(foundAddress);
-                var UpdateAddressReadDto = _mapper.Map<Address, AddressReadDto>(updatedAddress);
+                var UpdateAddressReadDto = _mapper.Map<AddressReadDto>(updatedAddress);
 
                 return UpdateAddressReadDto;
             }

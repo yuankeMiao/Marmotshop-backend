@@ -45,8 +45,10 @@ builder.Services.AddDbContext<AppDbContext>
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 builder.Services.AddScoped<IUserRepo, UserRepo>();
-builder.Services.AddScoped<IAddressRepo, AddressRepo>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IAddressRepo, AddressRepo>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IProductService, ProductService>();

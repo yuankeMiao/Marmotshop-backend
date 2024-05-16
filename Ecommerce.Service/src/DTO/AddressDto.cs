@@ -26,7 +26,6 @@ namespace Ecommerce.Service.src.DTO
 
     public class AddressUpdateDto
     {
-        public Guid Id { get; set; }
         public string? Recipient { get; set; }
         public string? Phone { get; set; }
         public string? Line1 { get; set; }
