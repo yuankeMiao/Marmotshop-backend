@@ -24,6 +24,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<IEnumerable<Order>> GetAllOrdersAsync(BaseQueryOptions? options)
         {
             var query = _orders.AsQueryable();
+            query = query.Include(o => o.Products);
 
             // Pagination
             if (options is not null)
@@ -34,12 +35,6 @@ namespace Ecommerce.WebAPI.src.Repo
             }
 
             var orders = await query.ToListAsync();
-            foreach (var order in orders)
-            {
-                var foundOrderProducts = await _orderProducts.Where(op => op.OrderId == order.Id).ToListAsync();
-                order.Products = [.. foundOrderProducts];
-            }
-
             return orders;
         }
 

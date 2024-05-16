@@ -17,25 +17,6 @@ namespace Ecommerce.WebAPI.src.Repo
             _reviews = _context.Reviews;
         }
 
-        public async Task<Review> CreateReviewAsync(Review newReview)
-        {
-            var review = await _reviews.AddAsync(newReview);
-            await _context.SaveChangesAsync();
-            return review.Entity;
-        }
-
-        public async Task<bool> DeleteReviewByIdAsync(Guid reviewId)
-        {
-            var foundReview = await _reviews.FindAsync(reviewId);
-            if (foundReview is null)
-            {
-                return false;
-            }
-
-            _reviews.Remove(foundReview);
-            await _context.SaveChangesAsync();
-            return true;
-        }
 
         public async Task<IEnumerable<Review>> GetAllReviewsAsync(BaseQueryOptions options)
         {
@@ -44,8 +25,6 @@ namespace Ecommerce.WebAPI.src.Repo
             if (options is not null)
             {
                 query = query.OrderBy(r => r.CreatedDate)
-                             .Include(r => r.Product)
-                             .Include(r => r.User)
                              .Skip(options.Offset)
                              .Take(options.Limit);
             }
@@ -54,13 +33,24 @@ namespace Ecommerce.WebAPI.src.Repo
             return reviews;
         }
 
-        public async Task<IEnumerable<Review>> GetAllReviewsOfProductAsync(Guid productId)
+        // consider to add pagination here with more order options like orderby rating, only check review with content
+        public async Task<IEnumerable<Review>> GetAllReviewsByProductIdAsync(Guid productId)
         {
             var query = _reviews.AsQueryable();
             query = query
-                .Include(r => r.Product)
-                .Include(r => r.User)
-                .Where(r => r.Product.Id == productId);
+                .Where(r => r.ProductId == productId)
+                .OrderBy(r => r.CreatedDate);
+
+            var reviews = await query.ToListAsync();
+            return reviews;
+        }
+
+        public async Task<IEnumerable<Review>> GetAllReviewsByUserIdAsync(Guid userId)
+        {
+            var query = _reviews.AsQueryable();
+            query = query
+                .Where(r => r.UserId == userId)
+                .OrderBy(r => r.CreatedDate);
 
             var reviews = await query.ToListAsync();
             return reviews;
@@ -68,18 +58,33 @@ namespace Ecommerce.WebAPI.src.Repo
 
         public async Task<Review> GetReviewByIdAsync(Guid reviewId)
         {
-            var review = await _reviews
-                .Include(r => r.Product)
-                .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Id == reviewId);
-
+            var review = await _reviews.FindAsync(reviewId) ?? throw AppException.NotFound("Review not found");
             return review;
+        }
+
+        public async Task<Review> CreateReviewAsync(Review newReview)
+        {
+            var review = await _reviews.AddAsync(newReview);
+            await _context.SaveChangesAsync();
+
+            return review.Entity;
+        }
+
+        public async Task<bool> DeleteReviewByIdAsync(Guid reviewId)
+        {
+            var foundReview = await _reviews.FindAsync(reviewId) ?? throw AppException.NotFound("Review not found");
+
+            _reviews.Remove(foundReview);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<Review> UpdateReviewByIdAsync(Review updatedReview)
         {
             _reviews.Update(updatedReview);
             await _context.SaveChangesAsync();
+            
             return updatedReview;
         }
     }

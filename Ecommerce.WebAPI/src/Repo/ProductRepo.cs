@@ -30,10 +30,8 @@ namespace Ecommerce.WebAPI.src.Repo
                 // Filter by search title
                 if (!string.IsNullOrEmpty(options.Title))
                 {
-
                     var lowercaseTitle = options.Title.ToLower(); // Convert title to lowercase
                     query = query.Where(p => p.Title.ToLower().Contains(lowercaseTitle));
-
                 }
 
                 // Filter by price range
@@ -70,13 +68,6 @@ namespace Ecommerce.WebAPI.src.Repo
 
             // Execute the query
             var products = await query.ToListAsync();
-
-            foreach (var product in products)
-            {
-                var foundImages = await _images.Where(i => i.ProductId == product.Id).ToListAsync();
-                product.Images = foundImages;
-            }
-
             return products;
         }
 

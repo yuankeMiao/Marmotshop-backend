@@ -29,7 +29,7 @@ namespace Ecommerce.Controller.src.Controller
         [HttpGet("product/{productId}")]
         public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsOfProductAsync([FromQuery] Guid productId)
         {
-            return await _service.GetAllReviewsOfProductAsync(productId); // Will be modified later
+            return await _service.GetAllReviewsByProductIdAsync(productId); // Will be modified later
         }
 
         // Customer auth = CreateAReview's Customer auth or Admin
@@ -59,7 +59,7 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<ReviewReadDto> CreateReviewAsync([FromBody] ReviewCreateDto reviewCreateDto)
         {
             var userId = GetUserIdClaim();
-            return await _service.CreateReviewAsync(userId, reviewCreateDto); // Will be modified later
+            return await _service.CreateReviewAsync(reviewCreateDto); // Will be modified later
         }
 
         // Customer auth = CreateAReview's Customer auth or Admin

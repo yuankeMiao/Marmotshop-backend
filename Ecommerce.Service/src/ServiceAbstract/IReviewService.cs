@@ -5,11 +5,12 @@ namespace Ecommerce.Service.src.ServiceAbstract
 {
     public interface IReviewService
     {
-        Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions options); // Admin auth
-        Task<IEnumerable<ReviewReadDto>> GetAllReviewsOfProductAsync(Guid productId); // Customer auth
-        Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId); // Customer auth
-        Task<ReviewReadDto> CreateReviewAsync(Guid userId, ReviewCreateDto reviewCreateDto); // Customer auth
-        Task<ReviewReadDto> UpdateReviewByIdAsync(Guid reviewId, ReviewUpdateDto reviewUpdateDto); // Customer auth = CreateAReview's Customer auth
-        Task<bool> DeleteReviewByIdAsync(Guid reviewId); // Customer auth = CreateAReview's Customer auth
+        Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions options);
+        Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId);
+        Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid UserId);
+        Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId);
+        Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto reviewCreateDto);
+        Task<ReviewReadDto> UpdateReviewByIdAsync(Guid reviewId, ReviewUpdateDto reviewUpdateDto);
+        Task<bool> DeleteReviewByIdAsync(Guid reviewId);
     }
 }

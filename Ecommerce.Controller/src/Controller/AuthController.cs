@@ -17,9 +17,10 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [HttpPost("login")]
-        public async Task<string> LoginAsync([FromBody] UserCredential userCredential)
+        public async Task<ActionResult<string>> LoginAsync([FromBody] UserCredential userCredential)
         {
-            return await _authService.LoginAsync(userCredential);
+            var result =  await _authService.LoginAsync(userCredential); // it will throw exception and handled by middleware
+            return Ok(result);
         }
 
         [Authorize]

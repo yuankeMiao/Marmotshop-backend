@@ -22,9 +22,9 @@ namespace Ecommerce.Service.src.Service
             _userRepo = userRepo;
         }
 
-        public async Task<ReviewReadDto> CreateReviewAsync(Guid userId, ReviewCreateDto reviewCreateDto)
+        public async Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto reviewCreateDto)
         {
-            var foundUser = await _userRepo.GetUserByIdAsync(userId);
+            var foundUser = await _userRepo.GetUserByIdAsync(reviewCreateDto.UserId);
             if (foundUser is null)
             {
                 throw AppException.NotFound("User not found");
@@ -41,7 +41,7 @@ namespace Ecommerce.Service.src.Service
             {
                 Rating = reviewCreateDto.Rating,
                 Content = reviewCreateDto.Content,
-                UserId = userId,
+                UserId = reviewCreateDto.UserId,
                 User = foundUser,
                 ProductId = reviewCreateDto.ProductId,
                 Product = foundProduct
@@ -78,15 +78,20 @@ namespace Ecommerce.Service.src.Service
             return reviewDtos;
         }
 
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsOfProductAsync(Guid productId)
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId)
         {
             var foundProduct = _productRepo.GetProductByIdAsync(productId);
             if (foundProduct is null)
             {
                 throw AppException.NotFound("Product not found");
             }
-            var result = await _reviewRepo.GetAllReviewsOfProductAsync(productId);
+            var result = await _reviewRepo.GetAllReviewsByProductIdAsync(productId);
             return _mapper.Map<IEnumerable<Review>, IEnumerable<ReviewReadDto>>(result);
+        }
+
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid userId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId)
