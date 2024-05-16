@@ -3,6 +3,7 @@ using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.WebAPI.src.Service;
 
+
 namespace Ecommerce.WebAPI.src.Database
 {
     public class SeedingData
@@ -31,11 +32,11 @@ namespace Ecommerce.WebAPI.src.Database
         {
             var passwordService = new PasswordService();
             var users = new List<User>();
-            var faker = new Faker("en");
 
             // customers
             for (int i = 0; i < 100; i++)
             {
+                var faker = new Faker("en");
                 var rawPsw = faker.Internet.Password();
                 var hashedPassword = passwordService.HashPassword(rawPsw, out byte[] salt);
 
@@ -57,6 +58,7 @@ namespace Ecommerce.WebAPI.src.Database
             var hashedYuankePassword = passwordService.HashPassword("yuanke@123", out byte[] yuankeSalt);
             var hashedLukaPassword = passwordService.HashPassword("yuanke@123", out byte[] lukaSalt);
 
+            var avatarFaker = new Faker("en");
             var admin1 = new User()
             {
                 Id = Guid.NewGuid(),
@@ -65,7 +67,7 @@ namespace Ecommerce.WebAPI.src.Database
                 Email = "yuanke@admin.com",
                 Password = hashedYuankePassword,
                 Salt = yuankeSalt,
-                Avatar = faker.Person.Avatar,
+                Avatar = avatarFaker.Person.Avatar,
                 Role = UserRole.Admin,
             };
             var admin2 = new User()
@@ -76,7 +78,7 @@ namespace Ecommerce.WebAPI.src.Database
                 Email = "luka@admin.com",
                 Password = hashedLukaPassword,
                 Salt = lukaSalt,
-                Avatar = faker.Person.Avatar,
+                Avatar = avatarFaker.Person.Avatar,
                 Role = UserRole.Admin,
             };
             users.Add(admin1);
@@ -87,15 +89,15 @@ namespace Ecommerce.WebAPI.src.Database
 
         public static List<Address> GetAddresses(List<User> users)
         {
-            var faker = new Faker("fi");
             var addresses = new List<Address>();
 
             // giva users random amount addresses, from 0 to 3, to simulate the real life data
             foreach (var user in users)
             {
-                int addressAmount = faker.Random.Int(0, 3);
+                int addressAmount = new Random().Next(0, 3);
                 for (int i = 0; i < addressAmount; i++)
                 {
+                    var faker = new Faker("fi");
                     var address = new Address
                     {
                         Id = Guid.NewGuid(),
@@ -118,16 +120,15 @@ namespace Ecommerce.WebAPI.src.Database
         {
             var products = new List<Product>();
 
-            var faker = new Faker("en");
-
             foreach (var category in categories)
             {
                 for (int i = 0; i < 20; i++)
                 {
+                    var faker = new Faker("en");
                     var product = new Product
                     {
                         Id = Guid.NewGuid(),
-                        Title = $"{faker.Commerce.ProductAdjective()} {faker.Commerce.Product()} {faker.Random.Word()}", // make sure title is unique
+                        Title = $"{faker.Commerce.ProductAdjective()} {faker.Commerce.Product()} {faker.Random.Word()}",
                         Description = faker.Commerce.ProductDescription(),
                         Price = decimal.Parse(faker.Commerce.Price()),
                         DiscountPercentage = faker.Commerce.Random.Int(0, 30),
@@ -147,13 +148,13 @@ namespace Ecommerce.WebAPI.src.Database
 
         public static List<Image> GetImages(List<Product> products)
         {
-            var faker = new Faker("en");
 
             var images = new List<Image>();
             foreach (var product in products)
             {
                 for (int i = 0; i < 5; i++)
                 {
+                    var faker = new Faker("en");
                     var image = new Image
                     {
                         Id = Guid.NewGuid(),
@@ -169,14 +170,14 @@ namespace Ecommerce.WebAPI.src.Database
 
         public static List<Order> GetOrders(List<User> users)
         {
-            var faker = new Faker("fi");
             var orders = new List<Order>();
 
             foreach (var user in users)
             {
-                int orderAmount = faker.Random.Int(0,10);
+                int orderAmount = new Random().Next(0, 10);
                 for (int i = 0; i < orderAmount; i++)
                 {
+                    var faker = new Faker("fi");
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -193,18 +194,17 @@ namespace Ecommerce.WebAPI.src.Database
 
         public static List<OrderProduct> GetOrderProducts(List<Order> orders, List<Product> products)
         {
-            var faker = new Faker("en");
-
             var orderProducts = new List<OrderProduct>();
 
             foreach (var order in orders)
             {
+                var faker = new Faker("en");
                 var randomProducts = faker.Random.ListItems(products, 20);
                 int productAmount = faker.Random.Int(1, 20);
                 for (int i = 0; i < productAmount; i++)
                 {
                     var randomProduct = randomProducts[i];
-    
+
                     var actualPrice = decimal.Round(randomProduct.Price - randomProduct.Price * randomProduct.DiscountPercentage / 100, 2);
                     var quantity = faker.Random.Int(1, 30);
 
@@ -217,32 +217,32 @@ namespace Ecommerce.WebAPI.src.Database
                         Thumbnail = randomProduct.Thumbnail,
                         ActualPrice = actualPrice,
                         Quantity = quantity,
-                        TotalPrice = decimal.Round( actualPrice * quantity, 2)
+                        TotalPrice = decimal.Round(actualPrice * quantity, 2)
                     };
 
                     orderProducts.Add(orderProduct);
 
                 }
             }
-            
+
             return orderProducts;
         }
 
         public static List<Review> GetReviews(List<User> users, List<Product> products)
         {
-            var faker = new Faker("en");
             var reviews = new List<Review>();
 
-            foreach(var product in products)
+            foreach (var product in products)
             {
-                int reveiwAmount = faker.Random.Int(0,100);
-                for (int i = 0; i < reveiwAmount; i ++)
+                var faker = new Faker("en");
+                int reveiwAmount = faker.Random.Int(0, 100);
+                for (int i = 0; i < reveiwAmount; i++)
                 {
                     var randomUser = faker.Random.ListItem(users);
                     var review = new Review
                     {
                         Id = Guid.NewGuid(),
-                        Rating = faker.Random.Int(1 ,5),
+                        Rating = faker.Random.Int(1, 5),
                         Content = faker.Lorem.Paragraph(),
                         UserId = randomUser.Id,
                         ProductId = product.Id,
