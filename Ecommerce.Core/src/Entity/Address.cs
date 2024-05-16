@@ -22,7 +22,7 @@ namespace Ecommerce.Core.src.Entity
         public string? Line2 { get; set; }
 
         [Required]
-        public int PostalCode { get; set; }
+        public required string PostalCode { get; set; }
 
         [Required]
         [Column(TypeName = "varchar")]

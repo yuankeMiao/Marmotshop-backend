@@ -56,6 +56,7 @@ namespace Ecommerce.Service.src.Shared
 
             CreateMap<Product, OrderProduct>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.ActualPrice, opt => opt.MapFrom(src => decimal.Round(src.Price - src.Price * src.DiscountPercentage / 100, 2)))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
 
             #endregion

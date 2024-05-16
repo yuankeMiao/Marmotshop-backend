@@ -9,7 +9,7 @@ namespace Ecommerce.Service.src.DTO
         public required string Phone { get; set; }
         public required string Line1 { get; set; }
         public string? Line2 { get; set; }
-        public int PostalCode { get; set; }
+        public required string PostalCode { get; set; }
         public required string City { get; set; }
         public required Guid UserId { get; set; }
     }
@@ -20,7 +20,7 @@ namespace Ecommerce.Service.src.DTO
         public required string Phone { get; set; }
         public required string Line1 { get; set; }
         public string? Line2 { get; set; }
-        public int PostalCode { get; set; }
+        public string? PostalCode { get; set; }
         public required string City { get; set; }
     }
 
@@ -31,7 +31,7 @@ namespace Ecommerce.Service.src.DTO
         public string? Phone { get; set; }
         public string? Line1 { get; set; }
         public string? Line2 { get; set; }
-        public int? PostalCode { get; set; }
+        public string? PostalCode { get; set; }
         public string? City { get; set; }
     }
 }

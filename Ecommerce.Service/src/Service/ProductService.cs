@@ -105,11 +105,11 @@ namespace Ecommerce.Service.src.Service
                 var category = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
 
                 var createdProduct = _mapper.Map<Product>(newProduct);
-                createdProduct.Images = _mapper.Map<IEnumerable<Image>>(createdProduct.Images);
+                // createdProduct.Images = _mapper.Map<IEnumerable<Image>>(createdProduct.Images);
 
                 await _productRepo.CreateProductWithTransactionAsync(createdProduct);
                 var productReadDto = _mapper.Map<ProductReadDto>(createdProduct);
-                productReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(productReadDto.Images);
+                // productReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(productReadDto.Images);
 
                 return productReadDto;
             }

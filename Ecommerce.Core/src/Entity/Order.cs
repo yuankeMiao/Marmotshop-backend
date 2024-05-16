@@ -10,7 +10,7 @@ namespace Ecommerce.Core.src.Entity
         public User User { get; set; } = null!; //reference only
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public required HashSet<OrderProduct> Products { get; set; }
+        public HashSet<OrderProduct> Products { get; set; } = null!;
 
         public required string ShippingAddress { get; set; }
     }

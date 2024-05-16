@@ -157,8 +157,8 @@ namespace Ecommerce.WebAPI.src.Database
 
             modelBuilder.Entity<OrderProduct>()
                 .HasOne(op => op.Product)
-                .WithOne()
-                .HasForeignKey<OrderProduct>(op => op.ProductId)
+                .WithMany()
+                .HasForeignKey(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
@@ -205,7 +205,7 @@ namespace Ecommerce.WebAPI.src.Database
             }
         }
 
-        private void SeedData(ModelBuilder modelBuilder)
+        private static void SeedData(ModelBuilder modelBuilder)
         {
             var categories = SeedingData.GetCategories();
             modelBuilder.Entity<Category>().HasData(categories);
@@ -219,6 +219,17 @@ namespace Ecommerce.WebAPI.src.Database
             var images = SeedingData.GetImages(products);
             modelBuilder.Entity<Image>().HasData(images);
 
+            var addresses = SeedingData.GetAddresses(users);
+            modelBuilder.Entity<Address>().HasData(addresses);
+
+            var orders = SeedingData.GetOrders(users);
+            modelBuilder.Entity<Order>().HasData(orders);
+
+            var orderProducts = SeedingData.GetOrderProducts(orders, products);
+            modelBuilder.Entity<OrderProduct>().HasData(orderProducts);
+
+            var reviews = SeedingData.GetReviews(users, products);
+            modelBuilder.Entity<Review>().HasData(reviews);
         }
         #endregion
     }
