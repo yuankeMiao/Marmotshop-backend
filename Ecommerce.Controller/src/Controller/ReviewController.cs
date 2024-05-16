@@ -27,30 +27,21 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [HttpGet("product/{productId}")]
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsOfProductAsync([FromQuery] Guid productId)
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId)
         {
-            return await _service.GetAllReviewsByProductIdAsync(productId); // Will be modified later
+            return await _service.GetAllReviewsByProductIdAsync(productId); 
         }
 
-        // Customer auth = CreateAReview's Customer auth or Admin
-        [Authorize]
+        [HttpGet("user/{userId}")]
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId)
+        {
+            return await _service.GetAllReviewsByUserIdAsync(userId); // Will be modified later
+        }
+
         [HttpGet("{reviewId}")]
         public async Task<ActionResult<ReviewReadDto>> GetReviewByIdAsync([FromRoute] Guid reviewId)
         {
-
             var review = await _service.GetReviewByIdAsync(reviewId);
-            var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, review, "AdminOrOwnerReview");
-
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-
-            if (review == null)
-            {
-                return NotFound();
-            }
-
             return Ok(review);
         }
 
@@ -59,7 +50,7 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<ReviewReadDto> CreateReviewAsync([FromBody] ReviewCreateDto reviewCreateDto)
         {
             var userId = GetUserIdClaim();
-            return await _service.CreateReviewAsync(reviewCreateDto); // Will be modified later
+            return await _service.CreateReviewAsync(userId, reviewCreateDto);
         }
 
         // Customer auth = CreateAReview's Customer auth or Admin

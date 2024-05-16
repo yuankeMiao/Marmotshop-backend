@@ -15,7 +15,7 @@ namespace Ecommerce.WebAPI.src.AuthorizationPolicy
             var userRole = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            if (userId == review.User.Id.ToString() || userRole == UserRole.Admin.ToString())
+            if (userId == review.UserId.ToString() || userRole == UserRole.Admin.ToString())
             {
                 context.Succeed(requirement);
             }

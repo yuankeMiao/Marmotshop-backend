@@ -7,16 +7,14 @@ namespace Ecommerce.Service.src.DTO
     {
         public int Rating { get; set; }
         public string? Content { get; set; }
-        public required UserReadDto User { get; set; }
+        public required Guid UserId { get; set; }
         public required string ProductId { get; set; }
-         public required string ProductTitle { get; set; }
     }
     public class ReviewCreateDto
     {
         public int Rating { get; set; }
         public string? Content { get; set; }
         public Guid ProductId { get; set; }
-        public Guid UserId { get; set; }
     }
     public class ReviewUpdateDto
     {

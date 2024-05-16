@@ -9,7 +9,7 @@ namespace Ecommerce.Service.src.ServiceAbstract
         Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId);
         Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid UserId);
         Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId);
-        Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto reviewCreateDto);
+        Task<ReviewReadDto> CreateReviewAsync(Guid userId, ReviewCreateDto reviewCreateDto);
         Task<ReviewReadDto> UpdateReviewByIdAsync(Guid reviewId, ReviewUpdateDto reviewUpdateDto);
         Task<bool> DeleteReviewByIdAsync(Guid reviewId);
     }

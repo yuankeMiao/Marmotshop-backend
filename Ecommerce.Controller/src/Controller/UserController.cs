@@ -44,7 +44,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{userId}")] // endpoint: /users/:user_id
+        [HttpPatch("{userId}")] // endpoint: /users/:user_id
         public async Task<UserReadDto> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
         {
             return await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
@@ -68,7 +68,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize] // will implement authorization later
-        [HttpPut("profile")]
+        [HttpPatch("profile")]
         public async Task<UserReadDto> UpdateUserProfileAsync(UserUpdateDto userUpdateDto)
         {
             throw new NotImplementedException();
@@ -89,7 +89,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize]
-        [HttpPut("profile/addresses/{addressId}")]
+        [HttpPatch("profile/addresses/{addressId}")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
             throw new NotImplementedException();

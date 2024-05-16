@@ -65,9 +65,7 @@ namespace Ecommerce.Service.src.Shared
             CreateMap<Review, ReviewReadDto>();
 
             CreateMap<ReviewCreateDto, Review>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
-                .ForMember(dest => dest.UserId, opt => opt.Ignore())
-                .ForMember(dest => dest.ProductId, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
             #endregion
         }
     }

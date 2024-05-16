@@ -39,7 +39,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{categoryId}")] // endpoint: /categories/:category_id
+        [HttpPatch("{categoryId}")] // endpoint: /categories/:category_id
         public async Task<CategoryReadDto> UpdateCategoryByIdAsync([FromRoute] Guid categoryId, [FromBody] CategoryUpdateDto categoryUpdateDto)
         {
             return await _categoryService.UpdateCategoryByIdAsync(categoryId, categoryUpdateDto);

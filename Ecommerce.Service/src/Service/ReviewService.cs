@@ -41,7 +41,7 @@ namespace Ecommerce.Service.src.Service
         {
             try
             {
-                _ = _productRepo.GetProductByIdAsync(productId) ?? throw AppException.NotFound("Product not found");
+                _ = await  _productRepo.GetProductByIdAsync(productId) ?? throw AppException.NotFound("Product not found");
                 var reviews = await _reviewRepo.GetAllReviewsByProductIdAsync(productId);
                 var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
@@ -57,8 +57,8 @@ namespace Ecommerce.Service.src.Service
         {
             try
             {
-                _ = _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
-                var reviews = await _reviewRepo.GetAllReviewsByProductIdAsync(userId);
+                _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+                var reviews = await _reviewRepo.GetAllReviewsByUserIdAsync(userId);
                 var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
                 return reviewReadDtos;
@@ -78,16 +78,17 @@ namespace Ecommerce.Service.src.Service
         }
 
 
-        public async Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto reviewCreateDto)
+        public async Task<ReviewReadDto> CreateReviewAsync(Guid userId, ReviewCreateDto reviewCreateDto)
         {
             // check if user and product exist
-            _ = await _userRepo.GetUserByIdAsync(reviewCreateDto.UserId) ?? throw AppException.NotFound("User not found");
-            _ = await _productRepo.GetProductByIdAsync(reviewCreateDto.ProductId) ?? throw AppException.NotFound("Product not found");
+            _ = await _userRepo.GetUserByIdAsync(userId);
+            _ = await _productRepo.GetProductByIdAsync(reviewCreateDto.ProductId);
 
             // validation
             if (reviewCreateDto.Rating < 1 || reviewCreateDto.Rating > 5) throw AppException.InvalidInput("Raiting should be from 1 to 5");
 
             var newReview = _mapper.Map<Review>(reviewCreateDto);
+            newReview.UserId = userId;
             var createdReview = await _reviewRepo.CreateReviewAsync(newReview);
 
             var reviewReadDto = _mapper.Map<ReviewReadDto>(createdReview);
