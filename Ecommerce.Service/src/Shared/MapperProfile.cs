@@ -13,8 +13,6 @@ namespace Ecommerce.Service.src.Shared
 
             CreateMap<CategoryCreateDto, Category>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
-
-            CreateMap<CategoryUpdateDto, Category>();
             #endregion
 
             #region User Mapper:
@@ -22,18 +20,16 @@ namespace Ecommerce.Service.src.Shared
 
             CreateMap<User, UserReadDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
-
-            CreateMap<UserUpdateDto, User>();
             #endregion
 
 
             #region Product Mapper:
-            CreateMap<Product, ProductReadDto>();
+            CreateMap<Product, ProductReadDto>()
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images));
 
             CreateMap<ProductCreateDto, Product>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
-
-            CreateMap<ProductUpdateDto, Product>();
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images));
             #endregion
 
             #region Image Mapper:
@@ -41,8 +37,6 @@ namespace Ecommerce.Service.src.Shared
 
             CreateMap<ImageCreateDto, Image>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
-
-            CreateMap<ImageUpdateDto, Image>();
             #endregion
 
 
@@ -53,9 +47,6 @@ namespace Ecommerce.Service.src.Shared
             CreateMap<OrderCreateDto, Order>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
-
-            CreateMap<OrderUpdateDto, Order>();
-
             #endregion
 
             #region OrderProduct Mapper:
@@ -76,8 +67,6 @@ namespace Ecommerce.Service.src.Shared
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
                 .ForMember(dest => dest.ProductId, opt => opt.Ignore());
-
-            CreateMap<ReviewUpdateDto, Review>();
             #endregion
         }
     }

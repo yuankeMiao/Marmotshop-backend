@@ -51,9 +51,6 @@ namespace Ecommerce.Service.src.Service
                 var product = await _productRepo.GetProductByIdAsync(productId);
                 var productDto = _mapper.Map<ProductReadDto>(product);
 
-                // var images = await _imageRepo.GetImagesByProductIdAsync(productDto.Id);
-                productDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(productDto.Images);
-
                 return productDto;
             }
             catch (Exception)
