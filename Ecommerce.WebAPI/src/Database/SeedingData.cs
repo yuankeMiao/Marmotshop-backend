@@ -7,106 +7,94 @@ namespace Ecommerce.WebAPI.src.Database
 {
     public class SeedingData
     {
-        private static Random random = new Random();
-        private static int GetRandomNumber()
-        {
-            return random.Next(1, 11);
-        }
-        private static int GetRandomNumberForImage()
-        {
-            return random.Next(100, 1000);
-        }
-
-        private static int RandomNumber1 = GetRandomNumber();
-        private static int RandomNumber2 = GetRandomNumber();
-        private static int RandomNumber3 = GetRandomNumber();
-        private static int RandomNumber4 = GetRandomNumber();
-        private static int RandomNumber5 = GetRandomNumber();
-        private static int RandomNumber6 = GetRandomNumber();
-
-        #region Categories
-        private static Category category1 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Electronic",
-            Image = $"https://picsum.photos/200/?random={RandomNumber1}"
-        };
-        private static Category category2 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Clothing",
-            Image = $"https://picsum.photos/200/?random={RandomNumber2}"
-        };
-        private static Category category3 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Furniture",
-            Image = $"https://picsum.photos/200/?random={RandomNumber3}"
-        };
-        private static Category category4 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Books",
-            Image = $"https://picsum.photos/200/?random={RandomNumber4}"
-        };
-        private static Category category5 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Toys",
-            Image = $"https://picsum.photos/200/?random={RandomNumber5}"
-        };
-        private static Category category6 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Sports",
-            Image = $"https://picsum.photos/200/?random={RandomNumber6}"
-        };
-
         public static List<Category> GetCategories()
         {
-            return new List<Category>
-            {
-                category1, category2, category3, category4, category5, category6
-            };
-        }
-        #endregion
+            var faker = new Faker("en");
+            var categories = new List<Category>();
+            List<string> categoryNames = ["Sport", "Clothes", "Games", "Self care", "Books"];
 
-        #region Users
+            foreach (var categoryName in categoryNames)
+            {
+                var category = new Category
+                {
+                    Id = Guid.NewGuid(),
+                    Name = categoryName,
+                    Image = faker.Image.PicsumUrl(),
+                };
+                categories.Add(category);
+            }
+
+            return categories;
+        }
+ 
         public static List<User> GetUsers()
         {
             var passwordService = new PasswordService();
-            var hashedYuankePassword = passwordService.HashPassword("yuanke@123", out byte[] yuankeSalt);
-            var hashedCustomerPassword = passwordService.HashPassword("customer@123", out byte[] customerSalt);
-            return new List<User>
+            var users = new List<User>();
+            var faker = new Faker("en");
+
+            // customers
+            for (int i = 0; i < 100; i++)
             {
-                new User
+                var rawPsw = faker.Internet.Password();
+                var hashedPassword = passwordService.HashPassword(rawPsw, out byte[] salt);
+
+                var user = new User
                 {
                     Id = Guid.NewGuid(),
-                    Firstname = "Yuanke",
-                    Lastname = "Miao",
-                    Email = "yuanke@admin.com",
-                    Password = hashedYuankePassword,
-                    Salt= yuankeSalt,
-                    Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    Role = UserRole.Admin,
-                },
-                new User
-                {
-                    Id = Guid.NewGuid(),
-                     Firstname = "John",
-                    Lastname = "Doe",
-                    Email = "John@customer.com",
-                    Password = hashedCustomerPassword,
-                    Salt= customerSalt,
-                    Avatar = $"https://picsum.photos/200/?random={GetRandomNumberForImage}",
-                    Role = UserRole.Customer,
-                }
+                    Firstname = faker.Person.FirstName,
+                    Lastname = faker.Person.LastName,
+                    Email = i.ToString() + faker.Person.Email,
+                    Password = hashedPassword,
+                    Salt = salt,
+                    Avatar = faker.Person.Avatar,
+                    Role = UserRole.Customer
+                };
+                users.Add(user);
+            }
+
+            // admins
+            var hashedYuankePassword = passwordService.HashPassword("yuanke@123", out byte[] yuankeSalt);
+            var hashedLukaPassword = passwordService.HashPassword("yuanke@123", out byte[] lukaSalt);
+
+            var admin1 = new User()
+            {
+                Id = Guid.NewGuid(),
+                Firstname = "Yuanke",
+                Lastname = "Miao",
+                Email = "yuanke@admin.com",
+                Password = hashedYuankePassword,
+                Salt = yuankeSalt,
+                Avatar = faker.Person.Avatar,
+                Role = UserRole.Admin,
             };
+            var admin2 = new User()
+            {
+                Id = Guid.NewGuid(),
+                Firstname = "Luka",
+                Lastname = "Miao",
+                Email = "luka@admin.com",
+                Password = hashedLukaPassword,
+                Salt = lukaSalt,
+                Avatar = faker.Person.Avatar,
+                Role = UserRole.Admin,
+            };
+            users.Add(admin1);
+            users.Add(admin2);
+
+            return users;
         }
 
-        #endregion
+        public static List<Address> GetAddresses(List<User> users)
+        {
+            var addresses = new List<Address>();
 
-        #region products
+            // only gave half users address, since it's optional
+            // giva users random amount addresses, from 1 to 4, to simulate the real life data
+            return addresses;
+        }
+
+
         public static List<Product> GetProducts(List<Category> categories)
         {
             var products = new List<Product>();
@@ -137,9 +125,7 @@ namespace Ecommerce.WebAPI.src.Database
             return products;
         }
 
-        #endregion
-
-        #region  Image
+  
         public static List<Image> GetImages(List<Product> products)
         {
             var faker = new Faker("en");
@@ -161,6 +147,6 @@ namespace Ecommerce.WebAPI.src.Database
 
             return images;
         }
-        #endregion
+   
     }
 }

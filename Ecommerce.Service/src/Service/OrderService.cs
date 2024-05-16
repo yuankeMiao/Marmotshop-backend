@@ -29,7 +29,7 @@ namespace Ecommerce.Service.src.Service
             _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
             // if true, created order object, assign userId
-            var order = _mapper.Map<OrderCreateDto, Order>(orderCreateDto);
+            var order = _mapper.Map<Order>(orderCreateDto);
             order.UserId = userId;
 
             // create orderProducts set
@@ -40,7 +40,7 @@ namespace Ecommerce.Service.src.Service
                 // check every product in orderCreateDto.OrderProducts
                 var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId);
                 // if found, create a new OrderProduct object
-                var newOrderProduct = _mapper.Map<Product, OrderProduct>(foundProduct);
+                var newOrderProduct = _mapper.Map<OrderProduct>(foundProduct);
                 newOrderProduct.Quantity = orderProductDto.Quantity;
                 newOrderProduct.TotalPrice = newOrderProduct.Quantity * newOrderProduct.ActualPrice;
                 newOrderProduct.OrderId = order.Id;

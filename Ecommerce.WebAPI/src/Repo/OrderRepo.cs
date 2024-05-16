@@ -64,7 +64,7 @@ namespace Ecommerce.WebAPI.src.Repo
                     await _orderProducts.AddAsync(newOrderProduct);
 
                     // change product.Stock in product table
-                    var foundProduct = await _products.FindAsync(newOrderProduct.ProductId) ?? throw AppException.NotFound("Product");
+                    var foundProduct = await _products.FindAsync(newOrderProduct.ProductId) ?? throw AppException.NotFound("Product Not Found");
                     foundProduct.Stock -= newOrderProduct.Quantity;
 
                     _products.Update(foundProduct);

@@ -13,7 +13,6 @@ namespace Ecommerce.Service.src.DTO
 
     public class OrderCreateDto
     {
-        public Guid UserId { get; set; }
         public required HashSet<OrderProductCreateDto> Products { get; set; }
         public required string ShippingAddress { get; set; }
 
