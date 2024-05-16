@@ -30,7 +30,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<Category> CreateCategoryAsync(Category newCategory)
         {
             var duplicatedCategory = await _categories.FirstOrDefaultAsync(c => c.Name == newCategory.Name);
-            if(duplicatedCategory is not null) throw AppException.DuplicateCategotyNameException();
+            if(duplicatedCategory is not null) throw AppException.Duplicate("Catefory name");
 
             await _categories.AddAsync(newCategory);
             await _context.SaveChangesAsync();
@@ -43,7 +43,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
             // check if the new name already exist
             var duplicatedCategory = await _categories.FirstOrDefaultAsync(c => c.Name == updatedCategory.Name && c.Id != updatedCategory.Id);
-            if(duplicatedCategory is not null) throw AppException.DuplicateCategotyNameException();
+            if(duplicatedCategory is not null) throw AppException.Duplicate("Category name");
 
             _categories.Update(updatedCategory);
             await _context.SaveChangesAsync();

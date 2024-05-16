@@ -26,7 +26,6 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
         {
-
             try
             {
                 var products = await _productRepo.GetAllProductsAsync(productQueryOptions);
@@ -45,7 +44,7 @@ namespace Ecommerce.Service.src.Service
         {
             if (productId == Guid.Empty)
             {
-                throw AppException.BadRequest();
+                throw AppException.InvalidInput("Product id cannot be null");
             }
             try
             {
@@ -77,13 +76,13 @@ namespace Ecommerce.Service.src.Service
                 // Check if the product name is provided
                 if (string.IsNullOrWhiteSpace(newProduct.Title))
                 {
-                    throw AppException.InvalidInputException("Product name cannot be empty");
+                    throw AppException.InvalidInput("Product name cannot be empty");
                 }
 
                 // Check if the price is greater than zero
                 if (newProduct.Price <= 0)
                 {
-                    throw AppException.InvalidInputException("Price should be greated than zero.");
+                    throw AppException.InvalidInput("Price should be greated than zero.");
                 }
 
                 // Validate image URLs
@@ -95,13 +94,13 @@ namespace Ecommerce.Service.src.Service
                         // Check if the URL is provided
                         if (string.IsNullOrWhiteSpace(image.Url))
                         {
-                            throw AppException.InvalidInputException("Image URL cannot be empty");
+                            throw AppException.InvalidInput("Image URL cannot be empty");
                         }
 
                         // Check if the URL points to a valid image format 
                         if (!IsImageUrlValid(image.Url))
                         {
-                            throw AppException.InvalidInputException("Invalid image format");
+                            throw AppException.InvalidInput("Invalid image format");
                         }
                     }
                 }

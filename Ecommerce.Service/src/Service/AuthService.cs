@@ -28,7 +28,7 @@ namespace Ecommerce.Service.src.Service
             }
             else
             {
-                throw AppException.InvalidLoginCredentialsException("Incorrect password");
+                throw AppException.InvalidLoginCredentials("Incorrect password");
             }
         }
 

@@ -5,7 +5,7 @@ namespace Ecommerce.Service.src.ServiceAbstract
 {
     public interface IReviewService
     {
-        Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions options);
+        Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions? options);
         Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId);
         Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid UserId);
         Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId);

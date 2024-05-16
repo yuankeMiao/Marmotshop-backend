@@ -18,7 +18,7 @@ namespace Ecommerce.WebAPI.src.Repo
         }
 
 
-        public async Task<IEnumerable<Review>> GetAllReviewsAsync(BaseQueryOptions options)
+        public async Task<IEnumerable<Review>> GetAllReviewsAsync(BaseQueryOptions? options)
         {
             var query = _reviews.AsQueryable();
             // Pagination

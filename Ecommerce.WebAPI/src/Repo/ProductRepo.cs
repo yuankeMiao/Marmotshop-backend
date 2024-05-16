@@ -88,7 +88,7 @@ namespace Ecommerce.WebAPI.src.Repo
             {
                 // create product record
                 var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title);
-                if (foundProduct is not null) throw AppException.DuplicateException("Product Title already exist");
+                if (foundProduct is not null) throw AppException.Duplicate("Product Title");
 
                 await _products.AddAsync(newProduct);
 

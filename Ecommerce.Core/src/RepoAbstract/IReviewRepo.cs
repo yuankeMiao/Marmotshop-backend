@@ -5,7 +5,7 @@ namespace Ecommerce.Core.src.RepoAbstract
 {
     public interface IReviewRepo
     {
-        Task<IEnumerable<Review>> GetAllReviewsAsync(BaseQueryOptions options);
+        Task<IEnumerable<Review>> GetAllReviewsAsync(BaseQueryOptions? options);
         Task<IEnumerable<Review>> GetAllReviewsByProductIdAsync(Guid productId);
         Task<IEnumerable<Review>> GetAllReviewsByUserIdAsync(Guid userId);
         Task<Review> GetReviewByIdAsync(Guid reviewId);

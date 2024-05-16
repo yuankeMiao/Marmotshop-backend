@@ -64,7 +64,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<User> CreateUserAsync(User newUser)
         {
             var duplicatedUser = await _users.FirstOrDefaultAsync(user => user.Email == newUser.Email);
-            if (duplicatedUser is not null) throw AppException.DuplicateEmailException();
+            if (duplicatedUser is not null) throw AppException.Duplicate("User email");
 
             await _users.AddAsync(newUser);
             await _context.SaveChangesAsync();
@@ -78,7 +78,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
             // check if the new email is duplicated
             var duplicatedUser = await _users.FirstOrDefaultAsync(u => u.Email == updatedUser.Email && u.Id != updatedUser.Id);
-            if (duplicatedUser is not null) throw AppException.DuplicateEmailException();
+            if (duplicatedUser is not null) throw AppException.Duplicate("User email");
 
             _users.Update(updatedUser);
             await _context.SaveChangesAsync();
@@ -97,7 +97,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<User> GetUserByCredentialsAsync(UserCredential userCredential)
         {
 
-            var foundUser = await _users.FirstOrDefaultAsync(user => user.Email == userCredential.Email) ?? throw AppException.InvalidLoginCredentialsException();
+            var foundUser = await _users.FirstOrDefaultAsync(user => user.Email == userCredential.Email) ?? throw AppException.InvalidLoginCredentials();
             return foundUser;
         }
     }

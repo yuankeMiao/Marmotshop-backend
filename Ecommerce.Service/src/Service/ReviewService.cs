@@ -22,34 +22,92 @@ namespace Ecommerce.Service.src.Service
             _userRepo = userRepo;
         }
 
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions? options)
+        {
+            try
+            {
+                var reviews = await _reviewRepo.GetAllReviewsAsync(options);
+                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+
+                return reviewReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId)
+        {
+            try
+            {
+                _ = _productRepo.GetProductByIdAsync(productId) ?? throw AppException.NotFound("Product not found");
+                var reviews = await _reviewRepo.GetAllReviewsByProductIdAsync(productId);
+                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+
+                return reviewReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid userId)
+        {
+            try
+            {
+                _ = _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+                var reviews = await _reviewRepo.GetAllReviewsByProductIdAsync(userId);
+                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+
+                return reviewReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId)
+        {
+            var foundReview = await _reviewRepo.GetReviewByIdAsync(reviewId) ?? throw AppException.NotFound("Review not found");
+            
+            var reviewReadDto = _mapper.Map<ReviewReadDto>(foundReview);
+            return reviewReadDto;
+        }
+
+
         public async Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto reviewCreateDto)
         {
-            var foundUser = await _userRepo.GetUserByIdAsync(reviewCreateDto.UserId);
-            if (foundUser is null)
-            {
-                throw AppException.NotFound("User not found");
-            }
+            // check if user and product exist
+            _ = await _userRepo.GetUserByIdAsync(reviewCreateDto.UserId) ?? throw AppException.NotFound("User not found");
+            _ = await _productRepo.GetProductByIdAsync(reviewCreateDto.ProductId) ?? throw AppException.NotFound("Product not found");
 
-            var foundProduct = await _productRepo.GetProductByIdAsync(reviewCreateDto.ProductId);
-            if (foundProduct is null)
-            {
-                throw AppException.NotFound("Product not found");
-            }
+            // validation
+            if (reviewCreateDto.Rating < 1 || reviewCreateDto.Rating > 5) throw AppException.InvalidInput("Raiting should be from 1 to 5");
 
-            // Create a new Review object and set its properties
-            var review = new Review
-            {
-                Rating = reviewCreateDto.Rating,
-                Content = reviewCreateDto.Content,
-                UserId = reviewCreateDto.UserId,
-                User = foundUser,
-                ProductId = reviewCreateDto.ProductId,
-                Product = foundProduct
-            };
-
-            var createdReview = await _reviewRepo.CreateReviewAsync(review);
+            var newReview = _mapper.Map<Review>(reviewCreateDto);
+            var createdReview = await _reviewRepo.CreateReviewAsync(newReview);
 
             var reviewReadDto = _mapper.Map<ReviewReadDto>(createdReview);
+
+            return reviewReadDto;
+        }
+
+        public async Task<ReviewReadDto> UpdateReviewByIdAsync(Guid reviewId, ReviewUpdateDto reviewUpdateDto)
+        {
+            // check if review exists
+            var foundReview = await _reviewRepo.GetReviewByIdAsync(reviewId) ?? throw AppException.NotFound("Review not found");
+
+            // Update
+            foundReview.Rating = reviewUpdateDto.Rating ?? foundReview.Rating;
+            foundReview.Content = reviewUpdateDto.Content ?? foundReview.Content;
+            foundReview.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+
+            // Save changes
+            var updatedReview = await _reviewRepo.UpdateReviewByIdAsync(foundReview);
+            var reviewReadDto = _mapper.Map<ReviewReadDto>(updatedReview);
 
             return reviewReadDto;
         }
@@ -58,78 +116,12 @@ namespace Ecommerce.Service.src.Service
         {
             if (reviewId == Guid.Empty)
             {
-                throw new Exception("bad request");
+                throw AppException.InvalidInput("Review Id should not be empty");
             }
             var isDeleted = await _reviewRepo.DeleteReviewByIdAsync(reviewId);
 
             return isDeleted;
         }
 
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsAsync(BaseQueryOptions options)
-        {
-            var reviews = await _reviewRepo.GetAllReviewsAsync(options);
-            var reviewDtos = new List<ReviewReadDto>();
-
-            foreach (var review in reviews)
-            {
-                reviewDtos.Add(_mapper.Map<ReviewReadDto>(review));
-            }
-
-            return reviewDtos;
-        }
-
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId)
-        {
-            var foundProduct = _productRepo.GetProductByIdAsync(productId);
-            if (foundProduct is null)
-            {
-                throw AppException.NotFound("Product not found");
-            }
-            var result = await _reviewRepo.GetAllReviewsByProductIdAsync(productId);
-            return _mapper.Map<IEnumerable<Review>, IEnumerable<ReviewReadDto>>(result);
-        }
-
-        public async Task<IEnumerable<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId)
-        {
-            var foundReview = await _reviewRepo.GetReviewByIdAsync(reviewId);
-            if (foundReview is null)
-            {
-                throw AppException.NotFound("Review not found");
-            }
-            var reviewReadDto = _mapper.Map<ReviewReadDto>(foundReview);
-            return reviewReadDto;
-        }
-
-        public async Task<ReviewReadDto> UpdateReviewByIdAsync(Guid reviewId, ReviewUpdateDto reviewUpdateDto)
-        {
-            var foundReview = await _reviewRepo.GetReviewByIdAsync(reviewId);
-            if (foundReview is null)
-            {
-                throw AppException.NotFound("Review not found");
-            }
-
-            // Update
-            if (reviewUpdateDto.Rating != null)
-            {
-                foundReview.Rating = reviewUpdateDto.Rating.Value;
-            }
-            if (reviewUpdateDto.Content != null)
-            {
-                foundReview.Content = reviewUpdateDto.Content;
-            }
-            foundReview.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
-
-            // Save changes
-            var updatedReview = await _reviewRepo.UpdateReviewByIdAsync(foundReview);
-
-            var reviewReadDto = _mapper.Map<ReviewReadDto>(updatedReview);
-
-            return reviewReadDto;
-        }
     }
 }

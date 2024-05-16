@@ -59,7 +59,7 @@ namespace Ecommerce.WebAPI.src.Repo
                 foreach (var newOrderProduct in newOrder.Products)
                 {
                     var duplicatedOrderProduct = await _orderProducts.FirstOrDefaultAsync(op => op.OrderId == newOrderProduct.OrderId && op.ProductId == newOrderProduct.ProductId);
-                    if (duplicatedOrderProduct is not null) throw AppException.DuplicateException("Product in order");
+                    if (duplicatedOrderProduct is not null) throw AppException.Duplicate("Product in order");
 
                     await _orderProducts.AddAsync(newOrderProduct);
 

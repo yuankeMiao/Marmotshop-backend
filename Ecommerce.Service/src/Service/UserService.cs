@@ -40,7 +40,7 @@ namespace Ecommerce.Service.src.Service
         {
             if (userId == Guid.Empty)
             {
-                AppException.BadRequest("UserId is required");
+                AppException.InvalidInput("UserId is required");
             }
             try
             {
@@ -59,7 +59,7 @@ namespace Ecommerce.Service.src.Service
         {
             if (email == string.Empty)
             {
-                throw AppException.BadRequest("Email is required");
+                throw AppException.InvalidInput("Email is required");
             }
             try
             {
@@ -79,20 +79,20 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 // validation
-                if (string.IsNullOrEmpty(userCreateDto.Firstname)) throw AppException.InvalidInputException("User name cannot be empty");
-                if (userCreateDto.Firstname.Length > 20) throw AppException.InvalidInputException("User name cannot be longer than 20 characters");
+                if (string.IsNullOrEmpty(userCreateDto.Firstname)) throw AppException.InvalidInput("User name cannot be empty");
+                if (userCreateDto.Firstname.Length > 20) throw AppException.InvalidInput("User name cannot be longer than 20 characters");
 
-                if (string.IsNullOrEmpty(userCreateDto.Lastname)) throw AppException.InvalidInputException("User name cannot be empty");
-                if (userCreateDto.Lastname.Length > 20) throw AppException.InvalidInputException("User name cannot be longer than 20 characters");
+                if (string.IsNullOrEmpty(userCreateDto.Lastname)) throw AppException.InvalidInput("User name cannot be empty");
+                if (userCreateDto.Lastname.Length > 20) throw AppException.InvalidInput("User name cannot be longer than 20 characters");
 
                 string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
                 // Create Regex object
                 Regex emailRegex = new(emailPattern);
-                if (!emailRegex.IsMatch(userCreateDto.Email)) throw AppException.InvalidInputException("Email is not valid");
+                if (!emailRegex.IsMatch(userCreateDto.Email)) throw AppException.InvalidInput("Email is not valid");
 
                 string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
                 Regex imageRegex = new(imagePatten);
-                if (userCreateDto.Avatar is not null && !imageRegex.IsMatch(userCreateDto.Avatar)) throw AppException.InvalidInputException("Avatar can only be jpg|jpeg|png|gif|bmp");
+                if (userCreateDto.Avatar is not null && !imageRegex.IsMatch(userCreateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
 
                 // Create a new User entity and populate its properties from the UserCreateDto
 
@@ -122,33 +122,33 @@ namespace Ecommerce.Service.src.Service
                 // validation
                 if (userUpdateDto.Firstname is not null && string.IsNullOrEmpty(userUpdateDto.Firstname))
                 {
-                    throw AppException.InvalidInputException("Firstname cannot be empty");
+                    throw AppException.InvalidInput("Firstname cannot be empty");
                 }
 
                 if (userUpdateDto.Firstname is not null && userUpdateDto.Firstname.Length > 20)
                 {
-                    throw AppException.InvalidInputException("Firstname cannot be longer than 20 characters");
+                    throw AppException.InvalidInput("Firstname cannot be longer than 20 characters");
                 }
 
                 if (userUpdateDto.Lastname is not null && string.IsNullOrEmpty(userUpdateDto.Lastname))
                 {
-                    throw AppException.InvalidInputException("Lastname cannot be empty");
+                    throw AppException.InvalidInput("Lastname cannot be empty");
                 }
 
                 if (userUpdateDto.Lastname is not null && userUpdateDto.Lastname.Length > 20)
                 {
-                    throw AppException.InvalidInputException("Lastname cannot be longer than 20 characters");
+                    throw AppException.InvalidInput("Lastname cannot be longer than 20 characters");
                 }
 
 
                 string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
                 // Create Regex object
                 Regex emailRegex = new(emailPattern);
-                if (userUpdateDto.Email is not null && !emailRegex.IsMatch(userUpdateDto.Email)) throw AppException.InvalidInputException("Email is not valid");
+                if (userUpdateDto.Email is not null && !emailRegex.IsMatch(userUpdateDto.Email)) throw AppException.InvalidInput("Email is not valid");
 
                 string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
                 Regex imageRegex = new(imagePatten);
-                if (userUpdateDto.Avatar is not null && !imageRegex.IsMatch(userUpdateDto.Avatar)) throw AppException.InvalidInputException("Avatar can only be jpg|jpeg|png|gif|bmp");
+                if (userUpdateDto.Avatar is not null && !imageRegex.IsMatch(userUpdateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
 
                 foundUser.Firstname = userUpdateDto.Firstname ?? foundUser.Firstname;
                 foundUser.Lastname = userUpdateDto.Lastname ?? foundUser.Lastname;

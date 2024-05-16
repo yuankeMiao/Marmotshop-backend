@@ -61,7 +61,7 @@ namespace Ecommerce.Service.src.Service
         {
             if (orderId == Guid.Empty)
             {
-                AppException.BadRequest("OrderId is required");
+                AppException.InvalidInput("OrderId is required");
             }
             try
             {
@@ -98,7 +98,7 @@ namespace Ecommerce.Service.src.Service
         {
             if (orderId == Guid.Empty)
             {
-                AppException.BadRequest("OrderId is required");
+                AppException.InvalidInput("OrderId is required");
             }
             try
             {
@@ -122,7 +122,7 @@ namespace Ecommerce.Service.src.Service
 
             if (orderId == Guid.Empty)
             {
-                throw AppException.BadRequest("Order id is required");
+                throw AppException.InvalidInput("Order id is required");
             }
             if (foundOrder is null)
             {
