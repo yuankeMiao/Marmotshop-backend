@@ -1,10 +1,13 @@
 using Ecommerce.Core.src.Entity;
+using Ecommerce.Service.src.DTO;
 
 namespace Ecommerce.Service.src.ServiceAbstract
 {
     public interface ITokenService
     {
-        string GetToken(User user);
-        Task<string> InvalidateTokenAsync();
+        TokenResponseDto GetToken(User foundUser);
+        TokenResponseDto RefreshToken(string token, User foundUser);
+        Task<bool> InvalidateTokenAsync(Guid userId);
+        bool IsTokenValid(RefreshToken token);
     }
 }

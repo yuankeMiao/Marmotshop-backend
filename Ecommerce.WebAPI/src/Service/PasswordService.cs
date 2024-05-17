@@ -18,7 +18,7 @@ namespace Ecommerce.WebAPI.src.Service
             return hashedPassword == passwordHash;
         }
 
-        private string HashPassword(string password, byte[] salt)
+        private static string HashPassword(string password, byte[] salt)
         {
             string hashed = Convert.ToBase64String(
                 KeyDerivation.Pbkdf2(
@@ -32,7 +32,7 @@ namespace Ecommerce.WebAPI.src.Service
             return hashed;
         }
 
-        private byte[] GenerateSalt()
+        private static byte[] GenerateSalt()
         {
             byte[] salt = new byte[16];
             using (var rng = RandomNumberGenerator.Create())

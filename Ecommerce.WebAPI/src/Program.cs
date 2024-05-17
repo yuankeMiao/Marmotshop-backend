@@ -110,7 +110,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Secrets:JwtKey"]!)),
         ValidateIssuer = true,
         ValidateAudience = false,
-        ValidateLifetime = true, // make sure it's not expired during development
+        ValidateLifetime = true, 
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Secrets:Issuer"],
       };

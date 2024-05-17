@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.Extensions.Caching.Memory;
+using Ecommerce.Service.src.DTO;
+using System.Security.Cryptography;
 
 namespace Ecommerce.WebAPI.src.Service
 {
@@ -20,7 +22,7 @@ namespace Ecommerce.WebAPI.src.Service
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public string GetToken(User foundUser)
+        public TokenResponseDto GetToken(User foundUser)
         {
             var claims = new List<Claim>
             {
@@ -38,32 +40,97 @@ namespace Ecommerce.WebAPI.src.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = securityKey,
-                Issuer = _configuration["Secrets:Issuer"], // Who generate the token: webdemo
+                Issuer = _configuration["Secrets:Issuer"],
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            // Store the token with a consistent key
-            _cache.Set("JwtToken", token);
-            return tokenHandler.WriteToken(token);
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            var accessTokenString = tokenHandler.WriteToken(accessToken);
+
+            var refreshToken = GenerateRefreshToken();
+            _cache.Set($"RefreshToken_{foundUser.Id}", refreshToken);
+
+            return new TokenResponseDto
+            {
+                AccessToken = accessTokenString,
+                RefreshToken = refreshToken.Token
+            };
         }
 
-
-        public async Task<string> InvalidateTokenAsync()
+        private static RefreshToken GenerateRefreshToken()
         {
-            var storedToken = _cache.Get("JwtToken");
-            if (storedToken is not null)
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+
+            return new RefreshToken
             {
-                _cache.Remove("JwtToken");
-                await Task.CompletedTask;
-                return "removed";
-            }
-            else
-            {
-                await Task.CompletedTask;
-                return "already removed";
-            }
+                Token = Convert.ToBase64String(randomBytes),
+                Expires = DateTime.UtcNow.AddDays(7),
+                Created = DateTime.UtcNow
+            };
         }
+
+        public TokenResponseDto RefreshToken(string refreshToken, User foundUser)
+        {
+            var refreshTokenKey = $"RefreshToken_{foundUser.Id}";
+            var storedRefreshToken = _cache.Get<RefreshToken>(refreshTokenKey);
+
+            if (storedRefreshToken == null || storedRefreshToken.Token != refreshToken)
+            {
+                throw new SecurityTokenException("Invalid refresh token");
+            }
+
+            if (storedRefreshToken.Revoked != null)
+            {
+                throw new SecurityTokenException("Refresh token has been revoked");
+            }
+
+            if (storedRefreshToken.Expires < DateTime.UtcNow)
+            {
+                throw new SecurityTokenException("Refresh token has expired");
+            }
+
+            var newAccessToken = GetToken(foundUser).AccessToken;
+            var newRefreshToken = GenerateRefreshToken();
+
+            _cache.Set(refreshTokenKey, newRefreshToken);
+
+            return new TokenResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken.Token
+            };
+        }
+
+        public async Task<bool> InvalidateTokenAsync(Guid userId)
+        {
+            var refreshTokenKey = $"RefreshToken_{userId}";
+            var storedToken = _cache.Get<RefreshToken>(refreshTokenKey);
+            if (storedToken != null)
+            {
+                storedToken.Revoked = DateTime.UtcNow;
+                _cache.Set(refreshTokenKey, storedToken);
+            }
+            await Task.CompletedTask;
+            return true;
+        }
+
+        public bool IsTokenValid(RefreshToken token)
+        {
+            if (token.Revoked != null)
+            {
+                return false; // Token is invalid because it has been revoked
+            }
+
+            if (token.Expires < DateTime.UtcNow)
+            {
+                return false; // Token is invalid because it has expired
+            }
+
+            return true; // Token is valid
+        }
+
     }
 }
 

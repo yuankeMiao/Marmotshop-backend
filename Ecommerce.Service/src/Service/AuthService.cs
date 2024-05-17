@@ -1,5 +1,6 @@
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.RepoAbstract;
+using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 
 namespace Ecommerce.Service.src.Service
@@ -17,26 +18,51 @@ namespace Ecommerce.Service.src.Service
         }
 
 
-        public async Task<string> LoginAsync(UserCredential userCredential)
+        public async Task<TokenResponseDto> LoginAsync(UserCredential userCredential)
         {
-            var foundUser = await _userRepo.GetUserByEmailAsync(userCredential.Email) ?? throw AppException.NotFound("Email is not registered");
+            try
+            {
+                var foundUser = await _userRepo.GetUserByEmailAsync(userCredential.Email) ?? throw AppException.NotFound("Email is not registered");
 
-            var isMatch = _passwordService.VerifyPassword(userCredential.Password, foundUser.Password, foundUser.Salt);
-            if (isMatch)
-            {
-                return _tokenService.GetToken(foundUser);
+                var isMatch = _passwordService.VerifyPassword(userCredential.Password, foundUser.Password, foundUser.Salt);
+                if (isMatch)
+                {
+                    return _tokenService.GetToken(foundUser);
+                }
+                else
+                {
+                    throw AppException.InvalidLoginCredentials("Incorrect password");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw AppException.InvalidLoginCredentials("Incorrect password");
+                throw;
             }
         }
 
-        public async Task<string> LogoutAsync()
+        public async Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, Guid userId)
         {
+            try
+            {
+                var foundUser = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+                return _tokenService.RefreshToken(refreshToken, foundUser);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-           return await _tokenService.InvalidateTokenAsync();
-
+        public async Task<bool> LogoutAsync(Guid userId)
+        {
+            try
+            {
+                return await _tokenService.InvalidateTokenAsync(userId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
