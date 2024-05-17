@@ -36,8 +36,8 @@ namespace Ecommerce.WebAPI.src.Database
             // customers
             for (int i = 0; i < 100; i++)
             {
-                var faker = new Faker("en");
-                var rawPsw = faker.Internet.Password();
+                var faker = new Faker("fi");
+                var rawPsw = faker.Person.FullName;// i set psw as fullname for seeding data, so i can login any customer account for demo
                 var hashedPassword = passwordService.HashPassword(rawPsw, out byte[] salt);
 
                 var user = new User
@@ -45,7 +45,7 @@ namespace Ecommerce.WebAPI.src.Database
                     Id = Guid.NewGuid(),
                     Firstname = faker.Person.FirstName,
                     Lastname = faker.Person.LastName,
-                    Email = i.ToString() + faker.Person.Email,
+                    Email = faker.Person.Email,
                     Password = hashedPassword,
                     Salt = salt,
                     Avatar = faker.Person.Avatar,
