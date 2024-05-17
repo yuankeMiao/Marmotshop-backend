@@ -21,17 +21,16 @@ namespace Ecommerce.WebAPI.src.Repo
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryOptions? options)
         {
-            // var query = _products.AsQueryable();
             var query = _products.AsQueryable();
             query = query.Include(p => p.Images);
-            // Apply filters if ProductQueryOptions is not null
+
             if (options != null)
             {
                 // Filter by search title
                 if (!string.IsNullOrEmpty(options.Title))
                 {
-                    var lowercaseTitle = options.Title.ToLower(); // Convert title to lowercase
-                    query = query.Where(p => p.Title.ToLower().Contains(lowercaseTitle));
+                    var lowercaseTitle = options.Title.ToLower();
+                    query = query.Where(p => p.Title.Contains(lowercaseTitle, StringComparison.CurrentCultureIgnoreCase));
                 }
 
                 // Filter by price range
@@ -51,6 +50,12 @@ namespace Ecommerce.WebAPI.src.Repo
                     query = query.Where(p => p.CategoryId == options.Category_Id);
                 }
 
+                // filter by is in stock
+                if(options.In_Stock.HasValue)
+                {
+                    query = query.Where(p => p.Stock > 0);
+                }
+
                 // Sorting
                 if (!string.IsNullOrEmpty(options.SortBy))
                 {
@@ -58,7 +63,9 @@ namespace Ecommerce.WebAPI.src.Repo
                     {
                         "title" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Title) : query.OrderBy(p => p.Title),
                         "price" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
-                        _ => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),// Default sorting by created date if sort by is not specified or invalid
+                        "created_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
+                        "updated_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
+                        _ => query.OrderBy(p => p.CreatedDate),
                     };
                 }
 

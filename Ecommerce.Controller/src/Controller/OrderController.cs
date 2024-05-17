@@ -16,7 +16,7 @@ namespace Ecommerce.Controller.src.Controller
         {
             _orderService = orderService;
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] BaseQueryOptions options)
@@ -46,7 +46,7 @@ namespace Ecommerce.Controller.src.Controller
         [HttpPatch("{orderId}")]
         public async Task<ActionResult<OrderReadDto>> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
         {
-            var order =  await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto);
+            var order = await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto);
             return Ok(order);
         }
 

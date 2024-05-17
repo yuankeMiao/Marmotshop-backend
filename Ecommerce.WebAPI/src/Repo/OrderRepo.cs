@@ -21,18 +21,33 @@ namespace Ecommerce.WebAPI.src.Repo
             _products = _context.Products;
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync(BaseQueryOptions? options)
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync(OrderQueryOptions? options)
         {
             var query = _orders.AsQueryable();
             query = query.Include(o => o.Products);
 
-            // Pagination
             if (options is not null)
             {
-                query = query.OrderBy(o => o.CreatedDate)
-                             .Skip(options.Offset)
-                             .Take(options.Limit);
+                if (options.Status is not null)
+                {
+                    query = query.Where(o => o.Status == options.Status);
+                }
+
+                // Sorting
+                if (!string.IsNullOrEmpty(options.SortBy))
+                {
+                    query = options.SortBy.ToLower() switch
+                    {
+                        "created_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
+                        "updated_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
+                        _ => query.OrderBy(p => p.CreatedDate),
+                    };
+                }
+
+                // Pagination
+                query = query.Skip(options.Offset).Take(options.Limit);
             }
+
             var orders = await query.ToListAsync();
             return orders;
         }
@@ -71,7 +86,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
                 await _context.SaveChangesAsync();
                 transaction.Commit();
-                
+
                 return newOrder;
             }
             catch (Exception)
