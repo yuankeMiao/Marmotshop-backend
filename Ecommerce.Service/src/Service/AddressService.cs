@@ -1,5 +1,6 @@
 
 using AutoMapper;
+using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.Service.src.DTO;
@@ -47,6 +48,8 @@ namespace Ecommerce.Service.src.Service
         {
             try
             {
+                if(string.IsNullOrEmpty(addressCreateDto.Recipient)) throw AppException.InvalidInput("Recipient can not be empty");
+                
                 var newAddress = _mapper.Map<AddressCreateDto, Address>(addressCreateDto);
                 newAddress.UserId = UserId;
                 var createdAddress = await _addressRepo.CreateAddressAsync(newAddress);

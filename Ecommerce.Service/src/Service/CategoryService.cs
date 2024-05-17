@@ -6,6 +6,7 @@ using Ecommerce.Core.src.RepoAbstract;
 using AutoMapper;
 using Ecommerce.Core.src.Common;
 using System.Text.RegularExpressions;
+using Ecommerce.Service.src.Shared;
 
 namespace Ecommerce.Service.src.Service
 {
@@ -57,13 +58,14 @@ namespace Ecommerce.Service.src.Service
                 if (string.IsNullOrEmpty(categoryCreateDto.Name)) throw AppException.InvalidInput("Category name cannot be empty");
                 if (categoryCreateDto.Name.Length > 20) throw AppException.InvalidInput("Category name cannot be longer than 20 characters");
 
-                string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
-                Regex imageRegex = new(imagePatten);
-                if (categoryCreateDto.Image is not null && !imageRegex.IsMatch(categoryCreateDto.Image)) throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
+                if (categoryCreateDto.Image is not null && !ValidationHelper.IsImageUrlValid(categoryCreateDto.Image))
+                {
+                    throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
+                }
 
                 var newCategory = _mapper.Map<CategoryCreateDto, Category>(categoryCreateDto);
                 var createdCategory = await _categoryRepo.CreateCategoryAsync(newCategory);
-                
+
                 var createdCategoryDto = _mapper.Map<Category, CategoryReadDto>(createdCategory);
                 return createdCategoryDto;
             }
@@ -81,10 +83,7 @@ namespace Ecommerce.Service.src.Service
                 // validations
                 if (categoryUpdateDto.Name is not null && string.IsNullOrEmpty(categoryUpdateDto.Name)) throw AppException.InvalidInput("Category name cannot be empty");
                 if (categoryUpdateDto.Name is not null && categoryUpdateDto.Name.Length > 20) throw AppException.InvalidInput("Category name cannot be longer than 20 characters");
-
-                string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
-                Regex imageRegex = new(imagePatten);
-                if (categoryUpdateDto.Image is not null && !imageRegex.IsMatch(categoryUpdateDto.Image)) throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
+                if (categoryUpdateDto.Image is not null && !ValidationHelper.IsImageUrlValid(categoryUpdateDto.Image)) throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
 
                 foundCategory.Name = categoryUpdateDto.Name ?? foundCategory.Name;
                 foundCategory.Image = categoryUpdateDto.Image ?? foundCategory.Image;

@@ -5,6 +5,7 @@ using Ecommerce.Service.src.DTO;
 using Ecommerce.Core.src.RepoAbstract;
 using AutoMapper;
 using System.Text.RegularExpressions;
+using Ecommerce.Service.src.Shared;
 
 namespace Ecommerce.Service.src.Service
 {
@@ -79,20 +80,14 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 // validation
-                if (string.IsNullOrEmpty(userCreateDto.Firstname)) throw AppException.InvalidInput("User name cannot be empty");
+                if (string.IsNullOrWhiteSpace(userCreateDto.Firstname)) throw AppException.InvalidInput("User name cannot be empty");
                 if (userCreateDto.Firstname.Length > 20) throw AppException.InvalidInput("User name cannot be longer than 20 characters");
-
-                if (string.IsNullOrEmpty(userCreateDto.Lastname)) throw AppException.InvalidInput("User name cannot be empty");
+                if (string.IsNullOrWhiteSpace(userCreateDto.Lastname)) throw AppException.InvalidInput("User name cannot be empty");
                 if (userCreateDto.Lastname.Length > 20) throw AppException.InvalidInput("User name cannot be longer than 20 characters");
 
-                string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-                // Create Regex object
-                Regex emailRegex = new(emailPattern);
-                if (!emailRegex.IsMatch(userCreateDto.Email)) throw AppException.InvalidInput("Email is not valid");
-
-                string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
-                Regex imageRegex = new(imagePatten);
-                if (userCreateDto.Avatar is not null && !imageRegex.IsMatch(userCreateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
+                if (!ValidationHelper.IsEmailValid(userCreateDto.Email)) throw AppException.InvalidInput("Email is not valid");
+                if (!ValidationHelper.IsValidPassword(userCreateDto.Password)) throw AppException.InvalidInput("Password shoulbe 6-20 charaters with at least one uppercase, one lowercase, and one number");
+                if (userCreateDto.Avatar is not null && !ValidationHelper.IsImageUrlValid(userCreateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
 
                 // Create a new User entity and populate its properties from the UserCreateDto
 
@@ -120,42 +115,40 @@ namespace Ecommerce.Service.src.Service
             {
                 var foundUser = await _userRepo.GetUserByIdAsync(userId);
                 // validation
-                if (userUpdateDto.Firstname is not null && string.IsNullOrEmpty(userUpdateDto.Firstname))
+                if (userUpdateDto.Firstname is not null)
                 {
-                    throw AppException.InvalidInput("Firstname cannot be empty");
+                    if (!ValidationHelper.IsValidName(userUpdateDto.Firstname)) throw AppException.InvalidInput("Firstname should be 2 - 20 characters without numbers");
+                    foundUser.Firstname = userUpdateDto.Firstname;
                 }
 
-                if (userUpdateDto.Firstname is not null && userUpdateDto.Firstname.Length > 20)
+                if (userUpdateDto.Lastname is not null)
                 {
-                    throw AppException.InvalidInput("Firstname cannot be longer than 20 characters");
+                    if (!ValidationHelper.IsValidName(userUpdateDto.Lastname)) throw AppException.InvalidInput("Lastname should be 2 - 20 characters without numbers");
+                    foundUser.Lastname = userUpdateDto.Lastname;
                 }
 
-                if (userUpdateDto.Lastname is not null && string.IsNullOrEmpty(userUpdateDto.Lastname))
+                if (userUpdateDto.Email is not null)
                 {
-                    throw AppException.InvalidInput("Lastname cannot be empty");
+                    if (!ValidationHelper.IsEmailValid(userUpdateDto.Email)) throw AppException.InvalidInput("Email is not valid");
+                    foundUser.Email = userUpdateDto.Email;
                 }
 
-                if (userUpdateDto.Lastname is not null && userUpdateDto.Lastname.Length > 20)
+                if (userUpdateDto.Password is not null)
                 {
-                    throw AppException.InvalidInput("Lastname cannot be longer than 20 characters");
+                    if (!ValidationHelper.IsValidPassword(userUpdateDto.Password))
+                    {
+                        throw AppException.InvalidInput("Password shoulbe 6-20 charaters with at least one uppercase, one lowercase, and one number");
+                    }
+
+                    foundUser.Password = _passwordService.HashPassword(userUpdateDto.Password, out byte[] salt);
+                    foundUser.Salt = salt;
                 }
-
-
-                string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-                // Create Regex object
-                Regex emailRegex = new(emailPattern);
-                if (userUpdateDto.Email is not null && !emailRegex.IsMatch(userUpdateDto.Email)) throw AppException.InvalidInput("Email is not valid");
-
-                string imagePatten = @"^.*\.(jpg|jpeg|png|gif|bmp)$";
-                Regex imageRegex = new(imagePatten);
-                if (userUpdateDto.Avatar is not null && !imageRegex.IsMatch(userUpdateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
-
-                foundUser.Firstname = userUpdateDto.Firstname ?? foundUser.Firstname;
-                foundUser.Lastname = userUpdateDto.Lastname ?? foundUser.Lastname;
-                foundUser.Email = userUpdateDto.Email ?? foundUser.Email;
-                foundUser.Password = userUpdateDto.Password ?? foundUser.Password;
-                foundUser.Avatar = userUpdateDto.Avatar ?? foundUser.Avatar;
-                foundUser.Role = userUpdateDto.Role ?? foundUser.Role;
+                
+                if (userUpdateDto.Avatar is not null)
+                {
+                    if (!ValidationHelper.IsImageUrlValid(userUpdateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
+                    foundUser.Avatar = userUpdateDto.Avatar;
+                }
 
                 foundUser.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 

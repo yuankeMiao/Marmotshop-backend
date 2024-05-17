@@ -21,7 +21,7 @@ namespace Ecommerce.Service.src.DTO
          public required string Email { get; set; }
         public required string Password { get; set; }
         public string? Avatar { get; set; }
-        public UserRole Role { get; set; }
+        public UserRole Role { get; set; } = UserRole.Customer;
         public DateOnly? CreatedDate { get; set; }
         public DateOnly? UpdatedDate { get; set; }
     }
@@ -33,6 +33,5 @@ namespace Ecommerce.Service.src.DTO
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? Avatar { get; set; }
-        public UserRole? Role { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
+using Ecommerce.Service.src.Shared;
 
 namespace Ecommerce.Service.src.Service
 {
@@ -66,43 +67,26 @@ namespace Ecommerce.Service.src.Service
         {
             try
             {
-                if (newProduct == null)
-                {
-                    throw new ArgumentNullException(nameof(newProduct), "Product cannot be null");
-                }
-                // Check if the product name is provided
-                if (string.IsNullOrWhiteSpace(newProduct.Title))
-                {
-                    throw AppException.InvalidInput("Product name cannot be empty");
-                }
+                if (newProduct == null) throw new ArgumentNullException(nameof(newProduct), "Product cannot be null");
+    
+                if (string.IsNullOrWhiteSpace(newProduct.Title)) throw AppException.InvalidInput("Product name cannot be empty");
+                if (string.IsNullOrWhiteSpace(newProduct.Description)) throw AppException.InvalidInput("Product description cannot be empty");
+               
+               // Check if category exists
+                _ = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
 
-                // Check if the price is greater than zero
-                if (newProduct.Price <= 0)
-                {
-                    throw AppException.InvalidInput("Price should be greated than zero.");
-                }
 
-                // Validate image URLs
+                if (newProduct.Price <= 0) throw AppException.InvalidInput("Price should be greated than zero.");
+                if (newProduct.DiscountPercentage < 0) throw AppException.InvalidInput("Discount percentage should be greated than or equal to zero.");
+                if (newProduct.Stock < 0) throw AppException.InvalidInput("Stock should be greated than or equal to zero.");
+                if (!ValidationHelper.IsImageUrlValid(newProduct.Thumbnail)) throw AppException.InvalidInput("Thumbnail cannot be empty");
                 if (newProduct.Images is not null)
                 {
-
                     foreach (var image in newProduct.Images)
                     {
-                        // Check if the URL is provided
-                        if (string.IsNullOrWhiteSpace(image.Url))
-                        {
-                            throw AppException.InvalidInput("Image URL cannot be empty");
-                        }
-
-                        // Check if the URL points to a valid image format 
-                        if (!IsImageUrlValid(image.Url))
-                        {
-                            throw AppException.InvalidInput("Invalid image format");
-                        }
+                        if (image is not null && !ValidationHelper.IsImageUrlValid(image.Url)) throw AppException.InvalidInput("image format can onl be only be jpg|jpeg|png|gif|bmp");
                     }
                 }
-                // Check if the specified category ID exists
-                var category = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
 
                 var createdProduct = _mapper.Map<Product>(newProduct);
 
@@ -124,28 +108,70 @@ namespace Ecommerce.Service.src.Service
             {
                 var foundProduct = await _productRepo.GetProductByIdAsync(productId);
 
+                if (productUpdateDto.Title is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(productUpdateDto.Title)) throw AppException.InvalidInput("Product name cannot be empty");
+                    foundProduct.Title = productUpdateDto.Title;
+                }
 
-                foundProduct.Title = productUpdateDto.Title ?? foundProduct.Title;
-                foundProduct.Description = productUpdateDto.Description ?? foundProduct.Description;
-                foundProduct.CategoryId = productUpdateDto.CategoryId ?? foundProduct.CategoryId;
-                foundProduct.Price = productUpdateDto.Price ?? foundProduct.Price;
-                foundProduct.DiscountPercentage = productUpdateDto.DiscountPercentage ?? foundProduct.DiscountPercentage;
-                foundProduct.Stock = productUpdateDto.Stock ?? foundProduct.Stock;
-                foundProduct.Brand = productUpdateDto.Brand ?? foundProduct.Brand;
-                foundProduct.Thumbnail = productUpdateDto.Thumbnail ?? foundProduct.Thumbnail;
-                foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+                if (productUpdateDto.Description is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(productUpdateDto.Description)) throw AppException.InvalidInput("Product description cannot be empty");
+                    foundProduct.Description = productUpdateDto.Description;
+                }
+
+                if (productUpdateDto.CategoryId.HasValue)
+                {
+                    _ = await _categoryRepo.GetCategoryByIdAsync(productUpdateDto.CategoryId.Value) ?? throw AppException.NotFound("Category not found");
+                    foundProduct.CategoryId = productUpdateDto.CategoryId.Value;
+                }
+
+                if (productUpdateDto.Price.HasValue)
+                {
+                    if (productUpdateDto.Price <= 0) throw AppException.InvalidInput("Price must be greater than zero");
+                    foundProduct.Price = productUpdateDto.Price.Value;
+                }
+
+                if (productUpdateDto.DiscountPercentage.HasValue)
+                {
+                    if (productUpdateDto.DiscountPercentage < 0) throw AppException.InvalidInput("Discount percentage cannot be smaller than zero");
+                    foundProduct.DiscountPercentage = productUpdateDto.DiscountPercentage.Value;
+                }
+
+                if (productUpdateDto.Stock.HasValue)
+                {
+                    if (productUpdateDto.Stock < 0) throw AppException.InvalidInput("Stock cannot be smaller than zero");
+                    foundProduct.Stock = productUpdateDto.Stock.Value;
+                }
+
+                if (productUpdateDto.Brand is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(productUpdateDto.Brand)) foundProduct.Brand = null;
+                }
+
+                if (productUpdateDto.Thumbnail is not null)
+                {
+                    if (!ValidationHelper.IsImageUrlValid(productUpdateDto.Thumbnail)) throw AppException.InvalidInput("Thumbnail cannot be empty");
+                    foundProduct.Thumbnail = productUpdateDto.Thumbnail;
+                }
 
                 if (productUpdateDto.Images is not null)
                 {
+                    foreach (var image in productUpdateDto.Images)
+                    {
+                        if (image is not null && !ValidationHelper.IsImageUrlValid(image.Url)) throw AppException.InvalidInput("image format can onl be only be jpg|jpeg|png|gif|bmp");
+                    }
                     var updatedImages = _mapper.Map<IEnumerable<Image>>(productUpdateDto.Images);
                     foundProduct.Images = updatedImages;
                 }
+
+                foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
                 var updatedProduct = await _productRepo.UpdateProductByIdWithTransactionAsync(foundProduct);
 
                 var updatedProductReadDto = _mapper.Map<ProductReadDto>(updatedProduct);
                 updatedProductReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(updatedProductReadDto.Images);
-                
+
                 return updatedProductReadDto;
             }
             catch (Exception)
@@ -175,19 +201,5 @@ namespace Ecommerce.Service.src.Service
         {
             throw new NotImplementedException();
         }
-
-        // Method to validate image URL
-        static bool IsImageUrlValid(string imageUrl)
-        {
-            // Regular expression pattern to match common image file extensions (e.g., .jpg, .jpeg, .png, .gif)
-            string pattern = @"^(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png)$";
-
-            // Create a regular expression object
-            Regex regex = new(pattern, RegexOptions.IgnoreCase);
-
-            // Check if the URL matches the pattern
-            return regex.IsMatch(imageUrl);
-        }
-
     }
 }
