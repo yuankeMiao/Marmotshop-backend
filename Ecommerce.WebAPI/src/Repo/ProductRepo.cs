@@ -19,12 +19,12 @@ namespace Ecommerce.WebAPI.src.Repo
             _images = _context.Images;
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync(ProductQueryOptions? options)
+        public async Task<QueryResult<Product>> GetAllProductsAsync(ProductQueryOptions? options)
         {
             var query = _products.AsQueryable();
             query = query.Include(p => p.Images);
 
-            if (options != null)
+            if (options is not null)
             {
                 // Filter by search title
                 if (!string.IsNullOrEmpty(options.Title))
@@ -51,7 +51,7 @@ namespace Ecommerce.WebAPI.src.Repo
                 }
 
                 // filter by is in stock
-                if(options.In_Stock.HasValue)
+                if (options.In_Stock.HasValue)
                 {
                     query = query.Where(p => p.Stock > 0);
                 }
@@ -69,13 +69,23 @@ namespace Ecommerce.WebAPI.src.Repo
                     };
                 }
 
-                // Pagination
-                query = query.Skip(options.Offset).Take(options.Limit);
-            }
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
 
-            // Execute the query
-            var products = await query.ToListAsync();
-            return products;
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+                var products = await query.ToListAsync();
+                return new QueryResult<Product> { Data = products, TotalCount = totalCount };
+            }
+            else
+            {
+                // If no query options provided, return all without pagination
+                var products = await query.ToListAsync();
+                return new QueryResult<Product> { Data = products, TotalCount = products.Count };
+            }
         }
 
         public async Task<Product> GetProductByIdAsync(Guid productId)
@@ -166,18 +176,5 @@ namespace Ecommerce.WebAPI.src.Repo
             await _context.SaveChangesAsync();
             return true;
         }
-
-        // will modify later
-        public async Task<IEnumerable<Product>> GetMostPurchasedProductsAsync(int topNumber)
-        {
-            var parameters = new List<object> { topNumber };
-
-            var mostPurchasedProducts = await _products
-                .FromSqlRaw("SELECT * FROM public.get_most_purchased_products({0})", parameters.ToArray())
-                .ToListAsync();
-
-            return mostPurchasedProducts;
-        }
-
     }
 }

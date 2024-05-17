@@ -1,4 +1,5 @@
 
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using AutoMapper;
 using Ecommerce.Core.src.Common;
@@ -25,14 +26,16 @@ namespace Ecommerce.Service.src.Service
             _categoryRepo = categoryRepo;
         }
 
-        public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
+        public async Task<QueryResult<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
         {
             try
             {
-                var products = await _productRepo.GetAllProductsAsync(productQueryOptions);
-                var productDtos = _mapper.Map<IEnumerable<Product>, HashSet<ProductReadDto>>(products);
+                var queryResult = await _productRepo.GetAllProductsAsync(productQueryOptions);
+                var products = queryResult.Data;
+                var totalCount = queryResult.TotalCount;
+                var productReadDtos = _mapper.Map<IEnumerable<ProductReadDto>>(products);
 
-                return productDtos;
+                return new QueryResult<ProductReadDto> { Data = productReadDtos, TotalCount = totalCount };
             }
             catch (Exception)
             {
@@ -68,11 +71,11 @@ namespace Ecommerce.Service.src.Service
             try
             {
                 if (newProduct == null) throw new ArgumentNullException(nameof(newProduct), "Product cannot be null");
-    
+
                 if (string.IsNullOrWhiteSpace(newProduct.Title)) throw AppException.InvalidInput("Product name cannot be empty");
                 if (string.IsNullOrWhiteSpace(newProduct.Description)) throw AppException.InvalidInput("Product description cannot be empty");
-               
-               // Check if category exists
+
+                // Check if category exists
                 _ = await _categoryRepo.GetCategoryByIdAsync(newProduct.CategoryId) ?? throw AppException.NotFound("Category not found");
 
 

@@ -3,6 +3,7 @@ using Ecommerce.Core.src.Common;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Controller.src.Controller
@@ -21,7 +22,11 @@ namespace Ecommerce.Controller.src.Controller
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] OrderQueryOptions options)
         {
-            var orders = await _orderService.GetAllOrdersAsync(options);
+            var result = await _orderService.GetAllOrdersAsync(options);
+            var orders = result.Data;
+            var totalCount = result.TotalCount;
+
+            Response.Headers.Append("X-Total-Count", totalCount.ToString());
             return Ok(orders);
         }
 
@@ -37,7 +42,11 @@ namespace Ecommerce.Controller.src.Controller
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersByUserIdAsync([FromRoute] Guid userId, [FromQuery] OrderQueryOptions options)
         {
-            var orders = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
+            var result = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
+            var orders = result.Data;
+            var totalCount = result.TotalCount;
+
+            Response.Headers.Append("X-Total-Count", totalCount.ToString());
             return Ok(orders);
         }
 

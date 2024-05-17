@@ -18,34 +18,84 @@ namespace Ecommerce.WebAPI.src.Repo
         }
 
 
-        public async Task<IEnumerable<Review>> GetAllReviewsAsync(ReviewQueryOptions? options)
+        public async Task<QueryResult<Review>> GetAllReviewsAsync(ReviewQueryOptions? options)
         {
             var query = _reviews.AsQueryable();
-            if(options is not null) query = ApplyQueryOptions(query, options);
+            if (options is not null)
+            {
+                ApplyQueryOptions(query, options);
 
-            var reviews = await query.ToListAsync();
-            return reviews;
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = totalCount };
+            }
+            else
+            {
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = reviews.Count };
+            }
         }
 
         // consider to add pagination here with more order options like orderby rating, only check review with content
-        public async Task<IEnumerable<Review>> GetAllReviewsByProductIdAsync(Guid productId, ReviewQueryOptions? options)
+        public async Task<QueryResult<Review>> GetAllReviewsByProductIdAsync(Guid productId, ReviewQueryOptions? options)
         {
             var query = _reviews.AsQueryable();
             query = query.Where(r => r.ProductId == productId);
-            if(options is not null) query = ApplyQueryOptions(query, options);
 
-            var reviews = await query.ToListAsync();
-            return reviews;
+            if (options is not null)
+            {
+                ApplyQueryOptions(query, options);
+
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = totalCount };
+            }
+            else
+            {
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = reviews.Count };
+            }
         }
 
-        public async Task<IEnumerable<Review>> GetAllReviewsByUserIdAsync(Guid userId, ReviewQueryOptions? options)
+        public async Task<QueryResult<Review>> GetAllReviewsByUserIdAsync(Guid userId, ReviewQueryOptions? options)
         {
             var query = _reviews.AsQueryable();
             query = query.Where(r => r.UserId == userId);
-            if(options is not null) query = ApplyQueryOptions(query, options);
 
-            var reviews = await query.ToListAsync();
-            return reviews;
+            if (options is not null)
+            {
+                ApplyQueryOptions(query, options);
+
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = totalCount };
+            }
+            else
+            {
+                var reviews = await query.ToListAsync();
+                return new QueryResult<Review> { Data = reviews, TotalCount = reviews.Count };
+            }
         }
 
         public async Task<Review> GetReviewByIdAsync(Guid reviewId)
@@ -103,8 +153,6 @@ namespace Ecommerce.WebAPI.src.Repo
                 };
             }
 
-            // Pagination
-            query = query.Skip(options.Offset).Take(options.Limit);
             return query;
         }
 

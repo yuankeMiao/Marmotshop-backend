@@ -4,7 +4,6 @@ using Ecommerce.Service.src.ServiceAbstract;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Core.src.RepoAbstract;
 using AutoMapper;
-using System.Text.RegularExpressions;
 using Ecommerce.Service.src.Shared;
 
 namespace Ecommerce.Service.src.Service
@@ -22,14 +21,17 @@ namespace Ecommerce.Service.src.Service
             _userRepo = userRepo;
             _passwordService = passwordService;
         }
-        public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync(UserQueryOptions userQueryOptions)
+        public async Task<QueryResult<UserReadDto>> GetAllUsersAsync(UserQueryOptions? options)
         {
             try
             {
-                var users = await _userRepo.GetAllUsersAsync(userQueryOptions);
-                var UserReadDtos = users.Select(u => _mapper.Map<User, UserReadDto>(u));
+                var queryResult = await _userRepo.GetAllUsersAsync(options);
+                var users = queryResult.Data;
 
-                return UserReadDtos;
+                var userReadDtos = _mapper.Map<IEnumerable<UserReadDto>>(users);
+                var totalCount = queryResult.TotalCount;
+
+                return  new QueryResult<UserReadDto> { Data = userReadDtos, TotalCount = totalCount };
             }
             catch (Exception)
             {
@@ -143,7 +145,7 @@ namespace Ecommerce.Service.src.Service
                     foundUser.Password = _passwordService.HashPassword(userUpdateDto.Password, out byte[] salt);
                     foundUser.Salt = salt;
                 }
-                
+
                 if (userUpdateDto.Avatar is not null)
                 {
                     if (!ValidationHelper.IsImageUrlValid(userUpdateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");

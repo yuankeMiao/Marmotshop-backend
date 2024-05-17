@@ -17,36 +17,40 @@ namespace Ecommerce.WebAPI.src.Repo
             _users = _context.Users;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync(UserQueryOptions? userQueryOptions)
+        public async Task<QueryResult<User>> GetAllUsersAsync(UserQueryOptions? options)
         {
+
             var query = _users.AsQueryable();
 
-            // Apply filters if UserQueryOptions is not null
-            if (userQueryOptions is not null)
+            if (options is not null)
             {
-                // Filter by role if provided
-                if (userQueryOptions.SearchRole.HasValue)
+                if (options.SearchRole.HasValue)
                 {
-                    query = query.Where(u => u.Role == userQueryOptions.SearchRole.Value);
+                    query = query.Where(u => u.Role == options.SearchRole.Value);
                 }
 
-                // Search by name if provided
-                if (!string.IsNullOrEmpty(userQueryOptions.SearchName))
+                if (!string.IsNullOrEmpty(options.SearchName))
                 {
-                    query = query.Where(u => u.Firstname.Contains(userQueryOptions.SearchName) || u.Lastname.Contains(userQueryOptions.SearchName));
+                    query = query.Where(u => u.Firstname.Contains(options.SearchName) || u.Lastname.Contains(options.SearchName));
                 }
 
-                if (userQueryOptions.Offset >= 0 && userQueryOptions.Limit > 0)
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                if (options.Offset >= 0 && options.Limit > 0)
                 {
-                    query = query.Skip(userQueryOptions.Offset).Take(userQueryOptions.Limit);
+                    query = query.Skip(options.Offset).Take(options.Limit);
                 }
 
+                var users = await query.ToListAsync();
+                return new QueryResult<User> { Data = users, TotalCount = totalCount };
             }
-
-
-            // Execute the query
-            var users = await query.ToListAsync();
-            return users;
+            else
+            {
+                // If no query options provided, return all users without pagination
+                var users = await query.ToListAsync();
+                return new QueryResult<User> { Data = users, TotalCount = users.Count };
+            }
         }
 
         public async Task<User> GetUserByIdAsync(Guid userId)
@@ -58,7 +62,7 @@ namespace Ecommerce.WebAPI.src.Repo
         public async Task<User> GetUserByEmailAsync(string email)
         {
             var foundUser = await _users.FirstOrDefaultAsync(u => u.Email == email) ?? throw AppException.NotFound("User not found");
-            return foundUser; 
+            return foundUser;
         }
 
         public async Task<User> CreateUserAsync(User newUser)

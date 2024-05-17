@@ -5,8 +5,8 @@ namespace Ecommerce.Core.src.RepoAbstract
 {
     public interface IOrderRepo
     {
-        Task<IEnumerable<Order>> GetAllOrdersAsync(OrderQueryOptions? options); // Admin auth
-        Task<IEnumerable<Order>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options); // Admin auth
+        Task<QueryResult<Order>> GetAllOrdersAsync(OrderQueryOptions? options); // Admin auth
+        Task<QueryResult<Order>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options); // Admin auth
         Task<Order> GetOrderByIdAsync(Guid orderId); // Admin auth
         Task<Order> CreateOrderWithTransactionAsync(Order createdOrder); // Customer auth
         Task<Order> UpdateOrderByIdAsync(Order updatedOrder); // Admin auth

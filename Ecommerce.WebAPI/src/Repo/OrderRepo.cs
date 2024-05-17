@@ -21,27 +21,62 @@ namespace Ecommerce.WebAPI.src.Repo
             _products = _context.Products;
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync(OrderQueryOptions? options)
+        public async Task<QueryResult<Order>> GetAllOrdersAsync(OrderQueryOptions? options)
         {
             var query = _orders.AsQueryable();
             query = query.Include(o => o.Products);
 
-            if (options is not null) ApplyQueryOptions(query, options);
+            if (options is not null)
+            {
+                ApplyQueryOptions(query, options);
 
-            var orders = await query.ToListAsync();
-            return orders;
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+
+                var orders = await query.ToListAsync();
+                return new QueryResult<Order> { Data = orders, TotalCount = totalCount };
+            }
+            else
+            {
+                var orders = await query.ToListAsync();
+                return new QueryResult<Order> { Data = orders, TotalCount = orders.Count };
+            }
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
+        public async Task<QueryResult<Order>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
         {
             var query = _orders.AsQueryable();
             query = query.Include(o => o.Products);
             query = query.Where(o => o.UserId == userId);
 
-            if (options is not null) ApplyQueryOptions(query, options);
+            if (options is not null)
+            {
+                ApplyQueryOptions(query, options);
 
-            var orders = await query.ToListAsync();
-            return orders;
+                // Execute the query to get total count before applying pagination
+                var totalCount = await query.CountAsync();
+
+                // Pagination
+                if (options.Offset >= 0 && options.Limit > 0)
+                {
+                    query = query.Skip(options.Offset).Take(options.Limit);
+                }
+
+                var orders = await query.ToListAsync();
+                return new QueryResult<Order> { Data = orders, TotalCount = totalCount };
+            }
+            else
+            {
+                var orders = await query.ToListAsync();
+                return new QueryResult<Order> { Data = orders, TotalCount = orders.Count };
+            }
+
         }
 
         public async Task<Order> GetOrderByIdAsync(Guid orderId)
@@ -121,8 +156,6 @@ namespace Ecommerce.WebAPI.src.Repo
                 };
             }
 
-            // Pagination
-            query = query.Skip(options.Offset).Take(options.Limit);
             return query;
         }
 

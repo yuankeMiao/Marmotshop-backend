@@ -1,9 +1,11 @@
+
 using System.Security.Claims;
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Controller.src.Controller
@@ -26,9 +28,13 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet] // endpoint: /users
-        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsersAsync([FromQuery] UserQueryOptions userQueryOptions)
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsersAsync([FromQuery] UserQueryOptions? options)
         {
-            var users = await _userService.GetAllUsersAsync(userQueryOptions);
+            var result = await _userService.GetAllUsersAsync(options);
+            var users = result.Data;
+            var totalCount = result.TotalCount;
+            
+            Response.Headers.Append("X-Total-Count", totalCount.ToString());
             return Ok(users);
         }
 
@@ -49,7 +55,7 @@ namespace Ecommerce.Controller.src.Controller
             {
                 //only super admin can create admin user
                 var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, null, "SuperAdmin");
-                if(!authResult.Succeeded) return Forbid();
+                if (!authResult.Succeeded) return Forbid();
             }
             var user = await _userService.CreateUserAsync(userCreateDto);
             return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);

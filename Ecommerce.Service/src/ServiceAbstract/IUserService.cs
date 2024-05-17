@@ -5,7 +5,7 @@ namespace Ecommerce.Service.src.ServiceAbstract
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserReadDto>> GetAllUsersAsync(UserQueryOptions userQueryOptions);
+        Task<QueryResult<UserReadDto>> GetAllUsersAsync(UserQueryOptions? options);
         Task<UserReadDto> GetUserByIdAsync(Guid userId);
         Task<UserReadDto> GetUserByEmailAsync(string email);
         Task<UserReadDto> CreateUserAsync(UserCreateDto userCreateDto); // this method will not create address

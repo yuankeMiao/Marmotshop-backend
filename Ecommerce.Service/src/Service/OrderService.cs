@@ -23,14 +23,17 @@ namespace Ecommerce.Service.src.Service
             _userRepo = userRepo;
         }
 
-        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(OrderQueryOptions? options)
+        public async Task<QueryResult<OrderReadDto>> GetAllOrdersAsync(OrderQueryOptions? options)
         {
             try
             {
-                var orders = await _orderRepo.GetAllOrdersAsync(options);
-                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
+                var queryResult = await _orderRepo.GetAllOrdersAsync(options);
 
-                return orderReadDtos;
+                var orders = queryResult.Data;
+                var totalCount = queryResult.TotalCount;
+                var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
+
+                return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
             }
             catch (Exception)
             {
@@ -38,17 +41,20 @@ namespace Ecommerce.Service.src.Service
             }
         }
 
-        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
+        public async Task<QueryResult<OrderReadDto>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
         {
             try
             {
                 // check if user exists
                 _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
-                var orders = await _orderRepo.GetAllOrdersByUserIdAsync(userId, options);
-                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
+                var queryResult = await _orderRepo.GetAllOrdersByUserIdAsync(userId, options);
 
-                return orderReadDtos;
+                var orders = queryResult.Data;
+                var totalCount = queryResult.TotalCount;
+                var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
+
+                return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
             }
             catch (Exception)
             {

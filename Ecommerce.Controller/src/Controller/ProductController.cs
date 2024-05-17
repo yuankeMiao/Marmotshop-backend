@@ -2,6 +2,7 @@ using Ecommerce.Core.src.Common;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Controller.src.Controller
@@ -21,7 +22,11 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
         {
 
-            var products = await _productService.GetAllProductsAsync(options);
+            var result = await _productService.GetAllProductsAsync(options);
+            var products = result.Data;
+            var totalCount = result.TotalCount;
+
+            Response.Headers.Append("X-Total-Count", totalCount.ToString());
             return Ok(products);
         }
 
