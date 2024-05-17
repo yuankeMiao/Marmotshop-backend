@@ -23,6 +23,58 @@ namespace Ecommerce.Service.src.Service
             _userRepo = userRepo;
         }
 
+        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(OrderQueryOptions? options)
+        {
+            try
+            {
+                var orders = await _orderRepo.GetAllOrdersAsync(options);
+                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
+
+                return orderReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
+        {
+            try
+            {
+                // check if user exists
+                _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+
+                var orders = await _orderRepo.GetAllOrdersByUserIdAsync(userId, options);
+                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
+
+                return orderReadDtos;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<OrderReadDto> GetOrderByIdAsync(Guid orderId)
+        {
+            if (orderId == Guid.Empty)
+            {
+                AppException.InvalidInput("OrderId is required");
+            }
+            try
+            {
+                var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
+                var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
+
+                return orderReadDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<OrderReadDto> CreateOrderWithtransactionAsync(Guid userId, OrderCreateDto orderCreateDto)
         {
             // check if user exists
@@ -57,62 +109,6 @@ namespace Ecommerce.Service.src.Service
             return orderReadDto;
         }
 
-        public async Task<bool> DeleteOrderByIdAsync(Guid orderId)
-        {
-            if (orderId == Guid.Empty)
-            {
-                AppException.InvalidInput("OrderId is required");
-            }
-            try
-            {
-                var targetOrder = await _orderRepo.GetOrderByIdAsync(orderId);
-                if (targetOrder is not null)
-                {
-                    await _orderRepo.DeleteOrderByIdAsync(orderId);
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(BaseQueryOptions? options)
-        {
-            try
-            {
-                var orders = await _orderRepo.GetAllOrdersAsync(options);
-                var orderReadDtos = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderReadDto>>(orders);
-
-                return orderReadDtos;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<OrderReadDto> GetOrderByIdAsync(Guid orderId)
-        {
-            if (orderId == Guid.Empty)
-            {
-                AppException.InvalidInput("OrderId is required");
-            }
-            try
-            {
-                var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
-                var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
-                
-                return orderReadDto;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<OrderReadDto> UpdateOrderByIdAsync(Guid orderId, OrderUpdateDto orderUpdateDto)
         {
             var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId);
@@ -138,5 +134,28 @@ namespace Ecommerce.Service.src.Service
 
             return orderReadDto;
         }
+
+        public async Task<bool> DeleteOrderByIdAsync(Guid orderId)
+        {
+            if (orderId == Guid.Empty)
+            {
+                AppException.InvalidInput("OrderId is required");
+            }
+            try
+            {
+                var targetOrder = await _orderRepo.GetOrderByIdAsync(orderId);
+                if (targetOrder is not null)
+                {
+                    await _orderRepo.DeleteOrderByIdAsync(orderId);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

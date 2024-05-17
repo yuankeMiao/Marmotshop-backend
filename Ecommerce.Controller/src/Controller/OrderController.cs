@@ -19,7 +19,7 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] BaseQueryOptions options)
+        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] OrderQueryOptions options)
         {
             var orders = await _orderService.GetAllOrdersAsync(options);
             return Ok(orders);
@@ -31,6 +31,23 @@ namespace Ecommerce.Controller.src.Controller
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
             return Ok(order);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersByUserIdAsync([FromRoute] Guid userId, [FromQuery] OrderQueryOptions options)
+        {
+            var orders = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
+            return Ok(orders);
+        }
+
+        [Authorize]
+        [HttpGet("my-orders")]
+        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetMyOrdersAsync([FromQuery] OrderQueryOptions options)
+        {
+            var userId = GetUserIdClaim();
+            var orders = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
+            return Ok(orders);
         }
 
         [Authorize()]

@@ -52,6 +52,38 @@ namespace Ecommerce.WebAPI.src.Repo
             return orders;
         }
 
+        public async Task<IEnumerable<Order>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
+        {
+            var query = _orders.AsQueryable();
+            query = query.Include(o => o.Products);
+            query = query.Where(o => o.UserId == userId);
+
+            if (options is not null)
+            {
+                if (options.Status is not null)
+                {
+                    query = query.Where(o => o.Status == options.Status);
+                }
+
+                // Sorting
+                if (!string.IsNullOrEmpty(options.SortBy))
+                {
+                    query = options.SortBy.ToLower() switch
+                    {
+                        "created_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
+                        "updated_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
+                        _ => query.OrderBy(p => p.CreatedDate),
+                    };
+                }
+
+                // Pagination
+                query = query.Skip(options.Offset).Take(options.Limit);
+            }
+            
+            var orders = await query.ToListAsync();
+            return orders;
+        }
+
         public async Task<Order> GetOrderByIdAsync(Guid orderId)
         {
             var foundOrder = await _orders.FindAsync(orderId) ?? throw AppException.NotFound("Order not found");
