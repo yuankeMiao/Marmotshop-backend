@@ -89,7 +89,7 @@ namespace Ecommerce.Service.src.Service
 
                 if (!ValidationHelper.IsEmailValid(userCreateDto.Email)) throw AppException.InvalidInput("Email is not valid");
                 if (!ValidationHelper.IsValidPassword(userCreateDto.Password)) throw AppException.InvalidInput("Password shoulbe 6-20 charaters with at least one uppercase, one lowercase, and one number");
-                if (userCreateDto.Avatar is not null && !ValidationHelper.IsImageUrlValid(userCreateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
+                if (userCreateDto.Avatar is not null && !ValidationHelper.IsImageUrlValid(userCreateDto.Avatar)) throw AppException.InvalidInput("Image must be a url");
 
                 // Create a new User entity and populate its properties from the UserCreateDto
 
@@ -148,7 +148,7 @@ namespace Ecommerce.Service.src.Service
 
                 if (userUpdateDto.Avatar is not null)
                 {
-                    if (!ValidationHelper.IsImageUrlValid(userUpdateDto.Avatar)) throw AppException.InvalidInput("Avatar can only be jpg|jpeg|png|gif|bmp");
+                    if (!ValidationHelper.IsImageUrlValid(userUpdateDto.Avatar)) throw AppException.InvalidInput("Image must be a url");
                     foundUser.Avatar = userUpdateDto.Avatar;
                 }
 

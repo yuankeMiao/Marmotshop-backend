@@ -87,7 +87,7 @@ namespace Ecommerce.Service.src.Service
                 {
                     foreach (var image in newProduct.Images)
                     {
-                        if (image is not null && !ValidationHelper.IsImageUrlValid(image.Url)) throw AppException.InvalidInput("image format can onl be only be jpg|jpeg|png|gif|bmp");
+                        if (image is not null && !ValidationHelper.IsImageUrlValid(image.Url)) throw AppException.InvalidInput("Image must be a url");
                     }
                 }
 
@@ -160,20 +160,27 @@ namespace Ecommerce.Service.src.Service
 
                 if (productUpdateDto.Images is not null)
                 {
-                    foreach (var image in productUpdateDto.Images)
+                    var newImages = new List<Image>();
+                    foreach (var imageUpdateDto in productUpdateDto.Images)
                     {
-                        if (image is not null && !ValidationHelper.IsImageUrlValid(image.Url)) throw AppException.InvalidInput("image format can onl be only be jpg|jpeg|png|gif|bmp");
+                        if (!ValidationHelper.IsImageUrlValid(imageUpdateDto.Url)) throw AppException.InvalidInput("Image must be a url");
+                        var updatedImage = new Image
+                        {
+                            Id = Guid.NewGuid(),
+                            Url = imageUpdateDto.Url,
+                            ProductId = foundProduct.Id
+                        };
+                       newImages.Add(updatedImage); 
                     }
-                    var updatedImages = _mapper.Map<IEnumerable<Image>>(productUpdateDto.Images);
-                    foundProduct.Images = updatedImages;
+                    foundProduct.Images = newImages;
                 }
+
 
                 foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
                 var updatedProduct = await _productRepo.UpdateProductByIdWithTransactionAsync(foundProduct);
 
                 var updatedProductReadDto = _mapper.Map<ProductReadDto>(updatedProduct);
-                updatedProductReadDto.Images = _mapper.Map<IEnumerable<ImageReadDto>>(updatedProductReadDto.Images);
 
                 return updatedProductReadDto;
             }

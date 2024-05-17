@@ -138,28 +138,32 @@ namespace Ecommerce.WebAPI.src.Repo
                 var foundProduct = await _products.FindAsync(updatedProduct.Id) ?? throw AppException.NotFound("Product not found");
                 // update product table
                 _products.Update(updatedProduct);
-                // rewrite images, because image updates are more complicated in front end
-                // so it is eaasier to just re-write them
-                if (updatedProduct.Images is not null)
+                /* rewrite images, because image updates are more complicated in front end
+                one single update of product might contrains multiple uodates on images and delete image, create new images...
+                so it is eaasier to just re-write them
+                even thought it will couse more queries, but since I don't expect client side will update products very frequently
+                so I will use this solution for now */
+
+                if (updatedProduct.Images is not null && updatedProduct.Images.Any())
                 {
                     // remove existing images
                     var foundImages = await _images.Where(i => i.ProductId == updatedProduct.Id).ToListAsync();
                     foreach (var image in foundImages)
                     {
-                        _images.Remove(image);
+                        _images.RemoveRange(_images.Where(i => i.ProductId == updatedProduct.Id));
                     }
-                    await _context.SaveChangesAsync();
                     // add new images
                     foreach (var image in updatedProduct.Images)
                     {
-                        await _images.AddAsync(image);
+                        image.Id = Guid.NewGuid();
+                        await _images.AddRangeAsync(updatedProduct.Images);
                     }
                 }
 
                 await _context.SaveChangesAsync();
                 transaction.Commit();
 
-                return updatedProduct;
+                return _products.FirstOrDefault(p => p.Id == updatedProduct.Id) ?? throw AppException.NotFound("Product not found");
             }
             catch (Exception)
             {

@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using AutoMapper;
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
@@ -13,13 +14,15 @@ namespace Ecommerce.Service.src.Service
         private readonly IReviewRepo _reviewRepo;
         private IUserRepo _userRepo;
         private IProductRepo _productRepo;
+        private IOrderRepo _orderRepo;
 
-        public ReviewService(IReviewRepo repo, IMapper mapper, IProductRepo productRepo, IUserRepo userRepo)
+        public ReviewService(IReviewRepo repo, IMapper mapper, IProductRepo productRepo, IUserRepo userRepo, IOrderRepo orderRepo)
         {
             _mapper = mapper;
             _reviewRepo = repo;
             _productRepo = productRepo;
             _userRepo = userRepo;
+            _orderRepo = orderRepo;
         }
 
         public async Task<QueryResult<ReviewReadDto>> GetAllReviewsAsync(ReviewQueryOptions? options)
@@ -70,7 +73,7 @@ namespace Ecommerce.Service.src.Service
 
                 var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
-                return new QueryResult<ReviewReadDto> {Data = reviewReadDtos, TotalCount = totalCount};
+                return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
             }
             catch (Exception)
             {
@@ -92,6 +95,13 @@ namespace Ecommerce.Service.src.Service
             // check if user and product exist
             _ = await _userRepo.GetUserByIdAsync(userId);
             _ = await _productRepo.GetProductByIdAsync(reviewCreateDto.ProductId);
+
+            //check if the user ever bought the product
+
+            var orderResult = await _orderRepo.GetAllOrdersByUserIdAsync(userId, null);
+            var foundOrders = orderResult.Data;
+            bool hasPerchased = foundOrders.Any(order => order.Products.Any(product => product.ProductId == reviewCreateDto.ProductId));
+            if (!hasPerchased) throw AppException.InvalidInput("User cannot give review to product not purchased");
 
             // validation
             if (reviewCreateDto.Rating < 1 || reviewCreateDto.Rating > 5) throw AppException.InvalidInput("Raiting should be from 1 to 5");

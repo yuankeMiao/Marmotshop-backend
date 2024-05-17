@@ -7,7 +7,7 @@ namespace Ecommerce.Service.src.Shared
     public static class ValidationHelper
     {
         // Regular expressions for validation
-        private static readonly Regex ImageUrlRegex = new(@"^(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|gif|bmp)$", RegexOptions.IgnoreCase);
+        private static readonly Regex ImageUrlRegex = new(@"^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$", RegexOptions.IgnoreCase);
         private static readonly Regex PhoneRegex = new(@"^(\+358|0)\d{8,9}$"); // only Finnish phone number
         private static readonly Regex EmailRegex = new(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
         private static readonly Regex StringRegex = new(@"^[a-zA-Z0-9\s]+$");

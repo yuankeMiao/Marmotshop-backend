@@ -60,7 +60,7 @@ namespace Ecommerce.Service.src.Service
 
                 if (categoryCreateDto.Image is not null && !ValidationHelper.IsImageUrlValid(categoryCreateDto.Image))
                 {
-                    throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
+                    throw AppException.InvalidInput("Image must be a url");
                 }
 
                 var newCategory = _mapper.Map<CategoryCreateDto, Category>(categoryCreateDto);
@@ -83,7 +83,7 @@ namespace Ecommerce.Service.src.Service
                 // validations
                 if (categoryUpdateDto.Name is not null && string.IsNullOrEmpty(categoryUpdateDto.Name)) throw AppException.InvalidInput("Category name cannot be empty");
                 if (categoryUpdateDto.Name is not null && categoryUpdateDto.Name.Length > 20) throw AppException.InvalidInput("Category name cannot be longer than 20 characters");
-                if (categoryUpdateDto.Image is not null && !ValidationHelper.IsImageUrlValid(categoryUpdateDto.Image)) throw AppException.InvalidInput("Category image can only be jpg|jpeg|png|gif|bmp");
+                if (categoryUpdateDto.Image is not null && !ValidationHelper.IsImageUrlValid(categoryUpdateDto.Image)) throw AppException.InvalidInput("Image must be a url");
 
                 foundCategory.Name = categoryUpdateDto.Name ?? foundCategory.Name;
                 foundCategory.Image = categoryUpdateDto.Image ?? foundCategory.Image;
