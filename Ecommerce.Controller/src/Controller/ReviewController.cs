@@ -21,23 +21,31 @@ namespace Ecommerce.Controller.src.Controller
 
         [AllowAnonymous]
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsAsync([FromQuery] BaseQueryOptions options)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsAsync([FromQuery] ReviewQueryOptions options)
         {
-            var reviews =  await _service.GetAllReviewsAsync(options);
+            var reviews = await _service.GetAllReviewsAsync(options);
             return Ok(reviews);
         }
 
         [HttpGet("product/{productId}")]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId, [FromQuery] ReviewQueryOptions options)
         {
-            var reviews = await _service.GetAllReviewsByProductIdAsync(productId);
+            var reviews = await _service.GetAllReviewsByProductIdAsync(productId, options);
             return Ok(reviews);
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId)
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId, [FromQuery] ReviewQueryOptions options)
         {
-            var reviews = await _service.GetAllReviewsByUserIdAsync(userId);
+            var reviews = await _service.GetAllReviewsByUserIdAsync(userId, options);
+            return Ok(reviews);
+        }
+
+        [HttpGet("my-reviews")]
+        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetMyReviewsAsync([FromQuery] ReviewQueryOptions options)
+        {
+            var userId = GetUserIdClaim();
+            var reviews = await _service.GetAllReviewsByUserIdAsync(userId, options);
             return Ok(reviews);
         }
 
