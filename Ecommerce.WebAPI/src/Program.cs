@@ -94,8 +94,7 @@ builder.Services.AddScoped<ExceptionHandlerMiddleware>(serviceProvider =>
 }); // Catching database exception
 
 // Register authorization handler
-builder.Services.AddSingleton<IAuthorizationHandler, AdminOrOwnerAccountHandler>();
-builder.Services.AddSingleton<IAuthorizationHandler, AdminOrOwnerOrderHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, OwnerAddressHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, AdminOrOwnerReviewHandler>();
 
 // add authentication instructions
@@ -121,9 +120,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(
     policy =>
     {
-      policy.AddPolicy("ResourceOwnerUser", policy => policy.Requirements.Add(new VerifyResourceOwnerRequirement()));
-      policy.AddPolicy("AdminOrOwnerAccount", policy => policy.Requirements.Add(new AdminOrOwnerAccountRequirement()));
-      policy.AddPolicy("AdminOrOwnerOrder", policy => policy.Requirements.Add(new AdminOrOwnerOrderRequirement()));
+      policy.AddPolicy("AddressOwner", policy => policy.Requirements.Add(new OwnerAddressRequirement()));
       policy.AddPolicy("AdminOrOwnerReview", policy => policy.Requirements.Add(new AdminOrOwnerReviewRequirement()));
     }
 );

@@ -16,7 +16,8 @@ namespace Ecommerce.Controller.src.Controller
         {
             _categoryService = categoryService;
         }
-        
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetAllCategoriesAsync() // endpoint: /categories
         {
@@ -24,6 +25,7 @@ namespace Ecommerce.Controller.src.Controller
             return Ok(categories);
         }
 
+        [AllowAnonymous]
         [HttpGet("{categoryId}")] // endpoint: /categories/:category_id
         public async Task<ActionResult<CategoryReadDto>> GetCategoryByIdAsync([FromRoute] Guid categoryId)
         {

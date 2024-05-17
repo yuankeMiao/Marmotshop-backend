@@ -92,7 +92,7 @@ namespace Ecommerce.Controller.src.Controller
             return Ok(addressBook);
         }
 
-        [Authorize] // need to check resource owner here
+        [Authorize]
         [HttpGet("profile/addresses/{addressId}")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> GetAddressByIdAsync([FromRoute] Guid addressId)
         {
@@ -116,16 +116,37 @@ namespace Ecommerce.Controller.src.Controller
         [HttpPatch("profile/addresses/{addressId}")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
-            var address = await _addressService.UpdateAddressAsync(addressId, addressUpdateDto);
-            return Ok(address);
+            var foundAddress = await _addressService.GetAddressByIdAsync(addressId);
+            var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, foundAddress, "AddressOwner");
+
+            if (authResult.Succeeded)
+            {
+                var address = await _addressService.UpdateAddressAsync(addressId, addressUpdateDto);
+                return Ok(address);
+            }
+            else
+            {
+                return Forbid();
+            }
+
         }
 
         [Authorize]
         [HttpDelete("profile/addresses/{addressId}")]
         public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId)
         {
-            var deleted = await _addressService.DeleteAddressByIdAsync(addressId);
-            return Ok(deleted);
+            var foundAddress = await _addressService.GetAddressByIdAsync(addressId);
+            var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, foundAddress, "AddressOwner");
+
+            if (authResult.Succeeded)
+            {
+                var deleted = await _addressService.DeleteAddressByIdAsync(addressId);
+                return Ok(deleted);
+            }
+            else
+            {
+                return Forbid();
+            }
         }
 
         private Guid GetUserIdClaim()

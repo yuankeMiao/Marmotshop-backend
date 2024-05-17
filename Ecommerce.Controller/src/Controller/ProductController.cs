@@ -16,8 +16,8 @@ namespace Ecommerce.Controller.src.Controller
         {
             _productService = productService;
         }
-
-        [HttpGet("")]
+        [AllowAnonymous]
+        [HttpGet()]
         public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
         {
 
@@ -25,6 +25,7 @@ namespace Ecommerce.Controller.src.Controller
             return Ok(products);
         }
 
+        [AllowAnonymous]
         [HttpGet("{productId}")]
         public async Task<ActionResult<ProductReadDto>> GetProductByIdAsync([FromRoute] Guid productId)
         {
@@ -33,11 +34,11 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("")]
+        [HttpPost()]
         public async Task<ActionResult<ProductReadDto>> CreateProductAsync([FromBody] ProductCreateDto productCreateDto)
         {
 
-            var product= await _productService.CreateProductAsync(productCreateDto);
+            var product = await _productService.CreateProductAsync(productCreateDto);
             return Created($"http://localhost:5227/api/v1/products/{product.Id}", product);
 
         }
