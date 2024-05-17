@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Ecommerce.Core.src.Common;
+using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.AspNetCore.Authorization;
@@ -40,9 +41,16 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [AllowAnonymous]
-        [HttpPost()] // endpoint: /users
+        [HttpPost()]
         public async Task<ActionResult<UserReadDto>> CreateUserAsync([FromBody] UserCreateDto userCreateDto)
         {
+
+            if (userCreateDto.Role == UserRole.Admin)
+            {
+                //only super admin can create admin user
+                var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, null, "SuperAdmin");
+                if(!authResult.Succeeded) return Forbid();
+            }
             var user = await _userService.CreateUserAsync(userCreateDto);
             return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);
         }

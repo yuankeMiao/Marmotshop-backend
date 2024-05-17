@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,6 +121,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(
     policy =>
     {
+      policy.AddPolicy("SuperAdmin", policy => policy.RequireClaim(ClaimTypes.Email, "yuanke@admin.com"));
       policy.AddPolicy("AddressOwner", policy => policy.Requirements.Add(new OwnerAddressRequirement()));
       policy.AddPolicy("AdminOrOwnerReview", policy => policy.Requirements.Add(new AdminOrOwnerReviewRequirement()));
     }
