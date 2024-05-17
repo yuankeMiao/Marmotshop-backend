@@ -1,4 +1,5 @@
 using System.Text;
+using Swashbuckle.AspNetCore.Filters;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.Service;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +22,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+      options =>
+    {
+      options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+      {
+        Description = "Bearer token authentication",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Scheme = "Bearer"
+      }
+      );
+
+      // swagger would add the token to the request header of routes with [Authorize] attribute
+      options.OperationFilter<SecurityRequirementsOperationFilter>();
+    }
+);
 
 // add all controllers
 builder.Services.AddControllers();
@@ -36,7 +53,7 @@ builder.Services.AddDbContext<AppDbContext>
       options
         .UseNpgsql(dataSource)
         .UseSnakeCaseNamingConvention()
-        // .AddInterceptors(new TimeStampInterceptor())
+// .AddInterceptors(new TimeStampInterceptor())
 );
 
 // service registration -> automatically create all instances of dependencies
@@ -65,6 +82,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+
 builder.Services.AddScoped<ExceptionHandlerMiddleware>(serviceProvider =>
 {
   var logger = serviceProvider.GetRequiredService<ILogger<ExceptionHandlerMiddleware>>();
@@ -92,7 +110,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Secrets:JwtKey"]!)),
         ValidateIssuer = true,
         ValidateAudience = false,
-        ValidateLifetime = true, // make sure it's not expired
+        ValidateLifetime = true, // make sure it's not expired during development
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Secrets:Issuer"],
       };
@@ -110,21 +128,22 @@ builder.Services.AddAuthorization(
     }
 );
 
-
-
 var app = builder.Build();
 
-
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+  options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+  options.RoutePrefix = string.Empty;
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
+app.UseCors(options => options.AllowAnyOrigin());
 app.UseHttpsRedirection();
-
 app.MapControllers();
 
 app.Run();
