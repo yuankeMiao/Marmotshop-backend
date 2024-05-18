@@ -1,165 +1,176 @@
-
 using Xunit;
 using Moq;
+using AutoMapper;
 using Ecommerce.Service.src.Service;
+using Ecommerce.Service.src.DTO;
+using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.RepoAbstract;
 using Ecommerce.Core.src.Entity;
-using Ecommerce.Service.src.DTO;
+using Ecommerce.Service.src.Shared;
+using Ecommerce.WebAPI.src.Database;
 
-namespace Ecommerce.Test.src.Service
+namespace Ecommerce.Service.Tests
 {
     public class CategoryServiceTests
     {
+        private readonly Mock<ICategoryRepo> _mockCategoryRepo;
+        private readonly IMapper _mapper;
         private readonly CategoryService _categoryService;
-        private readonly Mock<ICategoryRepo> _categoryRepoMock = new();
+        private readonly List<Category> _categories;
 
         public CategoryServiceTests()
         {
-            _categoryService = new CategoryService(_categoryRepoMock.Object);
-            InitializeMockData();
+            _mockCategoryRepo = new Mock<ICategoryRepo>();
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MapperProfile>();
+            });
+
+            _mapper = config.CreateMapper();
+            _categoryService = new CategoryService(_mapper, _mockCategoryRepo.Object);
+            _categories = SeedingData.GetCategories();
         }
-
-        // mock data
-
-        private List<Category> _categories;
-
-        private void InitializeMockData()
-        {
-            _categories =
-            [
-                new() { Id = Guid.NewGuid(), Name = "Category 1", Image = "image1.jpg" },
-                new() { Id = Guid.NewGuid(), Name = "Category 2", Image = "image2.jpg" },
-                new() { Id = Guid.NewGuid(), Name = "Category 3", Image = "image3.jpg" },
-                new() { Id = Guid.NewGuid(), Name = "Category 4", Image = "image4.jpg" },
-            ];
-        }
-
 
         [Fact]
-        public async Task GetAllCategoriesAsync_ShouldReturnAllCategories()
+        public async Task GetAllCategoriesAsync_ReturnsCategoryReadDtos()
         {
             // Arrange
-            var expectedCategories = _categories;
-            _categoryRepoMock.Setup(repo => repo.GetAllCategoriesAsync()).ReturnsAsync(expectedCategories);
+            _mockCategoryRepo.Setup(repo => repo.GetAllCategoriesAsync()).ReturnsAsync(_categories);
+            var expectedDtos = _mapper.Map<List<CategoryReadDto>>(_categories);
 
             // Act
             var result = await _categoryService.GetAllCategoriesAsync();
+            var resultList = result.ToList();
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(expectedCategories.Count, result.Count());
+            Assert.Equal(expectedDtos.Count, resultList.Count);
+            for (int i = 0; i < expectedDtos.Count; i++)
+            {
+                AssertCategoryReadDtoEqual(expectedDtos[i], resultList[i]);
+            }
         }
 
         [Fact]
-        public async Task GetCategoryByIdAsync_ValidId_ShouldReturnCategory()
+        public async Task GetCategoryByIdAsync_ValidId_ReturnsCategoryReadDto()
         {
             // Arrange
-            Guid categoryId = Guid.NewGuid();
-            Category expectedCategory = new() { Id = categoryId, Name = "Category 1", Image = "image1.jpg" };
+            var categoryId = _categories[0].Id;
+            var expectedDto = _mapper.Map<CategoryReadDto>(_categories[0]);
 
-            _categoryRepoMock.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ReturnsAsync(expectedCategory);
-
+            _mockCategoryRepo.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ReturnsAsync(_categories[0]);
 
             // Act
             var result = await _categoryService.GetCategoryByIdAsync(categoryId);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(expectedCategory.Id, result.CategoryId);
-            Assert.Equal(expectedCategory.Name, result.CategoryName);
-            Assert.Equal(expectedCategory.Image, result.CategoryImage);
-        }
-
-        // will modify later when we have exception handler
-        [Fact]
-        public async Task GetCategoryByIdAsync_InvalidId_ShouldReturnNull()
-        {
-            // Arrange
-            Guid invalidCategoryId = Guid.NewGuid();
-            _categoryRepoMock.Setup(repo => repo.GetCategoryByIdAsync(invalidCategoryId)).ThrowsAsync(new Exception("Category not found"));
-
-
-            // Act
-            var result = await _categoryService.GetCategoryByIdAsync(invalidCategoryId);
-
-            // Assert
-            Assert.Null(result);
-            await Assert.ThrowsAsync<Exception>(async () => await _categoryService.GetCategoryByIdAsync(invalidCategoryId));
+            AssertCategoryReadDtoEqual(expectedDto, result);
         }
 
         [Fact]
-        public async Task CreateCategoryAsync_ValidData_ShouldCreateCategory()
+        public async Task GetCategoryByIdAsync_InvalidId_ThrowsException()
         {
             // Arrange
-            Guid categoryId = Guid.NewGuid();
-            var newCategory = new Category { Id = categoryId, Name = "New Category", Image = "image.jpg" };
-            var categoryCreateDto = new CategoryCreateDto { CategoryName = newCategory.Name, CategoryImage = newCategory.Image };
+            var categoryId = Guid.NewGuid();
 
-            var createdCategory = new CategoryReadDto { CategoryId = categoryId, CategoryName = categoryCreateDto.CategoryName, CategoryImage = categoryCreateDto.CategoryImage };
+            _mockCategoryRepo.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ThrowsAsync(AppException.NotFound());
 
-            _categoryRepoMock.Setup(repo => repo.CreateCategoryAsync(newCategory)).ReturnsAsync(newCategory);
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(() => _categoryService.GetCategoryByIdAsync(categoryId));
+        }
 
+        [Fact]
+        public async Task CreateCategoryAsync_ValidData_ReturnsCategoryReadDto()
+        {
+            // Arrange
+            var categoryCreateDto = new CategoryCreateDto
+            {
+                Name = "New Category",
+                Image = "http://example.com/image.jpg"
+            };
+            var newCategory = _mapper.Map<Category>(categoryCreateDto);
+            var createdCategory = new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = newCategory.Name,
+                Image = newCategory.Image,
+                CreatedDate = DateOnly.FromDateTime(DateTime.Now)
+            };
+            var expectedDto = _mapper.Map<CategoryReadDto>(createdCategory);
+
+            _mockCategoryRepo.Setup(repo => repo.CreateCategoryAsync(It.IsAny<Category>())).ReturnsAsync(createdCategory);
 
             // Act
             var result = await _categoryService.CreateCategoryAsync(categoryCreateDto);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(createdCategory, result);
+            AssertCategoryReadDtoEqual(expectedDto, result);
         }
 
-        [Fact]
-        public async Task CreateCategoryAsync_InvalidData_ShouldThrowException()
+        [Theory]
+        [InlineData("", "http://example.com/image.jpg")]
+        [InlineData("Valid Name", "invalidUrl")]
+        public async Task CreateCategoryAsync_InvalidData_ThrowsException(string name, string image)
         {
             // Arrange
-            var invalidCategoryCreateDto = new CategoryCreateDto { CategoryName = "", CategoryImage = "" }; // Assuming both properties are required
+            var invalidCategoryCreateDto = new CategoryCreateDto
+            {
+                Name = name,
+                Image = image
+            };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await _categoryService.CreateCategoryAsync(invalidCategoryCreateDto));
+            await Assert.ThrowsAsync<AppException>(async () => await _categoryService.CreateCategoryAsync(invalidCategoryCreateDto));
         }
 
         [Fact]
-        public async Task CreateCategoryAsync_DuplicateName_ShouldThrowException()
+        public async Task UpdateCategoryByIdAsync_ValidData_ReturnsUpdatedCategoryReadDto()
         {
             // Arrange
+            var categoryId = _categories[0].Id;
+            var categoryUpdateDto = new CategoryUpdateDto { Name = "Updated Category", Image = "http://example.com/newimage.jpg" };
+            var updatedCategory = _categories[0];
+            updatedCategory.Name = categoryUpdateDto.Name;
+            updatedCategory.Image = categoryUpdateDto.Image;
+            updatedCategory.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
+            var expectedDto = _mapper.Map<CategoryReadDto>(updatedCategory);
 
-            var newCategory = new Category { Id = Guid.NewGuid(), Name = "Existing Category", Image = "image.jpg" };
-            var categoryCreateDto = new CategoryCreateDto { CategoryName = newCategory.Name, CategoryImage = newCategory.Image };
-
-            // Act
-            _categoryRepoMock.Setup(repo => repo.CreateCategoryAsync(newCategory)).ThrowsAsync(new ArgumentException("Category is duplicated"));
-
-            // Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await _categoryService.CreateCategoryAsync(categoryCreateDto));
-        }
-
-        [Fact]
-        public async Task UpdateCategoryByIdAsync_ValidIdAndData_ShouldUpdateCategory()
-        {
-            // Arrange
-            var categoryId = Guid.NewGuid();
-            var categoryUpdateDto = new CategoryUpdateDto { CategoryName = "Updated Category", CategoryImage = "updated.jpg" };
-            var updatedCategory = new Category { Id = categoryId, Name = categoryUpdateDto.CategoryName, Image = categoryUpdateDto.CategoryImage };
-            var categoryReadDto = new CategoryReadDto();
-            categoryReadDto.Transform(updatedCategory);
-
-            _categoryRepoMock.Setup(repo => repo.UpdateCategoryByIdAsync(updatedCategory)).ReturnsAsync(updatedCategory);
-
+            _mockCategoryRepo.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ReturnsAsync(_categories[0]);
+            _mockCategoryRepo.Setup(repo => repo.UpdateCategoryByIdAsync(It.IsAny<Category>())).ReturnsAsync(updatedCategory);
 
             // Act
             var result = await _categoryService.UpdateCategoryByIdAsync(categoryId, categoryUpdateDto);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(categoryReadDto, result);
+            AssertCategoryReadDtoEqual(expectedDto, result);
+        }
+
+        [Theory]
+        [InlineData("", "http://example.com/image.jpg")]
+        [InlineData("Updated Category", "invalidUrl")]
+        public async Task UpdateCategoryByIdAsync_InvalidData_ThrowsException(string name, string image)
+        {
+            // Arrange
+            var categoryId = _categories[0].Id;
+            var invalidCategoryUpdateDto = new CategoryUpdateDto
+            {
+                Name = name,
+                Image = image
+            };
+
+            _mockCategoryRepo.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ReturnsAsync(_categories[0]);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(async () => await _categoryService.UpdateCategoryByIdAsync(categoryId, invalidCategoryUpdateDto));
         }
 
         [Fact]
-        public async Task DeleteCategoryByIdAsync_ValidId_ShouldReturnTrue()
+        public async Task DeleteCategoryByIdAsync_ValidId_ReturnsTrue()
         {
             // Arrange
-            var categoryId = Guid.NewGuid();
-            _categoryRepoMock.Setup(repo => repo.DeleteCategoryByIdAsync(categoryId)).ReturnsAsync(true);
+            var categoryId = _categories[0].Id;
+
+            _mockCategoryRepo.Setup(repo => repo.DeleteCategoryByIdAsync(categoryId)).ReturnsAsync(true);
 
             // Act
             var result = await _categoryService.DeleteCategoryByIdAsync(categoryId);
@@ -169,18 +180,25 @@ namespace Ecommerce.Test.src.Service
         }
 
         [Fact]
-        public async Task DeleteCategoryByIdAsync_InValidId_ShouldReturnFalse()
+        public async Task DeleteCategoryByIdAsync_InvalidId_ThrowsException()
         {
             // Arrange
             var categoryId = Guid.NewGuid();
-            _categoryRepoMock.Setup(repo => repo.DeleteCategoryByIdAsync(categoryId)).ReturnsAsync(false);
 
-            // Act
-            var result = await _categoryService.DeleteCategoryByIdAsync(categoryId);
+            _mockCategoryRepo.Setup(repo => repo.DeleteCategoryByIdAsync(categoryId)).ThrowsAsync(AppException.NotFound());
 
-            // Assert
-            Assert.False(result);
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(() => _categoryService.DeleteCategoryByIdAsync(categoryId));
         }
 
+        // a helper method to compare CategoryReadDto
+        private void AssertCategoryReadDtoEqual(CategoryReadDto expected, CategoryReadDto actual)
+        {
+            Assert.Equal(expected.Id, actual.Id);
+            Assert.Equal(expected.Name, actual.Name);
+            Assert.Equal(expected.Image, actual.Image);
+            Assert.Equal(expected.CreatedDate, actual.CreatedDate);
+            Assert.Equal(expected.UpdatedDate, actual.UpdatedDate);
+        }
     }
 }

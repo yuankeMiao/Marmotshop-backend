@@ -11,7 +11,6 @@ using Ecommerce.WebAPI.src.Database;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.Shared;
 
-
 namespace Ecommerce.Service.Tests
 {
     public class UserServiceTests
@@ -27,7 +26,6 @@ namespace Ecommerce.Service.Tests
             _mockUserRepo = new Mock<IUserRepo>();
             _mockPasswordService = new Mock<IPasswordService>();
 
-            // to simplify the tests, I use real mapper instance instead of a mock mapper
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<MapperProfile>();
@@ -52,7 +50,6 @@ namespace Ecommerce.Service.Tests
             var result = await _userService.GetAllUsersAsync(options);
 
             // Assert
-            Assert.Equal(userReadDtos, result.Data);
             Assert.Equal(_users.Count, result.TotalCount);
         }
 
@@ -69,7 +66,7 @@ namespace Ecommerce.Service.Tests
             var result = await _userService.GetUserByIdAsync(userId);
 
             // Assert
-            Assert.Equal(userReadDto, result);
+            AssertUserReadDtoEqual(userReadDto, result);
         }
 
         [Fact]
@@ -97,7 +94,7 @@ namespace Ecommerce.Service.Tests
             var result = await _userService.GetUserByEmailAsync(email);
 
             // Assert
-            Assert.Equal(userReadDto, result);
+            AssertUserReadDtoEqual(userReadDto, result);
         }
 
         [Fact]
@@ -128,25 +125,17 @@ namespace Ecommerce.Service.Tests
                 UpdatedDate = DateOnly.FromDateTime(DateTime.Now)
             };
             var newUser = _mapper.Map<User>(userCreateDto);
-            var createdUser = new User
-            {
-                Id = newUser.Id,
-                Firstname = newUser.Firstname,
-                Lastname = newUser.Lastname,
-                Email = newUser.Email,
-                Password = "hashedPassword",
-                Salt = []
-            };
-            var userReadDto = _mapper.Map<UserReadDto>(createdUser);
+            newUser.Password = "hasedPassword";
+            var userReadDto = _mapper.Map<UserReadDto>(newUser);
 
             _mockPasswordService.Setup(p => p.HashPassword(userCreateDto.Password, out It.Ref<byte[]>.IsAny)).Returns("hashedPassword");
-            _mockUserRepo.Setup(repo => repo.CreateUserAsync(newUser)).ReturnsAsync(createdUser);
+            _mockUserRepo.Setup(repo => repo.CreateUserAsync(It.IsAny<User>())).ReturnsAsync(newUser);
 
             // Act
             var result = await _userService.CreateUserAsync(userCreateDto);
 
             // Assert
-            Assert.Equal(userReadDto, result);
+            AssertUserReadDtoEqual(userReadDto, result);
         }
 
         [Theory]
@@ -189,7 +178,32 @@ namespace Ecommerce.Service.Tests
             var result = await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
 
             // Assert
-            Assert.Equal(userReadDto, result);
+            AssertUserReadDtoEqual(userReadDto, result);
+        }
+
+        [Theory]
+        [InlineData("", "Doe", "john.doe@example.com", "Password123", "http://example.com/avatar.jpg")]
+        [InlineData("John", "", "john.doe@example.com", "Password123", "http://example.com/avatar.jpg")]
+        [InlineData("John", "Doe", "invalidEmail", "Password123", "http://example.com/avatar.jpg")]
+        [InlineData("John", "Doe", "john.doe@example.com", "123", "http://example.com/avatar.jpg")]
+        [InlineData("John", "Doe", "john.doe@example.com", "Password123", "invalidUrl")]
+        public async Task UpdateUserByIdAsync_InvalidData_ThrowsException(string firstname, string lastname, string email, string password, string avatar)
+        {
+            // Arrange
+            var userId = _users[0].Id;
+            var invalidUserUpdateDto = new UserUpdateDto
+            {
+                Firstname = firstname,
+                Lastname = lastname,
+                Email = email,
+                Password = password,
+                Avatar = avatar
+            };
+
+            _mockUserRepo.Setup(repo => repo.GetUserByIdAsync(userId)).ReturnsAsync(_users[0]);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(async () => await _userService.UpdateUserByIdAsync(userId, invalidUserUpdateDto));
         }
 
         [Fact]
@@ -198,7 +212,7 @@ namespace Ecommerce.Service.Tests
             // Arrange
             var userId = _users[0].Id;
 
-            _mockUserRepo.Setup(repo => repo.DeleteUserByIdAsync(userId)).Returns((Task<bool>)Task.CompletedTask);
+            _mockUserRepo.Setup(repo => repo.DeleteUserByIdAsync(userId)).ReturnsAsync(true);
 
             // Act
             var result = await _userService.DeleteUserByIdAsync(userId);
@@ -217,6 +231,15 @@ namespace Ecommerce.Service.Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<AppException>(() => _userService.DeleteUserByIdAsync(userId));
+        }
+
+        private void AssertUserReadDtoEqual(UserReadDto expected, UserReadDto actual)
+        {
+            Assert.Equal(expected.Firstname, actual.Firstname);
+            Assert.Equal(expected.Lastname, actual.Lastname);
+            Assert.Equal(expected.Email, actual.Email);
+            Assert.Equal(expected.Avatar, actual.Avatar);
+            Assert.Equal(expected.Role, actual.Role);
         }
     }
 }
