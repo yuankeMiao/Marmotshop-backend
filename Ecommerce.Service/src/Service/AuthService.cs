@@ -20,49 +20,34 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<TokenResponseDto> LoginAsync(UserCredential userCredential)
         {
-            try
-            {
-                var foundUser = await _userRepo.GetUserByEmailAsync(userCredential.Email) ?? throw AppException.NotFound("Email is not registered");
 
-                var isMatch = _passwordService.VerifyPassword(userCredential.Password, foundUser.Password, foundUser.Salt);
-                if (isMatch)
-                {
-                    return _tokenService.GetToken(foundUser);
-                }
-                else
-                {
-                    throw AppException.InvalidLoginCredentials("Incorrect password");
-                }
-            }
-            catch (Exception)
+            var foundUser = await _userRepo.GetUserByEmailAsync(userCredential.Email) ?? throw AppException.NotFound("Email is not registered");
+
+            var isMatch = _passwordService.VerifyPassword(userCredential.Password, foundUser.Password, foundUser.Salt);
+            if (isMatch)
             {
-                throw;
+                return _tokenService.GetToken(foundUser);
             }
+            else
+            {
+                throw AppException.InvalidLoginCredentials("Incorrect password");
+            }
+
         }
 
         public async Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, Guid userId)
         {
-            try
-            {
-                var foundUser = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
-                return _tokenService.RefreshToken(refreshToken, foundUser);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            var foundUser = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+            return _tokenService.RefreshToken(refreshToken, foundUser);
+
         }
 
         public async Task<bool> LogoutAsync(Guid userId)
         {
-            try
-            {
-                return await _tokenService.InvalidateTokenAsync(userId);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return await _tokenService.InvalidateTokenAsync(userId);
+
         }
     }
 }

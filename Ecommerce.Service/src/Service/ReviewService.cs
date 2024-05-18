@@ -29,58 +29,37 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<QueryResult<ReviewReadDto>> GetAllReviewsAsync(ReviewQueryOptions? options)
         {
-            try
-            {
-                var queryResult = await _reviewRepo.GetAllReviewsAsync(options);
-                var reviews = queryResult.Data;
-                var totalCount = queryResult.TotalCount;
+            var queryResult = await _reviewRepo.GetAllReviewsAsync(options);
+            var reviews = queryResult.Data;
+            var totalCount = queryResult.TotalCount;
 
-                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+            var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
-                return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
         }
 
         public async Task<QueryResult<ReviewReadDto>> GetAllReviewsByProductIdAsync(Guid productId, ReviewQueryOptions? options)
         {
-            try
-            {
-                _ = await _productRepo.GetProductByIdAsync(productId) ?? throw AppException.NotFound("Product not found");
-                var queryResult = await _reviewRepo.GetAllReviewsByProductIdAsync(productId, options);
-                var reviews = queryResult.Data;
-                var totalCount = queryResult.TotalCount;
+            _ = await _productRepo.GetProductByIdAsync(productId) ?? throw AppException.NotFound("Product not found");
+            var queryResult = await _reviewRepo.GetAllReviewsByProductIdAsync(productId, options);
+            var reviews = queryResult.Data;
+            var totalCount = queryResult.TotalCount;
 
-                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+            var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
-                return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
         }
 
         public async Task<QueryResult<ReviewReadDto>> GetAllReviewsByUserIdAsync(Guid userId, ReviewQueryOptions? options)
         {
-            try
-            {
-                _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
-                var queryResult = await _reviewRepo.GetAllReviewsByUserIdAsync(userId, options);
-                var reviews = queryResult.Data;
-                var totalCount = queryResult.TotalCount;
+            _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+            var queryResult = await _reviewRepo.GetAllReviewsByUserIdAsync(userId, options);
+            var reviews = queryResult.Data;
+            var totalCount = queryResult.TotalCount;
 
-                var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
+            var reviewReadDtos = _mapper.Map<IEnumerable<ReviewReadDto>>(reviews);
 
-                return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new QueryResult<ReviewReadDto> { Data = reviewReadDtos, TotalCount = totalCount };
         }
 
         public async Task<ReviewReadDto> GetReviewByIdAsync(Guid reviewId)
@@ -101,7 +80,8 @@ namespace Ecommerce.Service.src.Service
             //check if the user ever bought the product
 
             var orderResult = await _orderRepo.GetAllOrdersByUserIdAsync(userId, null);
-            var foundOrders = orderResult.Data;
+            var foundOrders = orderResult.Data ?? throw AppException.NotFound("Order not found");
+
             bool hasPerchased = foundOrders.Any(order => order.Products.Any(product => product.ProductId == reviewCreateDto.ProductId));
             if (!hasPerchased) throw AppException.InvalidInput("User cannot give review to product not purchased");
 
@@ -136,13 +116,9 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<bool> DeleteReviewByIdAsync(Guid reviewId)
         {
-            if (reviewId == Guid.Empty)
-            {
-                throw AppException.InvalidInput("Review Id should not be empty");
-            }
-            var isDeleted = await _reviewRepo.DeleteReviewByIdAsync(reviewId);
+            if (reviewId == Guid.Empty) throw AppException.InvalidInput("Review Id should not be empty");
 
-            return isDeleted;
+            return await _reviewRepo.DeleteReviewByIdAsync(reviewId);
         }
 
     }

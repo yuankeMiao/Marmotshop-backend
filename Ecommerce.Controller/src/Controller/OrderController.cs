@@ -64,7 +64,7 @@ namespace Ecommerce.Controller.src.Controller
         public async Task<ActionResult<OrderReadDto>> CreateOrderAsync([FromBody] OrderCreateDto orderCreateDto)
         {
             var userId = GetUserIdClaim();
-            var order = await _orderService.CreateOrderWithtransactionAsync(userId, orderCreateDto);
+            var order = await _orderService.CreateOrderWithTransactionAsync(userId, orderCreateDto);
             return Created($"http://localhost:5227/api/v1/orders/{order.Id}", order);
         }
 

@@ -28,41 +28,27 @@ namespace Ecommerce.Service.src.Service
 
         public async Task<QueryResult<OrderReadDto>> GetAllOrdersAsync(OrderQueryOptions? options)
         {
-            try
-            {
-                var queryResult = await _orderRepo.GetAllOrdersAsync(options);
+            var queryResult = await _orderRepo.GetAllOrdersAsync(options);
 
-                var orders = queryResult.Data;
-                var totalCount = queryResult.TotalCount;
-                var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
+            var orders = queryResult.Data;
+            var totalCount = queryResult.TotalCount;
+            var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
 
-                return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
         }
 
         public async Task<QueryResult<OrderReadDto>> GetAllOrdersByUserIdAsync(Guid userId, OrderQueryOptions? options)
         {
-            try
-            {
-                // check if user exists
-                _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
+            // check if user exists
+            _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
-                var queryResult = await _orderRepo.GetAllOrdersByUserIdAsync(userId, options);
+            var queryResult = await _orderRepo.GetAllOrdersByUserIdAsync(userId, options);
 
-                var orders = queryResult.Data;
-                var totalCount = queryResult.TotalCount;
-                var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
+            var orders = queryResult.Data;
+            var totalCount = queryResult.TotalCount;
+            var orderReadDtos = _mapper.Map<IEnumerable<OrderReadDto>>(orders);
 
-                return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new QueryResult<OrderReadDto> { Data = orderReadDtos, TotalCount = totalCount };
         }
 
         public async Task<OrderReadDto> GetOrderByIdAsync(Guid orderId)
@@ -71,36 +57,42 @@ namespace Ecommerce.Service.src.Service
             {
                 AppException.InvalidInput("OrderId is required");
             }
-            try
-            {
-                var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
-                var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
+            var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId) ?? throw AppException.NotFound("Order not found");
+            var orderReadDto = _mapper.Map<OrderReadDto>(foundOrder);
 
-                return orderReadDto;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return orderReadDto;
+
         }
 
-        public async Task<OrderReadDto> CreateOrderWithtransactionAsync(Guid userId, OrderCreateDto orderCreateDto)
+        public async Task<OrderReadDto> CreateOrderWithTransactionAsync(Guid userId, OrderCreateDto orderCreateDto)
         {
-            // check if user exists
+            if (string.IsNullOrWhiteSpace(orderCreateDto.ShippingAddress))
+            {
+                throw AppException.InvalidInput("Shipping address is required");
+            }
+
+            if (orderCreateDto.Products == null || orderCreateDto.Products.Count == 0)
+            {
+                throw AppException.InvalidInput("At least one product is required to create an order");
+            }
+
+            // Check if user exists
             _ = await _userRepo.GetUserByIdAsync(userId) ?? throw AppException.NotFound("User not found");
 
-            // if true, created order object, assign userId
+            // Create order object and assign userId
             var order = _mapper.Map<Order>(orderCreateDto);
             order.UserId = userId;
 
-            // create orderProducts set
+            // Create orderProducts set
             var newOrderProducts = new HashSet<OrderProduct>();
 
             foreach (var orderProductDto in orderCreateDto.Products)
             {
-                // check every product in orderCreateDto.OrderProducts
+                // Check every product in orderCreateDto.OrderProducts
+                if(orderProductDto.Quantity < 1) throw AppException.InvalidInput("product quantity should be at least 1");
                 var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId);
-                // if found, create a new OrderProduct object
+
+                // Create a new OrderProduct object
                 var newOrderProduct = _mapper.Map<OrderProduct>(foundProduct);
                 newOrderProduct.Quantity = orderProductDto.Quantity;
                 newOrderProduct.TotalPrice = newOrderProduct.Quantity * newOrderProduct.ActualPrice;
@@ -118,18 +110,20 @@ namespace Ecommerce.Service.src.Service
             return orderReadDto;
         }
 
+
         public async Task<OrderReadDto> UpdateOrderByIdAsync(Guid orderId, OrderUpdateDto orderUpdateDto)
         {
-            var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId);
-
             if (orderId == Guid.Empty)
             {
                 throw AppException.InvalidInput("Order id is required");
             }
-            if (foundOrder is null)
+
+            if (orderUpdateDto == null)
             {
-                throw AppException.NotFound($"Order not found");
+                throw AppException.InvalidInput("Order update data is required");
             }
+
+            var foundOrder = await _orderRepo.GetOrderByIdAsync(orderId);
 
             // Update order status and date
             foundOrder.Status = orderUpdateDto.Status;
@@ -144,26 +138,12 @@ namespace Ecommerce.Service.src.Service
             return orderReadDto;
         }
 
+
         public async Task<bool> DeleteOrderByIdAsync(Guid orderId)
         {
-            if (orderId == Guid.Empty)
-            {
-                AppException.InvalidInput("OrderId is required");
-            }
-            try
-            {
-                var targetOrder = await _orderRepo.GetOrderByIdAsync(orderId);
-                if (targetOrder is not null)
-                {
-                    await _orderRepo.DeleteOrderByIdAsync(orderId);
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            if (orderId == Guid.Empty) AppException.InvalidInput("Order id is required");
+
+            return await _orderRepo.DeleteOrderByIdAsync(orderId);
         }
 
     }

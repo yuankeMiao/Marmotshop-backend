@@ -6,7 +6,7 @@ namespace Ecommerce.Service.src.DTO
     {
         public required string Title { get; set; }
         public required string Description { get; set; }
-        public int Price { get; set; }
+        public decimal Price { get; set; }
         public int DiscountPercentage { get; set; }
         public decimal? Rating { get; set; }
         public int Stock { get; set; }
@@ -20,7 +20,7 @@ namespace Ecommerce.Service.src.DTO
     {
         public required string Title { get; set; }
         public required string Description { get; set; }
-        public int Price { get; set; }
+        public decimal Price { get; set; }
         public int DiscountPercentage { get; set; }
         public int Stock { get; set; }
         public string? Brand { get; set; }
@@ -34,7 +34,7 @@ namespace Ecommerce.Service.src.DTO
     {
         public string? Title { get; set; }
         public string? Description { get; set; }
-        public int? Price { get; set; }
+        public decimal? Price { get; set; }
         public int? DiscountPercentage { get; set; }
         public Guid? CategoryId { get; set; }
         public int? Stock { get; set; }
