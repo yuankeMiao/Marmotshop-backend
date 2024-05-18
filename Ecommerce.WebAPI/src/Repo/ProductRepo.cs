@@ -129,47 +129,13 @@ namespace Ecommerce.WebAPI.src.Repo
             }
         }
 
-        public async Task<Product> UpdateProductByIdWithTransactionAsync(Product updatedProduct)
+        public async Task<Product> UpdateProductByIdAsync(Product updatedProduct)
         {
-            using var transaction = _context.Database.BeginTransaction();
-            try
-            {
-                //check if product exist
-                var foundProduct = await _products.FindAsync(updatedProduct.Id) ?? throw AppException.NotFound("Product not found");
-                // update product table
-                _products.Update(updatedProduct);
-                /* rewrite images, because image updates are more complicated in front end
-                one single update of product might contrains multiple uodates on images and delete image, create new images...
-                so it is eaasier to just re-write them
-                even thought it will couse more queries, but since I don't expect client side will update products very frequently
-                so I will use this solution for now */
 
-                if (updatedProduct.Images is not null && updatedProduct.Images.Any())
-                {
-                    // remove existing images
-                    var foundImages = await _images.Where(i => i.ProductId == updatedProduct.Id).ToListAsync();
-                    foreach (var image in foundImages)
-                    {
-                        _images.RemoveRange(_images.Where(i => i.ProductId == updatedProduct.Id));
-                    }
-                    // add new images
-                    foreach (var image in updatedProduct.Images)
-                    {
-                        image.Id = Guid.NewGuid();
-                        await _images.AddRangeAsync(updatedProduct.Images);
-                    }
-                }
+            _products.Update(updatedProduct);
+            await _context.SaveChangesAsync();
+            return updatedProduct;
 
-                await _context.SaveChangesAsync();
-                transaction.Commit();
-
-                return _products.FirstOrDefault(p => p.Id == updatedProduct.Id) ?? throw AppException.NotFound("Product not found");
-            }
-            catch (Exception)
-            {
-                transaction.Rollback();
-                throw;
-            }
         }
 
         public async Task<bool> DeleteProductByIdAsync(Guid productId)

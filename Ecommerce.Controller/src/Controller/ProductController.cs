@@ -49,7 +49,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("{productId}")]
+        [HttpPut("{productId}")]
         public async Task<ActionResult<ProductReadDto>> UpdateProductByIdAsync([FromRoute] Guid productId, [FromBody] ProductUpdateDto productUpdateDto)
         {
 

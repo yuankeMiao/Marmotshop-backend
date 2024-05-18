@@ -9,7 +9,7 @@ namespace Ecommerce.Core.src.RepoAbstract
         // Task<IEnumerable<Product>> GetMostPurchasedProductsAsync(int topNumber); // maybe implement it later
         Task<Product> GetProductByIdAsync(Guid productId);
         Task<Product> CreateProductWithTransactionAsync(Product newProduct);
-        Task<Product> UpdateProductByIdWithTransactionAsync(Product updatedProduct);
+        Task<Product> UpdateProductByIdAsync(Product updatedProduct);
         Task<bool> DeleteProductByIdAsync(Guid productId);
     }
 }

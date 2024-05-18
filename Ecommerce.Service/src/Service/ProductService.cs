@@ -1,6 +1,4 @@
 
-using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 using AutoMapper;
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
@@ -18,12 +16,14 @@ namespace Ecommerce.Service.src.Service
         private readonly IProductRepo _productRepo;
         private IMapper _mapper;
         private readonly ICategoryRepo _categoryRepo;
+        private readonly IImageRepo _imageRepo;
 
-        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo)
+        public ProductService(IProductRepo productRepo, IMapper mapper, ICategoryRepo categoryRepo, IImageRepo imageRepo)
         {
             _productRepo = productRepo;
             _mapper = mapper;
             _categoryRepo = categoryRepo;
+            _imageRepo = imageRepo;
         }
 
         public async Task<QueryResult<ProductReadDto>> GetAllProductsAsync(ProductQueryOptions? productQueryOptions)
@@ -149,7 +149,7 @@ namespace Ecommerce.Service.src.Service
 
                 if (productUpdateDto.Brand is not null)
                 {
-                    if (string.IsNullOrWhiteSpace(productUpdateDto.Brand)) foundProduct.Brand = null;
+                    if (string.IsNullOrWhiteSpace(productUpdateDto.Brand)) foundProduct.Brand = productUpdateDto.Brand;
                 }
 
                 if (productUpdateDto.Thumbnail is not null)
@@ -157,6 +157,7 @@ namespace Ecommerce.Service.src.Service
                     if (!ValidationHelper.IsImageUrlValid(productUpdateDto.Thumbnail)) throw AppException.InvalidInput("Thumbnail cannot be empty");
                     foundProduct.Thumbnail = productUpdateDto.Thumbnail;
                 }
+
 
                 if (productUpdateDto.Images is not null)
                 {
@@ -170,18 +171,18 @@ namespace Ecommerce.Service.src.Service
                             Url = imageUpdateDto.Url,
                             ProductId = foundProduct.Id
                         };
-                       newImages.Add(updatedImage); 
+                        newImages.Add(updatedImage);
                     }
-                    foundProduct.Images = newImages;
+                    var updatedImages = await _imageRepo.UpdateImagesAsync(foundProduct.Id, newImages);
                 }
 
 
                 foundProduct.UpdatedDate = DateOnly.FromDateTime(DateTime.Now);
 
-                var updatedProduct = await _productRepo.UpdateProductByIdWithTransactionAsync(foundProduct);
+                await _productRepo.UpdateProductByIdAsync(foundProduct);
+                var updatedProduct = await _productRepo.GetProductByIdAsync(productId);
 
                 var updatedProductReadDto = _mapper.Map<ProductReadDto>(updatedProduct);
-
                 return updatedProductReadDto;
             }
             catch (Exception)
