@@ -111,9 +111,14 @@ namespace Ecommerce.WebAPI.src.Service
             {
                 storedToken.Revoked = DateTime.UtcNow;
                 _cache.Set(refreshTokenKey, storedToken);
+                await Task.CompletedTask;
+                return true;
             }
-            await Task.CompletedTask;
-            return true;
+            else
+            {
+                return false;
+            }
+
         }
 
         public bool IsTokenValid(RefreshToken token)

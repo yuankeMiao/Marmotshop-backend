@@ -8,12 +8,12 @@ using Ecommerce.Service.src.DTO;
 
 namespace Ecommerce.Test.src.Service
 {
-    public class CategoryServiceTest
+    public class CategoryServiceTests
     {
         private readonly CategoryService _categoryService;
         private readonly Mock<ICategoryRepo> _categoryRepoMock = new();
 
-        public CategoryServiceTest()
+        public CategoryServiceTests()
         {
             _categoryService = new CategoryService(_categoryRepoMock.Object);
             InitializeMockData();
