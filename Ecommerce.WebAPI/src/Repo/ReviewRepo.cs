@@ -10,11 +10,13 @@ namespace Ecommerce.WebAPI.src.Repo
     {
         private readonly AppDbContext _context;
         private readonly DbSet<Review> _reviews;
+        private readonly DbSet<Product> _products;
 
         public ReviewRepo(AppDbContext context)
         {
             _context = context;
             _reviews = _context.Reviews;
+            _products = _context.Products;
         }
 
 
@@ -106,10 +108,31 @@ namespace Ecommerce.WebAPI.src.Repo
 
         public async Task<Review> CreateReviewAsync(Review newReview)
         {
-            var review = await _reviews.AddAsync(newReview);
-            await _context.SaveChangesAsync();
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                // add new review
+                var review = await _reviews.AddAsync(newReview);
 
-            return review.Entity;
+                // calculate the new raiting for the product and update
+                var product = await _products.FirstOrDefaultAsync(p => p.Id == newReview.ProductId) ?? throw AppException.NotFound("Product not  found");
+                var reviewCount = await _reviews.Where(r => r.ProductId == newReview.ProductId).CountAsync();
+                var oldRating = product.Rating ?? 0; // if now rating yet, set it as 0 for calculating
+                var newRating = decimal.Round((oldRating * reviewCount + newReview.Rating) / (reviewCount + 1), 2);
+                product.Rating = newRating;
+
+                _products.Update(product);
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                return review.Entity;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteReviewByIdAsync(Guid reviewId)
