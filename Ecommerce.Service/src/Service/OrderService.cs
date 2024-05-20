@@ -92,6 +92,8 @@ namespace Ecommerce.Service.src.Service
                 if(orderProductDto.Quantity < 1) throw AppException.InvalidInput("product quantity should be at least 1");
                 var foundProduct = await _productRepo.GetProductByIdAsync(orderProductDto.ProductId);
 
+                if(orderProductDto.Quantity > foundProduct.Stock) throw AppException.InvalidInput("product quantity should not exceed product stock");
+
                 // Create a new OrderProduct object
                 var newOrderProduct = _mapper.Map<OrderProduct>(foundProduct);
                 newOrderProduct.Quantity = orderProductDto.Quantity;
