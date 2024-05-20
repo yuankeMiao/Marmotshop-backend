@@ -161,7 +161,7 @@ namespace Ecommerce.WebAPI.src.Repo
                 query = query.Where(r => r.Rating == options.Rating);
             }
 
-            if (options.Has_Content is not null)
+            if (options.HasContent is not null)
             {
                 query = query.Where(r => !string.IsNullOrEmpty(r.Content));
             }

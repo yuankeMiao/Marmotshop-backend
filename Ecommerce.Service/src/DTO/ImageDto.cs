@@ -1,7 +1,4 @@
 
-
-using Ecommerce.Core.src.Entity;
-
 namespace Ecommerce.Service.src.DTO
 {
     public class ImageReadDto

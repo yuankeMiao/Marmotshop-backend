@@ -35,24 +35,24 @@ namespace Ecommerce.WebAPI.src.Repo
                 }
 
                 // Filter by price range
-                if (options.Min_Price.HasValue)
+                if (options.MinPrice.HasValue)
                 {
-                    query = query.Where(p => p.Price >= options.Min_Price.Value);
+                    query = query.Where(p => p.Price >= options.MinPrice.Value);
                 }
 
-                if (options.Max_Price.HasValue)
+                if (options.MaxPrice.HasValue)
                 {
-                    query = query.Where(p => p.Price <= options.Max_Price.Value);
+                    query = query.Where(p => p.Price <= options.MaxPrice.Value);
                 }
 
                 // Filter by category ID
-                if (options.Category_Id.HasValue)
+                if (options.CategoryId.HasValue)
                 {
-                    query = query.Where(p => p.CategoryId == options.Category_Id);
+                    query = query.Where(p => p.CategoryId == options.CategoryId);
                 }
 
                 // filter by is in stock
-                if (options.In_Stock.HasValue)
+                if (options.InStock.HasValue)
                 {
                     query = query.Where(p => p.Stock > 0);
                 }
