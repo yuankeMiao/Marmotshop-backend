@@ -3,6 +3,7 @@ using Ecommerce.Core.src.Common;
 using Ecommerce.WebAPI.src.Database;
 using Ecommerce.Core.src.RepoAbstract;
 using Microsoft.EntityFrameworkCore;
+using Ecommerce.Core.src.ValueObject;
 
 namespace Ecommerce.WebAPI.src.Repo
 {
@@ -57,14 +58,14 @@ namespace Ecommerce.WebAPI.src.Repo
                 }
 
                 // Sorting
-                if (!string.IsNullOrEmpty(options.SortBy))
+                if (options.SortBy is not null)
                 {
-                    query = options.SortBy.ToLower() switch
+                    query = options.SortBy switch
                     {
-                        "title" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Title) : query.OrderBy(p => p.Title),
-                        "price" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
-                        "created_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
-                        "updated_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
+                        ProductSortByEnum.Title => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(p => p.Title) : query.OrderBy(p => p.Title),
+                        ProductSortByEnum.Price => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                        ProductSortByEnum.Created_Date => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
+                        ProductSortByEnum.Updated_Date => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
                         _ => query.OrderBy(p => p.CreatedDate),
                     };
                 }

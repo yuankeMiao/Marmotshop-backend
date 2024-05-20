@@ -33,8 +33,5 @@ namespace Ecommerce.Core.src.Entity
         public Category Category { get; set; } = null!; // for reference only
         public required string Thumbnail { get; set; }
         public IEnumerable<Image>? Images { get; set; }
-
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
     }
 }

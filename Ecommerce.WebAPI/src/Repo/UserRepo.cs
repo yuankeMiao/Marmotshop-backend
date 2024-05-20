@@ -2,6 +2,7 @@
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
+using Ecommerce.Core.src.ValueObject;
 using Ecommerce.WebAPI.src.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,17 @@ namespace Ecommerce.WebAPI.src.Repo
                 if (!string.IsNullOrEmpty(options.SearchName))
                 {
                     query = query.Where(u => u.Firstname.Contains(options.SearchName) || u.Lastname.Contains(options.SearchName));
+                }
+
+                if(options.SortBy != null)
+                {
+                    query = options.SortBy switch
+                {
+                    UserSortByEnum.Name => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(u => u.Lastname) : query.OrderBy(u => u.Lastname),
+                    UserSortByEnum.CreatedDate => options.SortOrder == SortOrderEnum.Desc? query.OrderByDescending(o => o.CreatedDate) : query.OrderBy(o => o.CreatedDate),
+                    UserSortByEnum.UpdatedDate => options.SortOrder == SortOrderEnum.Desc? query.OrderByDescending(o => o.UpdatedDate) : query.OrderBy(o => o.UpdatedDate),
+                    _ => query.OrderBy(p => p.CreatedDate),
+                };
                 }
 
                 // Execute the query to get total count before applying pagination

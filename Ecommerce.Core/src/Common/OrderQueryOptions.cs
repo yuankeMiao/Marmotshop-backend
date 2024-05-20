@@ -6,5 +6,6 @@ namespace Ecommerce.Core.src.Common
     public class OrderQueryOptions: BaseQueryOptions
     {
         public OrderStatus? Status{ get; set; }
+        public OrderSortByEnum? SortBy{ get; set; }
     }
 }

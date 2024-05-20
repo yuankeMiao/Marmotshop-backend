@@ -1,6 +1,7 @@
 using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.RepoAbstract;
+using Ecommerce.Core.src.ValueObject;
 using Ecommerce.WebAPI.src.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -146,12 +147,12 @@ namespace Ecommerce.WebAPI.src.Repo
             }
 
             // Sorting
-            if (!string.IsNullOrEmpty(options.SortBy))
+            if (options.SortBy is not null)
             {
-                query = options.SortBy.ToLower() switch
+                query = options.SortBy switch
                 {
-                    "created_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.CreatedDate) : query.OrderBy(p => p.CreatedDate),
-                    "updated_date" => options.SortOrder == "desc" ? query.OrderByDescending(p => p.UpdatedDate) : query.OrderBy(p => p.UpdatedDate),
+                    OrderSortByEnum.CreatedDate => options.SortOrder == SortOrderEnum.Desc? query.OrderByDescending(o => o.CreatedDate) : query.OrderBy(o => o.CreatedDate),
+                    OrderSortByEnum.UpdatedDate => options.SortOrder == SortOrderEnum.Desc? query.OrderByDescending(o => o.UpdatedDate) : query.OrderBy(o => o.UpdatedDate),
                     _ => query.OrderBy(p => p.CreatedDate),
                 };
             }

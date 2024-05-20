@@ -6,5 +6,6 @@ namespace Ecommerce.Core.src.Common
     {
         public UserRole? SearchRole { get; set; } = null;
         public string SearchName { get; set; } = string.Empty;
+        public UserSortByEnum? SortBy { get; set; } = null;
     }
 }

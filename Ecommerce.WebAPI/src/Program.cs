@@ -17,6 +17,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http.Json;
+using MvcJsonOptions = Microsoft.AspNetCore.Mvc.JsonOptions;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,21 +28,30 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(
-      options =>
+  options =>
     {
       options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-      {
-        Description = "Bearer token authentication",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Scheme = "Bearer"
-      }
+        {
+          Description = "Bearer token authentication",
+          Name = "Authorization",
+          In = ParameterLocation.Header,
+          Scheme = "Bearer"
+        }
       );
+
+    //   options.MapType<SortOrderEnum>(() => new OpenApiSchema
+    // {
+    //     Type = "string"
+    //     Enum = (IList<IOpenApiAny>)Enum.GetNames(typeof(SortOrderEnum)).Select(name => new OpenApiString(name)).ToList()
+    // });
 
       // swagger would add the token to the request header of routes with [Authorize] attribute
       options.OperationFilter<SecurityRequirementsOperationFilter>();
     }
 );
+
+builder.Services.Configure<JsonOptions>(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.Configure<MvcJsonOptions>(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // add all controllers
 builder.Services.AddControllers();
@@ -47,6 +60,7 @@ builder.Services.AddControllers();
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("Localhost"));
 dataSourceBuilder.MapEnum<UserRole>();
 dataSourceBuilder.MapEnum<OrderStatus>();
+
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<AppDbContext>
 (
@@ -111,7 +125,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Secrets:JwtKey"]!)),
         ValidateIssuer = true,
         ValidateAudience = false,
-        ValidateLifetime = true, 
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Secrets:Issuer"],
       };
