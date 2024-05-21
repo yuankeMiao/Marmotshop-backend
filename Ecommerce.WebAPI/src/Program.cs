@@ -39,12 +39,6 @@ builder.Services.AddSwaggerGen(
         }
       );
 
-    //   options.MapType<SortOrderEnum>(() => new OpenApiSchema
-    // {
-    //     Type = "string"
-    //     Enum = (IList<IOpenApiAny>)Enum.GetNames(typeof(SortOrderEnum)).Select(name => new OpenApiString(name)).ToList()
-    // });
-
       // swagger would add the token to the request header of routes with [Authorize] attribute
       options.OperationFilter<SecurityRequirementsOperationFilter>();
     }

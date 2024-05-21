@@ -46,7 +46,7 @@ namespace Ecommerce.Controller.src.Controller
             return Ok(user);
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")] // this endpoint is not user register, it's only for admin to add user manually
         [HttpPost()]
         public async Task<ActionResult<UserReadDto>> CreateUserAsync([FromBody] UserCreateDto userCreateDto)
         {

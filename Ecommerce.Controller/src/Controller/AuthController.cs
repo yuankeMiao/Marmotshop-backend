@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Ecommerce.Core.src.Common;
+using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,13 @@ namespace Ecommerce.Controller.src.Controller
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public AuthController(IAuthService authService)
+
+        public AuthController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
+            _userService = userService;
         }
 
         [HttpPost("login")]
@@ -24,6 +28,16 @@ namespace Ecommerce.Controller.src.Controller
             return Ok(tokenResponse);
 
         }
+
+        [HttpPost("register")]
+        public async Task<ActionResult<UserReadDto>> RegisterAsync([FromBody] UserCreateDto userCreateDto)
+        {
+
+            userCreateDto.Role = UserRole.Customer; // this endpoint can only add customer users
+            var user = await _userService.CreateUserAsync(userCreateDto);
+            return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);
+        }
+
 
         [HttpPost("refresh")]
         public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto requestDto)

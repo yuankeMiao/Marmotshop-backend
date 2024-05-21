@@ -22,8 +22,6 @@ namespace Ecommerce.Service.src.DTO
         public required string Password { get; set; }
         public string? Avatar { get; set; }
         public UserRole Role { get; set; } = UserRole.Customer;
-        public DateOnly? CreatedDate { get; set; }
-        public DateOnly? UpdatedDate { get; set; }
     }
 
     public class UserUpdateDto

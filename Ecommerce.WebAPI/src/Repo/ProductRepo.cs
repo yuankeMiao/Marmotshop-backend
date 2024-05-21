@@ -108,14 +108,15 @@ namespace Ecommerce.WebAPI.src.Repo
                 var foundProduct = await _products.FirstOrDefaultAsync(p => p.Title == newProduct.Title);
                 if (foundProduct is not null) throw AppException.Duplicate("Product Title");
 
-                await _products.AddAsync(newProduct);
+                var createdProduct = await _products.AddAsync(newProduct);
 
                 // create image record
                 if (newProduct.Images is not null)
                 {
                     foreach (var newImage in newProduct.Images)
                     {
-                        await _images.AddAsync(newImage);
+                        newImage.ProductId = newProduct.Id;
+                        var createdImage = await _images.AddAsync(newImage);
                     }
                 }
                 await _context.SaveChangesAsync();

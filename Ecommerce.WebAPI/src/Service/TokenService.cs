@@ -118,7 +118,6 @@ namespace Ecommerce.WebAPI.src.Service
             {
                 return false;
             }
-
         }
 
         public bool IsTokenValid(RefreshToken token)

@@ -11,7 +11,6 @@ namespace Ecommerce.Service.src.DTO
     public class ImageCreateDto
     {
         public required string Url { get; set; }
-        public Guid ProductId { get; set; }
     }
 
     public class ImageUpdateDto
