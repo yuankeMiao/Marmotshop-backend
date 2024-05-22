@@ -1,4 +1,5 @@
 using Bogus;
+using Bogus.Extensions;
 using Ecommerce.Core.src.Entity;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.WebAPI.src.Service;
@@ -12,7 +13,7 @@ namespace Ecommerce.WebAPI.src.Database
         {
             var faker = new Faker("en");
             var categories = new List<Category>();
-            List<string> categoryNames = ["Sport", "Clothes", "Games", "Self care", "Books"];
+            List<string> categoryNames = ["Sport", "Clothes", "Games", "Toys", "Books"];
 
             foreach (var categoryName in categoryNames)
             {
@@ -131,8 +132,8 @@ namespace Ecommerce.WebAPI.src.Database
                         Title = $"{faker.Commerce.ProductAdjective()} {faker.Commerce.Product()} {faker.Random.Word()}",
                         Description = faker.Commerce.ProductDescription(),
                         Price = decimal.Parse(faker.Commerce.Price()),
-                        DiscountPercentage = faker.Commerce.Random.Int(0, 30),
-                        Rating = faker.Commerce.Random.Int(1, 5),
+                        DiscountPercentage = faker.Commerce.Random.Int(0, 30) * faker.Random.Int(0, 1),
+                        Rating = faker.Commerce.Random.Decimal2() * 5,
                         Stock = faker.Commerce.Random.Int(0, 200),
                         Brand = faker.Random.Word(),
                         CategoryId = category.Id,
