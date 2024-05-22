@@ -35,7 +35,7 @@ namespace Ecommerce.Controller.src.Controller
 
             userCreateDto.Role = UserRole.Customer; // this endpoint can only add customer users
             var user = await _userService.CreateUserAsync(userCreateDto);
-            return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);
+            return StatusCode(201, user);
         }
 
 

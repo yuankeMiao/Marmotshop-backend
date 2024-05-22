@@ -39,7 +39,7 @@ namespace Ecommerce.Controller.src.Controller
         {
             var category = await _categoryService.CreateCategoryAsync(categoryCreateDto);
             // CreatedAtAction is not working, so i set the url manually for now, might check later if i have time
-            return Created($"http://localhost:5227/api/v1/categories/{category.Id}", category);
+            return StatusCode(201, category);
         }
 
         [Authorize(Roles = "Admin")]

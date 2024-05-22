@@ -28,14 +28,11 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet] // endpoint: /users
-        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsersAsync([FromQuery] UserQueryOptions? options)
+        public async Task<ActionResult<QueryResult<UserReadDto>>> GetAllUsersAsync([FromQuery] UserQueryOptions? options)
         {
             var result = await _userService.GetAllUsersAsync(options);
-            var users = result.Data;
-            var totalCount = result.TotalCount;
-            
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(users);
+
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
@@ -58,7 +55,7 @@ namespace Ecommerce.Controller.src.Controller
                 if (!authResult.Succeeded) return Forbid();
             }
             var user = await _userService.CreateUserAsync(userCreateDto);
-            return Created($"http://localhost:5227/api/v1/users/{user.Id}", user);
+            return StatusCode(201, user);
         }
 
         [Authorize(Roles = "Admin")]
@@ -119,16 +116,16 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize]
         [HttpPost("profile/addresses")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> AddAddressAsync([FromBody] AddressCreateDto addressCreateDto)
+        public async Task<ActionResult<AddressReadDto>> AddAddressAsync([FromBody] AddressCreateDto addressCreateDto)
         {
             var userId = GetUserIdClaim();
             var address = await _addressService.CreateAddressAsync(userId, addressCreateDto);
-            return Created($"http://localhost:5227/api/v1/user/profile/addresses/{address.Id}", address);
+            return Ok(address);
         }
 
         [Authorize]
         [HttpPatch("profile/addresses/{addressId}")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
+        public async Task<ActionResult<AddressReadDto>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
             var foundAddress = await _addressService.GetAddressByIdAsync(addressId);
             var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, foundAddress, "AddressOwner");
@@ -147,7 +144,7 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize]
         [HttpDelete("profile/addresses/{addressId}")]
-        public async Task<ActionResult<IEnumerable<AddressReadDto>>> DeleteAddressByIdAsync([FromRoute] Guid addressId)
+        public async Task<ActionResult<bool>> DeleteAddressByIdAsync([FromRoute] Guid addressId)
         {
             var foundAddress = await _addressService.GetAddressByIdAsync(addressId);
             var authResult = await _authorizationService.AuthorizeAsync(HttpContext.User, foundAddress, "AddressOwner");

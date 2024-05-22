@@ -22,51 +22,36 @@ namespace Ecommerce.Controller.src.Controller
 
         [AllowAnonymous]
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsAsync([FromQuery] ReviewQueryOptions options)
+        public async Task<ActionResult<QueryResult<ReviewReadDto>>> GetAllReviewsAsync([FromQuery] ReviewQueryOptions options)
         {
             var result = await _service.GetAllReviewsAsync(options);
-            var reviews = result.Data;
-            var totalCount = result.TotalCount;
-
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(reviews);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("product/{productId}")]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId, [FromQuery] ReviewQueryOptions options)
+        public async Task<ActionResult<QueryResult<ReviewReadDto>>> GetAllReviewsByProductIdAsync([FromRoute] Guid productId, [FromQuery] ReviewQueryOptions options)
         {
             var result = await _service.GetAllReviewsByProductIdAsync(productId, options);
-            var reviews = result.Data;
-            var totalCount = result.TotalCount;
-
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(reviews);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId, [FromQuery] ReviewQueryOptions options)
+        public async Task<ActionResult<QueryResult<ReviewReadDto>>> GetAllReviewsByUserIdAsync([FromRoute] Guid userId, [FromQuery] ReviewQueryOptions options)
         {
             var result = await _service.GetAllReviewsByUserIdAsync(userId, options);
-            var reviews = result.Data;
-            var totalCount = result.TotalCount;
-
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(reviews);
+            return Ok(result);
         }
 
         [Authorize]
         [HttpGet("my-reviews")]
-        public async Task<ActionResult<IEnumerable<ReviewReadDto>>> GetMyReviewsAsync([FromQuery] ReviewQueryOptions options)
+        public async Task<ActionResult<QueryResult<ReviewReadDto>>> GetMyReviewsAsync([FromQuery] ReviewQueryOptions options)
         {
             var userId = GetUserIdClaim();
             var result = await _service.GetAllReviewsByUserIdAsync(userId, options);
-            var reviews = result.Data;
-            var totalCount = result.TotalCount;
 
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(reviews);
+            return Ok(result);
         }
 
         [AllowAnonymous]
@@ -83,7 +68,7 @@ namespace Ecommerce.Controller.src.Controller
         {
             var userId = GetUserIdClaim();
             var review = await _service.CreateReviewAsync(userId, reviewCreateDto);
-            return Created($"http://localhost:5227/api/v1/reviews/{review.Id}", review);
+            return StatusCode(201, review);
         }
 
         [Authorize]

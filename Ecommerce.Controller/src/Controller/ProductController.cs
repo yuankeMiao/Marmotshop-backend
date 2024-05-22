@@ -19,15 +19,11 @@ namespace Ecommerce.Controller.src.Controller
         }
         [AllowAnonymous]
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
+        public async Task<ActionResult<QueryResult<ProductReadDto>>> GetAllProductsAsync([FromQuery] ProductQueryOptions? options)
         {
 
             var result = await _productService.GetAllProductsAsync(options);
-            var products = result.Data;
-            var totalCount = result.TotalCount;
-
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(products);
+            return Ok(result);
         }
 
         [AllowAnonymous]
@@ -44,7 +40,7 @@ namespace Ecommerce.Controller.src.Controller
         {
 
             var product = await _productService.CreateProductAsync(productCreateDto);
-            return Created($"http://localhost:5227/api/v1/products/{product.Id}", product);
+            return StatusCode(201, product);
 
         }
 

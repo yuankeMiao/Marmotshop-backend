@@ -65,7 +65,7 @@ namespace Ecommerce.Controller.src.Controller
         {
             var userId = GetUserIdClaim();
             var order = await _orderService.CreateOrderWithTransactionAsync(userId, orderCreateDto);
-            return Created($"http://localhost:5227/api/v1/orders/{order.Id}", order);
+            return StatusCode(201, order);
         }
 
         [Authorize(Roles = "Admin")]
