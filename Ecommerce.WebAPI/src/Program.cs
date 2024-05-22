@@ -31,12 +31,14 @@ builder.Services.AddSwaggerGen(
   options =>
     {
       options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-        {
-          Description = "Bearer token authentication",
-          Name = "Authorization",
-          In = ParameterLocation.Header,
-          Scheme = "Bearer"
-        }
+      {
+        Description = "Bearer token authentication",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer",
+      }
       );
 
       // swagger would add the token to the request header of routes with [Authorize] attribute
@@ -138,6 +140,14 @@ builder.Services.AddAuthorization(
 
 var app = builder.Build();
 
+app.UseCors(options => {
+      options
+      .AllowAnyOrigin()
+      .AllowAnyMethod()
+      .AllowAnyHeader();
+});
+
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -150,7 +160,6 @@ app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
-app.UseCors(options => options.AllowAnyOrigin());
 app.UseHttpsRedirection();
 app.MapControllers();
 
