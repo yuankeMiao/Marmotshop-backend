@@ -1,8 +1,6 @@
 ### Ignore unnecessary files in backend
 
 # User-specific files
-appsettings.json
-appsettings.*.json
 obj/
 bin/
 *.erd
