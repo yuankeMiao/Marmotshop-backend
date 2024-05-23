@@ -69,7 +69,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("{orderId}")]
+        [HttpPut("{orderId}")]
         public async Task<ActionResult<OrderReadDto>> UpdateOrderByIdAsync([FromRoute] Guid orderId, [FromBody] OrderUpdateDto orderUpdateDto)
         {
             var order = await _orderService.UpdateOrderByIdAsync(orderId, orderUpdateDto);

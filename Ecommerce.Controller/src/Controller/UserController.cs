@@ -59,7 +59,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("{userId}")] // endpoint: /users/:user_id
+        [HttpPut("{userId}")] // endpoint: /users/:user_id
         public async Task<ActionResult<UserReadDto>> UpdateUserByIdAsync([FromRoute] Guid userId, [FromBody] UserUpdateDto userUpdateDto)
         {
             var user = await _userService.UpdateUserByIdAsync(userId, userUpdateDto);
@@ -85,7 +85,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize] // will implement authorization later
-        [HttpPatch("profile")]
+        [HttpPut("profile")]
         public async Task<ActionResult<UserReadDto>> UpdateUserProfileAsync([FromBody] UserUpdateDto userUpdateDto)
         {
             var userId = GetUserIdClaim();
@@ -124,7 +124,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize]
-        [HttpPatch("profile/addresses/{addressId}")]
+        [HttpPut("profile/addresses/{addressId}")]
         public async Task<ActionResult<AddressReadDto>> UpdateAddressByIdAsync([FromRoute] Guid addressId, [FromBody] AddressUpdateDto addressUpdateDto)
         {
             var foundAddress = await _addressService.GetAddressByIdAsync(addressId);

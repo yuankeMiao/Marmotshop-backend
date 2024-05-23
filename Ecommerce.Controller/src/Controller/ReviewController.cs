@@ -72,7 +72,7 @@ namespace Ecommerce.Controller.src.Controller
         }
 
         [Authorize]
-        [HttpPatch("{reviewId}")]
+        [HttpPut("{reviewId}")]
         public async Task<ActionResult<ReviewReadDto>> UpdateReviewByIdAsync([FromRoute] Guid reviewId, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
             var review = await _service.GetReviewByIdAsync(reviewId);

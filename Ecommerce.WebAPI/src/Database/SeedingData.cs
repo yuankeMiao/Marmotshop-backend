@@ -133,7 +133,7 @@ namespace Ecommerce.WebAPI.src.Database
                         Description = faker.Commerce.ProductDescription(),
                         Price = decimal.Parse(faker.Commerce.Price()),
                         DiscountPercentage = faker.Commerce.Random.Int(0, 30) * faker.Random.Int(0, 1),
-                        Rating = faker.Commerce.Random.Decimal2() * 5,
+                        Rating = Math.Round(faker.Commerce.Random.Decimal2() * 5, 2),
                         Stock = faker.Commerce.Random.Int(0, 200),
                         Brand = faker.Random.Word(),
                         CategoryId = category.Id,

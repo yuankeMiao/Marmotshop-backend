@@ -3,6 +3,7 @@ using Ecommerce.Core.src.Common;
 using Ecommerce.Core.src.ValueObject;
 using Ecommerce.Service.src.DTO;
 using Ecommerce.Service.src.ServiceAbstract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Controller.src.Controller
@@ -39,10 +40,12 @@ namespace Ecommerce.Controller.src.Controller
         }
 
 
+        [Authorize]
         [HttpPost("refresh")]
         public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto requestDto)
         {
-            var tokenResponse = await _authService.RefreshTokenAsync(requestDto.RefreshToken, requestDto.UserId);
+            var userId = GetUserIdClaim();
+            var tokenResponse = await _authService.RefreshTokenAsync(requestDto.RefreshToken, userId);
             return Ok(tokenResponse);
         }
 

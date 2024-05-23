@@ -31,8 +31,9 @@ namespace Ecommerce.WebAPI.src.Repo
                 if (!string.IsNullOrEmpty(options.Title))
                 {
                     var lowercaseTitle = options.Title.ToLower();
-                    query = query.Where(p => p.Title.Contains(lowercaseTitle, StringComparison.CurrentCultureIgnoreCase));
+                    query = query.Where(p => EF.Functions.Like(p.Title.ToLower(), $"%{lowercaseTitle}%"));
                 }
+
 
                 // Filter by price range
                 if (options.MinPrice.HasValue)
@@ -46,7 +47,7 @@ namespace Ecommerce.WebAPI.src.Repo
                 }
 
                 // Filter by category ID
-                if (options.CategoryId.HasValue)
+                if (options.CategoryId is not null)
                 {
                     query = query.Where(p => p.CategoryId == options.CategoryId);
                 }
