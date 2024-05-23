@@ -26,7 +26,7 @@ namespace Ecommerce.WebAPI.src.Repo
             var query = _reviews.AsQueryable();
             if (options is not null)
             {
-                ApplyQueryOptions(query, options);
+                query = ApplyQueryOptions(query, options);
 
                 // Execute the query to get total count before applying pagination
                 var totalCount = await query.CountAsync();
@@ -54,7 +54,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
             if (options is not null)
             {
-                ApplyQueryOptions(query, options);
+                query = ApplyQueryOptions(query, options);
 
                 // Execute the query to get total count before applying pagination
                 var totalCount = await query.CountAsync();
@@ -81,7 +81,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
             if (options is not null)
             {
-                ApplyQueryOptions(query, options);
+                query = ApplyQueryOptions(query, options);
 
                 // Execute the query to get total count before applying pagination
                 var totalCount = await query.CountAsync();
@@ -156,6 +156,8 @@ namespace Ecommerce.WebAPI.src.Repo
 
         private static IQueryable<Review> ApplyQueryOptions(IQueryable<Review> query, ReviewQueryOptions options)
         {
+
+            Console.WriteLine(query);
             if (options.Rating is not null)
             {
                 query = query.Where(r => r.Rating == options.Rating);
@@ -171,7 +173,7 @@ namespace Ecommerce.WebAPI.src.Repo
             {
                 query = options.SortBy switch
                 {
-                    ReviewSortByEnum.Rating => options.SortOrder == SortOrderEnum.Desc ?query.OrderByDescending(r => r.Rating): query.OrderBy(r => r.Rating),
+                    ReviewSortByEnum.Rating => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(r => r.Rating): query.OrderBy(r => r.Rating),
                     ReviewSortByEnum.CreatedDate => options.SortOrder == SortOrderEnum.Desc ? query.OrderByDescending(r => r.CreatedDate) : query.OrderBy(r => r.CreatedDate),
                     ReviewSortByEnum.UpdatedDate => options.SortOrder ==SortOrderEnum.Desc ? query.OrderByDescending(r => r.UpdatedDate) : query.OrderBy(r => r.UpdatedDate),
                     _ => query.OrderBy(p => p.CreatedDate),
