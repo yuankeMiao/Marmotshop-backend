@@ -20,14 +20,11 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersAsync([FromQuery] OrderQueryOptions options)
+        public async Task<ActionResult<QueryResult<OrderReadDto>>> GetAllOrdersAsync([FromQuery] OrderQueryOptions options)
         {
             var result = await _orderService.GetAllOrdersAsync(options);
-            var orders = result.Data;
-            var totalCount = result.TotalCount;
 
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(orders);
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
@@ -40,23 +37,20 @@ namespace Ecommerce.Controller.src.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetAllOrdersByUserIdAsync([FromRoute] Guid userId, [FromQuery] OrderQueryOptions options)
+        public async Task<ActionResult<QueryResult<OrderReadDto>>> GetAllOrdersByUserIdAsync([FromRoute] Guid userId, [FromQuery] OrderQueryOptions options)
         {
             var result = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
-            var orders = result.Data;
-            var totalCount = result.TotalCount;
 
-            Response.Headers.Append("X-Total-Count", totalCount.ToString());
-            return Ok(orders);
+            return Ok(result);
         }
 
         [Authorize]
         [HttpGet("my-orders")]
-        public async Task<ActionResult<IEnumerable<OrderReadDto>>> GetMyOrdersAsync([FromQuery] OrderQueryOptions options)
+        public async Task<ActionResult<QueryResult<OrderReadDto>>> GetMyOrdersAsync([FromQuery] OrderQueryOptions options)
         {
             var userId = GetUserIdClaim();
-            var orders = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
-            return Ok(orders);
+            var result = await _orderService.GetAllOrdersByUserIdAsync(userId, options);
+            return Ok(result);
         }
 
         [Authorize]
