@@ -29,7 +29,7 @@ namespace Ecommerce.WebAPI.src.Repo
 
             if (options is not null)
             {
-                ApplyQueryOptions(query, options);
+                query = ApplyQueryOptions(query, options);
 
                 // Execute the query to get total count before applying pagination
                 var totalCount = await query.CountAsync();
