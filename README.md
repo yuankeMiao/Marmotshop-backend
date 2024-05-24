@@ -1,7 +1,7 @@
 # Ecommerce Fullstack Project
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-v.4-green)
-![SASS](https://img.shields.io/badge/SASS-v.4-hotpink)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v.3.4.1-hotpink)
 ![React](https://img.shields.io/badge/React-v.18-blue)
 ![Redux toolkit](https://img.shields.io/badge/Redux-v.1.9-brown)
 ![.NET Core](https://img.shields.io/badge/.NET%20Core-v.8-purple)
