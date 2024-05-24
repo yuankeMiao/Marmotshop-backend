@@ -1,15 +1,9 @@
-# Ecommerce Fullstack Project
+# Marmot Shop - Ecommerce Fullstack Project / Backend part
 
-![TypeScript](https://img.shields.io/badge/TypeScript-v.4-green)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v.3.4.1-hotpink)
-![React](https://img.shields.io/badge/React-v.18-blue)
-![Redux toolkit](https://img.shields.io/badge/Redux-v.1.9-brown)
 ![.NET Core](https://img.shields.io/badge/.NET%20Core-v.8-purple)
 ![EF Core](https://img.shields.io/badge/EF%20Core-v.8-cyan)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v.16-drakblue)
 ![PgAdmin 4](https://img.shields.io/badge/PgAdmin%204-v.8.2-lightblue)
-![.NET Core](https://img.shields.io/badge/.NET%20Core-v.8-purple)
-![EF Core](https://img.shields.io/badge/EF%20Core-v.8-cyan)
 ![XUnit](https://img.shields.io/badge/XUnit-v.2.4.2-green)
 ![Moq](https://img.shields.io/badge/Moq-v.4.20-pink)
 
