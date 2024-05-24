@@ -72,7 +72,7 @@ namespace Ecommerce.Service.src.Service
             if (!ValidationHelper.IsValidPassword(userCreateDto.Password)) throw AppException.InvalidInput("Password shoulbe 6-20 charaters with at least one uppercase, one lowercase, and one number");
             if (userCreateDto.Avatar is not null && !ValidationHelper.IsImageUrlValid(userCreateDto.Avatar)) throw AppException.InvalidInput("Image must be a url");
 
-            // Create a new User entity and populate its properties from the UserCreateDto
+            // Create a new User entity and populate its properties from the UserCreateDto 
 
             var newUser = _mapper.Map<UserCreateDto, User>(userCreateDto);
             // Call the CreateUserAsync method of the repository to create the user

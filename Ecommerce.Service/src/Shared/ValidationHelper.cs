@@ -70,10 +70,10 @@ namespace Ecommerce.Service.src.Shared
         /// <summary>
         /// Validates if the provided password has at 6 characters, at most 20, with at least onw capital letter ,one lower case letter, and one number
         /// </summary>
-            public static bool IsValidPassword(string password)
-    {
-        var pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,20}$";
-        return Regex.IsMatch(password, pattern);
-    }
+        public static bool IsValidPassword(string password)
+        {
+            var pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,20}$";
+            return Regex.IsMatch(password, pattern);
+        }
     }
 }
