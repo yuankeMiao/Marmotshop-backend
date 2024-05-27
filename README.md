@@ -11,7 +11,7 @@
 
 This repository contains the backend server for a fullstack ecommerce project built with ASP.NET Core 7, Entity Framework Core, and PostgreSQL. The frontend of the project, developed with React, Redux Toolkit, TypeScript, and TailwindCSS, is maintained in a [separate public repository](https://github.com/yuankeMiao/marmot-shop) and integrates with this backend to provide a seamless user experience and robust management system for administrators.
 
-Check the deployed backend [here](https://catagonia.azurewebsites.net/index.html).
+Check the deployed backend [here](https://marmote-shop-app.azurewebsites.net/index.html).
 Check the deployed frontend [here](https://marmotshop.yuankedev.fun).
 
 ## Table of Contents
